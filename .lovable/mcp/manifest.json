@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ekusmsvxqifysgqyeubv.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "demartini-coach-mcp",
+      "version": "0.1.0",
+      "title": "Demartini Coach AI"
+    },
+    "tools": [
+      {
+        "name": "list_sessions",
+        "title": "List coaching sessions",
+        "description": "List the signed-in coach's Demartini coaching sessions, newest first. Returns id, title, client name, and timestamps.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Maximum number of sessions to return (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_session_messages",
+        "title": "Get session messages",
+        "description": "Fetch the full message history (client statements + Demartini AI analyses) for a specific coaching session.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "session_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "The session id to load."
+            }
+          },
+          "required": [
+            "session_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_session",
+        "title": "Create coaching session",
+        "description": "Create a new empty Demartini coaching session for the signed-in coach. Returns the created session id.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "description": "Session title."
+            },
+            "client_name": {
+              "description": "Optional client name.",
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "title"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
