@@ -30,11 +30,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GrowthMap, type SessionMapData } from "@/components/growth-map";
+import { GoalClarifier, type GoalClarifierData } from "@/components/goal-clarifier";
+import { NewSessionDialog, type SessionMode } from "@/components/new-session-dialog";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
+import { extractGoalPayload } from "@/lib/parse-goal-payload";
 import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Compass } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -48,6 +51,7 @@ type SessionRow = {
   id: string;
   title: string;
   status: string;
+  mode: SessionMode;
   active_topic: string | null;
   active_column: string | null;
   active_belief: string | null;
@@ -66,6 +70,7 @@ const TABS = [
   { key: "integration", label: "Integracija", icon: Puzzle },
 ] as const;
 
+
 function SessionPage() {
   const navigate = useNavigate();
   const { s: sidFromUrl } = Route.useSearch();
@@ -80,6 +85,10 @@ function SessionPage() {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const [completionOpen, setCompletionOpen] = useState(false);
+  const [newSessionOpen, setNewSessionOpen] = useState(false);
+  const [savingGoal, setSavingGoal] = useState(false);
+
+  const mode: SessionMode = (session?.mode as SessionMode) ?? "demartini";
 
   // Load or bootstrap active session
   useEffect(() => {
@@ -87,7 +96,6 @@ function SessionPage() {
       if (sidFromUrl) {
         await loadSession(sidFromUrl);
       } else {
-        // Pick most recent, or create one
         const { data } = await supabase
           .from("sessions")
           .select("id")
@@ -96,20 +104,31 @@ function SessionPage() {
         if (data && data.length > 0) {
           navigate({ to: "/session", search: { s: data[0].id }, replace: true });
         } else {
-          const { data: userData } = await supabase.auth.getUser();
-          if (!userData.user) return;
-          const { data: created, error } = await supabase
-            .from("sessions")
-            .insert({ user_id: userData.user.id, title: "Nauja sesija" })
-            .select("id")
-            .single();
-          if (error) return toast.error(error.message);
-          navigate({ to: "/session", search: { s: created.id }, replace: true });
+          // No sessions yet — ask user which mode
+          setNewSessionOpen(true);
         }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sidFromUrl]);
+
+  async function createSession(pickedMode: SessionMode) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+    const { data: created, error } = await supabase
+      .from("sessions")
+      .insert({
+        user_id: userData.user.id,
+        title: pickedMode === "goal_clarify" ? "Tikslo išgryninimas" : "Nauja sesija",
+        mode: pickedMode,
+      })
+      .select("id")
+      .single();
+    if (error) return toast.error(error.message);
+    setNewSessionOpen(false);
+    navigate({ to: "/session", search: { s: created.id } });
+  }
+
 
   async function loadSession(id: string) {
     const [{ data: srow }, { data: mrows }] = await Promise.all([
@@ -137,6 +156,21 @@ function SessionPage() {
     grid: (session?.grid as Record<string, string> | null) ?? {},
   };
 
+
+  const grid = (session?.grid as Record<string, string> | null) ?? {};
+  const goalData: GoalClarifierData = {
+    stage: session?.active_column ?? null,
+    goal_draft: grid["goal_draft"] ?? session?.active_topic ?? null,
+    why: grid["goal_why"] ?? null,
+    value: grid["goal_value"] ?? null,
+    benefits: grid["goal_benefits"] ?? null,
+    costs: grid["goal_costs"] ?? null,
+    obstacles: grid["goal_obstacles"] ?? null,
+    first_step: grid["goal_first_step"] ?? null,
+    ready_to_save: grid["goal_ready"] === "true",
+    patterns: (session?.patterns as string[] | null) ?? [],
+  };
+
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const lastUser = [...messages].reverse().find((m) => m.role === "user");
   const focusQuote = lastUser?.content?.split(/[.!?]/)[0]?.trim() || "Kokia mintis dabar giliausiai kalba?";
@@ -153,6 +187,7 @@ function SessionPage() {
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setStreaming(true);
+
 
     await supabase.from("messages").insert({
       session_id: session.id,
@@ -175,9 +210,12 @@ function SessionPage() {
       const resp = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history, mode }),
       });
       if (!resp.ok || !resp.body) throw new Error(await resp.text().catch(() => "AI klaida"));
+
+      const parse = (raw: string) =>
+        mode === "goal_clarify" ? extractGoalPayload(raw) : extractMapPayload(raw);
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -186,11 +224,11 @@ function SessionPage() {
         const { done, value } = await reader.read();
         if (done) break;
         full += decoder.decode(value, { stream: true });
-        const { clean } = extractMapPayload(full);
+        const { clean } = parse(full);
         setMessages((m) => m.map((x) => (x.id === assistantId ? { ...x, content: clean } : x)));
       }
 
-      const { clean, payload } = extractMapPayload(full);
+      const { clean, payload } = parse(full);
       await supabase.from("messages").insert({
         session_id: session.id,
         user_id: userData.user.id,
@@ -200,16 +238,33 @@ function SessionPage() {
 
       if (payload) {
         const updates: Partial<SessionRow> = { updated_at: new Date().toISOString() };
-        if (payload.topic) updates.active_topic = payload.topic;
-        if (payload.belief) updates.active_belief = payload.belief;
-        if (payload.column) updates.active_column = payload.column;
-        if (typeof payload.emotion === "number") {
-          updates.emotional_current = payload.emotion;
-          if (session.emotional_start == null) updates.emotional_start = payload.emotion;
-        }
-        if (payload.patterns) updates.patterns = payload.patterns;
-        if (payload.grid) {
-          updates.grid = { ...(session.grid ?? {}), ...payload.grid };
+        if (mode === "demartini") {
+          const p = payload as import("@/lib/parse-ai-payload").MapPayload;
+          if (p.topic) updates.active_topic = p.topic;
+          if (p.belief) updates.active_belief = p.belief;
+          if (p.column) updates.active_column = p.column;
+          if (typeof p.emotion === "number") {
+            updates.emotional_current = p.emotion;
+            if (session.emotional_start == null) updates.emotional_start = p.emotion;
+          }
+          if (p.patterns) updates.patterns = p.patterns;
+          if (p.grid) updates.grid = { ...(session.grid ?? {}), ...p.grid };
+        } else {
+          const p = payload as import("@/lib/parse-goal-payload").GoalPayload;
+          if (p.stage) updates.active_column = p.stage;
+          if (p.goal_draft) updates.active_topic = p.goal_draft;
+          if (p.patterns) updates.patterns = p.patterns;
+          const gridUpdate: Record<string, string> = { ...(session.grid ?? {}) };
+          if (p.goal_draft) gridUpdate["goal_draft"] = p.goal_draft;
+          if (p.why) gridUpdate["goal_why"] = p.why;
+          if (p.value) gridUpdate["goal_value"] = p.value;
+          if (p.benefits) gridUpdate["goal_benefits"] = p.benefits;
+          if (p.costs) gridUpdate["goal_costs"] = p.costs;
+          if (p.obstacles) gridUpdate["goal_obstacles"] = p.obstacles;
+          if (p.first_step) gridUpdate["goal_first_step"] = p.first_step;
+          if (typeof p.ready_to_save === "boolean")
+            gridUpdate["goal_ready"] = String(p.ready_to_save);
+          updates.grid = gridUpdate;
         }
         const { data: updated } = await supabase
           .from("sessions")
@@ -219,6 +274,7 @@ function SessionPage() {
           .single();
         if (updated) setSession(updated as SessionRow);
       }
+
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "AI klaida";
       toast.error(msg);
@@ -272,7 +328,53 @@ function SessionPage() {
     setRecording(false);
   }
 
+  async function saveGoal() {
+    if (!session || !goalData.goal_draft) return;
+    setSavingGoal(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+
+      const descParts: string[] = [];
+      if (goalData.why) descParts.push(`Kodėl: ${goalData.why}`);
+      if (goalData.value) descParts.push(`Aukščiausia vertybė: ${goalData.value}`);
+      if (goalData.benefits) descParts.push(`Nauda: ${goalData.benefits}`);
+      if (goalData.costs) descParts.push(`Kaina: ${goalData.costs}`);
+      if (goalData.obstacles) descParts.push(`Kliūtys: ${goalData.obstacles}`);
+
+      const { data: goal, error: gErr } = await supabase
+        .from("goals")
+        .insert({
+          user_id: userData.user.id,
+          title: goalData.goal_draft.slice(0, 200),
+          description: descParts.join("\n\n") || null,
+        })
+        .select("id")
+        .single();
+      if (gErr) throw gErr;
+
+      if (goalData.first_step) {
+        const due = new Date();
+        due.setDate(due.getDate() + 3);
+        await supabase.from("priorities").insert({
+          user_id: userData.user.id,
+          title: goalData.first_step.slice(0, 200),
+          due_date: due.toISOString().slice(0, 10),
+          linked_goal_id: goal?.id ?? null,
+        });
+      }
+
+      toast.success("Tikslas įrašytas į Tikslus");
+      navigate({ to: "/goals" });
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Nepavyko išsaugoti");
+    } finally {
+      setSavingGoal(false);
+    }
+  }
+
   const currentTime = new Date().toLocaleTimeString("lt-LT", { hour: "2-digit", minute: "2-digit" });
+
 
   return (
     <div className="flex flex-1 min-h-0">
@@ -286,6 +388,7 @@ function SessionPage() {
               <h1 className="font-serif text-3xl leading-tight text-foreground">
                 {session?.title ?? "Gyva augimo sesija"}
               </h1>
+              <ModeBadge mode={mode} />
               <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <span className="h-2 w-2 rounded-full bg-map-green animate-pulse" />
                 Sesija aktyvi
@@ -293,21 +396,46 @@ function SessionPage() {
               <span className="text-sm text-muted-foreground">· {currentTime}</span>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį.
+              {mode === "goal_clarify"
+                ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
+                : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
             </p>
           </div>
           <Button
-            onClick={() => setCompletionOpen(true)}
+            onClick={() => setNewSessionOpen(true)}
+            variant="outline"
             size="sm"
             className="gap-2"
-            disabled={!session || messages.length < 2}
+            title="Pradėti naują sesiją kitu režimu"
           >
-            <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
+            <Sparkles className="h-3.5 w-3.5" /> Nauja sesija
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Settings2 className="h-3.5 w-3.5" /> Sesijos nustatymai
-          </Button>
+          {mode === "demartini" ? (
+            <Button
+              onClick={() => setCompletionOpen(true)}
+              size="sm"
+              className="gap-2"
+              disabled={!session || messages.length < 2}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
+            </Button>
+          ) : (
+            <Button
+              onClick={saveGoal}
+              size="sm"
+              className="gap-2"
+              disabled={!session || !goalData.goal_draft || savingGoal}
+            >
+              {savingGoal ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              )}
+              Perkelti į Tikslus
+            </Button>
+          )}
         </header>
+
 
         {/* Tabs */}
         <div className="border-b bg-background px-6">
@@ -345,26 +473,49 @@ function SessionPage() {
                     <PulseBadge icon={<Ear className="h-3 w-3" />} tone="map-green">
                       {streaming ? "AI analizuoja…" : "Klausausi"}
                     </PulseBadge>
-                    {mapData.topic && (
-                      <PulseBadge icon={<Circle className="h-3 w-3 fill-current" />} tone="map-blue">
-                        Aktyvi tema: {mapData.topic}
-                      </PulseBadge>
+                    {mode === "demartini" && (
+                      <>
+                        {mapData.topic && (
+                          <PulseBadge icon={<Circle className="h-3 w-3 fill-current" />} tone="map-blue">
+                            Aktyvi tema: {mapData.topic}
+                          </PulseBadge>
+                        )}
+                        {mapData.emotion != null && (
+                          <PulseBadge icon={<Flame className="h-3 w-3" />} tone="map-orange">
+                            Emocinis krūvis: {mapData.emotion}/10
+                          </PulseBadge>
+                        )}
+                        {mapData.column && (
+                          <PulseBadge icon={<Layers className="h-3 w-3" />} tone="map-violet">
+                            Aktyvus modulis: {mapData.column}
+                          </PulseBadge>
+                        )}
+                      </>
                     )}
-                    {mapData.emotion != null && (
-                      <PulseBadge icon={<Flame className="h-3 w-3" />} tone="map-orange">
-                        Emocinis krūvis: {mapData.emotion}/10
-                      </PulseBadge>
-                    )}
-                    {mapData.column && (
-                      <PulseBadge icon={<Layers className="h-3 w-3" />} tone="map-violet">
-                        Aktyvus modulis: {mapData.column}
-                      </PulseBadge>
+                    {mode === "goal_clarify" && (
+                      <>
+                        {goalData.stage && (
+                          <PulseBadge icon={<Layers className="h-3 w-3" />} tone="map-violet">
+                            Etapas: {goalData.stage}
+                          </PulseBadge>
+                        )}
+                        {goalData.goal_draft && (
+                          <PulseBadge icon={<Circle className="h-3 w-3 fill-current" />} tone="map-blue">
+                            Tikslas: {goalData.goal_draft.slice(0, 60)}
+                          </PulseBadge>
+                        )}
+                        {goalData.value && (
+                          <PulseBadge icon={<Sparkles className="h-3 w-3" />} tone="map-teal">
+                            Vertybė: {goalData.value}
+                          </PulseBadge>
+                        )}
+                      </>
                     )}
                   </div>
                 </Card>
 
-                {/* Gyvas fokusas */}
-                {messages.length > 0 && (
+                {/* Gyvas fokusas – tik demartini režime */}
+                {mode === "demartini" && messages.length > 0 && (
                   <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-4 w-4 text-primary" />
@@ -396,17 +547,23 @@ function SessionPage() {
 
                 {messages.length === 0 && (
                   <Card className="p-10 text-center border-dashed">
-                    <img src="/vite.svg" alt="" className="hidden" />
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary mx-auto mb-4 flex items-center justify-center">
-                      <Sparkles className="h-7 w-7" />
+                    <div className={cn(
+                      "h-14 w-14 rounded-2xl mx-auto mb-4 flex items-center justify-center",
+                      mode === "goal_clarify" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary",
+                    )}>
+                      {mode === "goal_clarify" ? <Compass className="h-7 w-7" /> : <Sparkles className="h-7 w-7" />}
                     </div>
-                    <h2 className="font-serif text-2xl">Pradėk savirefleksijos sesiją</h2>
+                    <h2 className="font-serif text-2xl">
+                      {mode === "goal_clarify" ? "Pradėk tikslo išgryninimą" : "Pradėk savirefleksijos sesiją"}
+                    </h2>
                     <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-                      Parašyk arba pasakyk temą, su kuria šiandien nori padirbėti. Vedlys ves tave
-                      po vieną žingsnį per 11 Demartini metodo etapų.
+                      {mode === "goal_clarify"
+                        ? "Parašyk savo norą ar tikslą tokį, kokį jį girdi galvoje. Vedlys per 8 etapus jį padarys konkretų, subalansuotą su tavo vertybėmis ir su pirmu žingsniu."
+                        : "Parašyk arba pasakyk temą, su kuria šiandien nori padirbėti. Vedlys ves tave po vieną žingsnį per 11 Demartini metodo etapų."}
                     </p>
                   </Card>
                 )}
+
 
                 {/* Messages */}
                 {messages.map((m) => (
@@ -564,8 +721,9 @@ function MessageBubble({ message }: { message: Message }) {
 
 
 function cleanMessage(m: Message): Message {
-  const { clean } = extractMapPayload(m.content);
-  return { ...m, content: clean };
+  const { clean: c1 } = extractMapPayload(m.content);
+  const { clean: c2 } = extractGoalPayload(c1);
+  return { ...m, content: c2 };
 }
 
 function TableView({ data }: { data: SessionMapData }) {

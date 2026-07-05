@@ -1,15 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AI_GATEWAY_URL, requireLovableApiKey } from "@/lib/ai-gateway.server";
 import { DEMARTINI_SYSTEM_PROMPT } from "@/lib/demartini-prompt";
+import { GOAL_CLARIFY_SYSTEM_PROMPT } from "@/lib/goal-clarify-prompt";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
+type Mode = "demartini" | "goal_clarify";
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.json()) as { messages?: ChatMsg[] };
+        const body = (await request.json()) as { messages?: ChatMsg[]; mode?: Mode };
         const messages = Array.isArray(body.messages) ? body.messages : [];
+        const mode: Mode = body.mode === "goal_clarify" ? "goal_clarify" : "demartini";
+        const systemPrompt =
+          mode === "goal_clarify" ? GOAL_CLARIFY_SYSTEM_PROMPT : DEMARTINI_SYSTEM_PROMPT;
         const key = requireLovableApiKey();
 
         const upstream = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
@@ -22,7 +27,7 @@ export const Route = createFileRoute("/api/chat")({
             model: "google/gemini-3-flash-preview",
             stream: true,
             messages: [
-              { role: "system", content: DEMARTINI_SYSTEM_PROMPT },
+              { role: "system", content: systemPrompt },
               ...messages,
             ],
           }),
