@@ -515,6 +515,14 @@ function SessionPage() {
           sessionId={session.id}
           sessionTitle={session.title}
           sessionTopic={session.active_topic}
+          context={{
+            topic: session.active_topic,
+            belief: session.active_belief,
+            column: session.active_column,
+            emotion: session.emotional_current,
+            patterns: session.patterns,
+            messages: messages.map((m) => ({ role: m.role, content: m.content })),
+          }}
           onComplete={() => navigate({ to: "/priorities" })}
         />
       )}

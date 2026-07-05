@@ -30,7 +30,16 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Step = { id: string; title: string; due_date: string; asPriority: boolean };
+type Step = { id: string; title: string; why?: string; due_date: string; asPriority: boolean };
+
+type SessionContext = {
+  topic?: string | null;
+  belief?: string | null;
+  column?: string | null;
+  emotion?: number | null;
+  patterns?: string[] | null;
+  messages?: { role: "user" | "assistant"; content: string }[];
+};
 
 type Props = {
   open: boolean;
@@ -38,6 +47,7 @@ type Props = {
   sessionId: string;
   sessionTitle: string;
   sessionTopic: string | null;
+  context?: SessionContext;
   onComplete?: () => void;
 };
 
@@ -53,10 +63,13 @@ export function SessionCompletionDialog({
   sessionId,
   sessionTitle,
   sessionTopic,
+  context,
   onComplete,
 }: Props) {
   const [stage, setStage] = useState<(typeof STAGES)[number]["key"]>("plan");
   const [saving, setSaving] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggested, setSuggested] = useState(false);
 
   // Plan
   const [planTitle, setPlanTitle] = useState("");
@@ -80,7 +93,68 @@ export function SessionCompletionDialog({
     setSteps([{ id: crypto.randomUUID(), title: "", due_date: "", asPriority: true }]);
     setGoalDesc("");
     setGoalDate("");
+    setSuggested(false);
   }, [open, sessionTopic, sessionTitle]);
+
+  async function suggestWithAI() {
+    if (suggesting) return;
+    setSuggesting(true);
+    try {
+      const resp = await fetch("/api/plan-suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: context?.messages ?? [],
+          topic: context?.topic ?? sessionTopic,
+          belief: context?.belief,
+          column: context?.column,
+          emotion: context?.emotion,
+          patterns: context?.patterns,
+        }),
+      });
+      if (!resp.ok) throw new Error(await resp.text().catch(() => "AI klaida"));
+      const data = (await resp.json()) as {
+        plan_title?: string;
+        plan_summary?: string;
+        goal_title?: string;
+        goal_description?: string;
+        goal_target_days?: number;
+        steps?: { title: string; why?: string; due_in_days?: number; as_priority?: boolean }[];
+      };
+      if (data.plan_title) setPlanTitle(data.plan_title);
+      if (data.plan_summary) setPlanSummary(data.plan_summary);
+      if (data.goal_title) setGoalTitle(data.goal_title);
+      if (data.goal_description) setGoalDesc(data.goal_description);
+      if (typeof data.goal_target_days === "number") {
+        const d = new Date();
+        d.setDate(d.getDate() + data.goal_target_days);
+        setGoalDate(d.toISOString().slice(0, 10));
+      }
+      if (Array.isArray(data.steps) && data.steps.length) {
+        setSteps(
+          data.steps.map((s) => {
+            const dd = new Date();
+            if (typeof s.due_in_days === "number") dd.setDate(dd.getDate() + s.due_in_days);
+            return {
+              id: crypto.randomUUID(),
+              title: s.title ?? "",
+              why: s.why,
+              due_date: typeof s.due_in_days === "number" ? dd.toISOString().slice(0, 10) : "",
+              asPriority: s.as_priority ?? false,
+            };
+          }),
+        );
+      }
+      setSuggested(true);
+      toast.success("AI paruošė juodraštį – peržiūrėk ir pakoreguok");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Nepavyko sugeneruoti";
+      toast.error(msg);
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
 
   function addStep() {
     setSteps((s) => [
@@ -110,6 +184,7 @@ export function SessionCompletionDialog({
       const stepsPayload = cleanSteps.map((s) => ({
         id: s.id,
         title: s.title.trim(),
+        why: s.why ?? null,
         due_date: s.due_date || null,
         done: false,
       }));
@@ -219,6 +294,32 @@ export function SessionCompletionDialog({
         <div className="flex-1 overflow-y-auto pr-1 space-y-4">
           {stage === "plan" && (
             <>
+              <Card className="p-3 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent flex items-start gap-3">
+                <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium">Padėk susidėlioti su AI</div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Iš sesijos įžvalgų sugeneruosiu 2–5 konkrečius žingsnius, tikslą ir terminus. Tu peržiūrėsi ir pakoreguosi.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={suggestWithAI}
+                  disabled={suggesting || !context?.messages?.length}
+                  className="gap-1.5 shrink-0"
+                >
+                  {suggesting ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {suggested ? "Pergeneruoti" : "Pasiūlyk planą"}
+                </Button>
+              </Card>
+
               <div>
                 <Label>Plano pavadinimas</Label>
                 <Input
@@ -258,6 +359,11 @@ export function SessionCompletionDialog({
                           onChange={(e) => updateStep(s.id, { title: e.target.value })}
                           placeholder="Konkretus veiksmas..."
                         />
+                        {s.why && (
+                          <p className="text-xs text-muted-foreground italic border-l-2 border-primary/30 pl-2">
+                            {s.why}
+                          </p>
+                        )}
                         <div className="flex items-center gap-3">
                           <Input
                             type="date"
