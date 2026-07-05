@@ -72,10 +72,11 @@ function AskPage() {
 
       // Read source titles header for pretty rendering
       let sources: Source[] = [];
-      const srcHeader = resp.headers.get("X-Sources-Json");
+      const srcHeader = resp.headers.get("X-Sources-B64");
       if (srcHeader) {
         try {
-          const parsed = JSON.parse(srcHeader) as { title: string }[];
+          const json = decodeURIComponent(escape(atob(srcHeader)));
+          const parsed = JSON.parse(json) as { title: string }[];
           sources = parsed.map((s, i) => ({ n: i + 1, title: s.title }));
         } catch { /* ignore */ }
       }
