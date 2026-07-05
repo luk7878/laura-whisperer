@@ -63,10 +63,13 @@ export function SessionCompletionDialog({
   sessionId,
   sessionTitle,
   sessionTopic,
+  context,
   onComplete,
 }: Props) {
   const [stage, setStage] = useState<(typeof STAGES)[number]["key"]>("plan");
   const [saving, setSaving] = useState(false);
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggested, setSuggested] = useState(false);
 
   // Plan
   const [planTitle, setPlanTitle] = useState("");
@@ -90,7 +93,68 @@ export function SessionCompletionDialog({
     setSteps([{ id: crypto.randomUUID(), title: "", due_date: "", asPriority: true }]);
     setGoalDesc("");
     setGoalDate("");
+    setSuggested(false);
   }, [open, sessionTopic, sessionTitle]);
+
+  async function suggestWithAI() {
+    if (suggesting) return;
+    setSuggesting(true);
+    try {
+      const resp = await fetch("/api/plan-suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: context?.messages ?? [],
+          topic: context?.topic ?? sessionTopic,
+          belief: context?.belief,
+          column: context?.column,
+          emotion: context?.emotion,
+          patterns: context?.patterns,
+        }),
+      });
+      if (!resp.ok) throw new Error(await resp.text().catch(() => "AI klaida"));
+      const data = (await resp.json()) as {
+        plan_title?: string;
+        plan_summary?: string;
+        goal_title?: string;
+        goal_description?: string;
+        goal_target_days?: number;
+        steps?: { title: string; why?: string; due_in_days?: number; as_priority?: boolean }[];
+      };
+      if (data.plan_title) setPlanTitle(data.plan_title);
+      if (data.plan_summary) setPlanSummary(data.plan_summary);
+      if (data.goal_title) setGoalTitle(data.goal_title);
+      if (data.goal_description) setGoalDesc(data.goal_description);
+      if (typeof data.goal_target_days === "number") {
+        const d = new Date();
+        d.setDate(d.getDate() + data.goal_target_days);
+        setGoalDate(d.toISOString().slice(0, 10));
+      }
+      if (Array.isArray(data.steps) && data.steps.length) {
+        setSteps(
+          data.steps.map((s) => {
+            const dd = new Date();
+            if (typeof s.due_in_days === "number") dd.setDate(dd.getDate() + s.due_in_days);
+            return {
+              id: crypto.randomUUID(),
+              title: s.title ?? "",
+              why: s.why,
+              due_date: typeof s.due_in_days === "number" ? dd.toISOString().slice(0, 10) : "",
+              asPriority: s.as_priority ?? false,
+            };
+          }),
+        );
+      }
+      setSuggested(true);
+      toast.success("AI paruošė juodraštį – peržiūrėk ir pakoreguok");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Nepavyko sugeneruoti";
+      toast.error(msg);
+    } finally {
+      setSuggesting(false);
+    }
+  }
+
 
   function addStep() {
     setSteps((s) => [
