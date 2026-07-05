@@ -296,6 +296,14 @@ function SessionPage() {
               AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį.
             </p>
           </div>
+          <Button
+            onClick={() => setCompletionOpen(true)}
+            size="sm"
+            className="gap-2"
+            disabled={!session || messages.length < 2}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
+          </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Settings2 className="h-3.5 w-3.5" /> Sesijos nustatymai
           </Button>
