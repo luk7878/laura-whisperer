@@ -100,9 +100,10 @@ export function AppSidebar() {
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">AI palydovas</div>
           </div>
         </Link>
-        <Button onClick={newSession} className="w-full gap-2 shadow-sm" size="sm">
+        <Button onClick={() => setNewOpen(true)} className="w-full gap-2 shadow-sm" size="sm">
           <Plus className="h-4 w-4" /> Nauja sesija
         </Button>
+        <NewSessionDialog open={newOpen} onOpenChange={setNewOpen} onPick={createSession} />
       </SidebarHeader>
 
       <SidebarContent>
