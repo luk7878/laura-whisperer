@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Target,
   Brain,
@@ -11,6 +13,8 @@ import {
   TrendingUp,
   MoreHorizontal,
   BookOpen,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
