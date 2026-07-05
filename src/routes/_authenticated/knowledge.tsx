@@ -164,7 +164,7 @@ function KnowledgePage() {
         </div>
         <Button asChild variant="outline" size="sm" className="gap-2">
           <Link to="/ask">
-            <MessageSquare className="h-3.5 w-3.5" /> Greitas Q&A
+            <MessageSquare className="h-3.5 w-3.5" /> Greitas Q&amp;A
           </Link>
         </Button>
       </header>

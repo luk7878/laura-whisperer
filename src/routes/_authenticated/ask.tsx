@@ -76,7 +76,7 @@ function AskPage() {
             <h1 className="font-serif text-3xl leading-tight">Klausk mentoriaus</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Greitas Q&A iš tavo įkeltos medžiagos. Atsakymai su citatomis.
+            Greitas Q&amp;A iš tavo įkeltos medžiagos. Atsakymai su citatomis.
           </p>
         </div>
         <Button asChild variant="outline" size="sm" className="gap-2">
