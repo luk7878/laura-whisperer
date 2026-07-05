@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Target,
   Brain,
@@ -11,6 +13,8 @@ import {
   TrendingUp,
   MoreHorizontal,
   BookOpen,
+  PanelRightClose,
+  PanelRightOpen,
 } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
@@ -40,7 +44,27 @@ export function GrowthMap({
   data: SessionMapData;
   progress?: { day: string; value: number }[];
 }) {
+  const [collapsed, setCollapsed] = useState(false);
   const emotionColor = emotionTone(data.emotion);
+
+  if (collapsed) {
+    return (
+      <aside className="w-12 shrink-0 border-l bg-sidebar/50 flex flex-col items-center py-4 gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => setCollapsed(false)}
+          title="Išskleisti augimo žemėlapį"
+        >
+          <PanelRightOpen className="h-4 w-4" />
+        </Button>
+        <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground [writing-mode:vertical-rl] rotate-180">
+          Augimo žemėlapis
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="w-[340px] shrink-0 border-l bg-sidebar/50 overflow-y-auto">
@@ -49,8 +73,20 @@ export function GrowthMap({
           <BookOpen className="h-4 w-4 text-primary" />
           <h2 className="font-medium text-sm">Augimo žemėlapis</h2>
         </div>
-        <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setCollapsed(true)}
+            title="Suskleisti"
+          >
+            <PanelRightClose className="h-4 w-4 text-muted-foreground" />
+          </Button>
+          <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+        </div>
       </div>
+
 
       <div className="p-4 space-y-3">
         <MapCard
