@@ -293,6 +293,32 @@ export function SessionCompletionDialog({
         <div className="flex-1 overflow-y-auto pr-1 space-y-4">
           {stage === "plan" && (
             <>
+              <Card className="p-3 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent flex items-start gap-3">
+                <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium">Padėk susidėlioti su AI</div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Iš sesijos įžvalgų sugeneruosiu 2–5 konkrečius žingsnius, tikslą ir terminus. Tu peržiūrėsi ir pakoreguosi.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={suggestWithAI}
+                  disabled={suggesting || !context?.messages?.length}
+                  className="gap-1.5 shrink-0"
+                >
+                  {suggesting ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {suggested ? "Pergeneruoti" : "Pasiūlyk planą"}
+                </Button>
+              </Card>
+
               <div>
                 <Label>Plano pavadinimas</Label>
                 <Input
@@ -332,6 +358,11 @@ export function SessionCompletionDialog({
                           onChange={(e) => updateStep(s.id, { title: e.target.value })}
                           placeholder="Konkretus veiksmas..."
                         />
+                        {s.why && (
+                          <p className="text-xs text-muted-foreground italic border-l-2 border-primary/30 pl-2">
+                            {s.why}
+                          </p>
+                        )}
                         <div className="flex items-center gap-3">
                           <Input
                             type="date"
