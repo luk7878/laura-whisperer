@@ -364,6 +364,37 @@ function SessionPage() {
         });
       }
 
+      // AI iškaido tikslą į hierarchinį užduočių medį
+      toast.message("AI skaido tikslą į užduotis…");
+      try {
+        const resp = await fetch("/api/goal-breakdown", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            goal_title: goalData.goal_draft,
+            goal_description: descParts.join("\n\n") || null,
+            why: goalData.why,
+            value: goalData.value,
+            benefits: goalData.benefits,
+            costs: goalData.costs,
+            obstacles: goalData.obstacles,
+            first_step: goalData.first_step,
+          }),
+        });
+        if (resp.ok && goal?.id) {
+          const breakdown = (await resp.json()) as import("@/lib/insert-task-tree").AIBreakdown;
+          const { insertTaskTree } = await import("@/lib/insert-task-tree");
+          const n = await insertTaskTree({
+            userId: userData.user.id,
+            goalId: goal.id,
+            breakdown,
+          });
+          if (n > 0) toast.success(`Sukurta ${n} užduočių tavo tiksle`);
+        }
+      } catch (e) {
+        console.error("goal-breakdown failed", e);
+      }
+
       toast.success("Tikslas įrašytas į Tikslus");
       navigate({ to: "/goals" });
     } catch (err: unknown) {
