@@ -5,10 +5,10 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Flame, Compass } from "lucide-react";
+import { Flame, Compass, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type SessionMode = "demartini" | "goal_clarify";
+export type SessionMode = "demartini" | "goal_clarify" | "mentor";
 
 export function NewSessionDialog({
   open,
@@ -45,11 +45,20 @@ export function NewSessionDialog({
             tone="text-primary"
             onClick={() => onPick("goal_clarify")}
           />
+          <ModeCard
+            icon={BookOpen}
+            title="Klausk mentoriaus"
+            subtitle="Iš tavo žinių bazės"
+            desc="Laisvas pokalbis. Mentorius atsako remdamasis TAVO įkelta medžiaga (knygos, konspektai) su citatomis."
+            tone="text-map-teal"
+            onClick={() => onPick("mentor")}
+          />
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 function ModeCard({
   icon: Icon,

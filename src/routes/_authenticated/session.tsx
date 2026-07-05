@@ -37,7 +37,7 @@ import { extractGoalPayload } from "@/lib/parse-goal-payload";
 import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
-import { CheckCircle2, Compass } from "lucide-react";
+import { CheckCircle2, Compass, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -115,13 +115,15 @@ function SessionPage() {
   async function createSession(pickedMode: SessionMode) {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
+    const title =
+      pickedMode === "goal_clarify"
+        ? "Tikslo išgryninimas"
+        : pickedMode === "mentor"
+          ? "Klausk mentoriaus"
+          : "Nauja sesija";
     const { data: created, error } = await supabase
       .from("sessions")
-      .insert({
-        user_id: userData.user.id,
-        title: pickedMode === "goal_clarify" ? "Tikslo išgryninimas" : "Nauja sesija",
-        mode: pickedMode,
-      })
+      .insert({ user_id: userData.user.id, title, mode: pickedMode })
       .select("id")
       .single();
     if (error) return toast.error(error.message);
@@ -207,15 +209,33 @@ function SessionPage() {
     setMessages((m) => [...m, { id: assistantId, role: "assistant", content: "" }]);
 
     try {
-      const resp = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history, mode }),
-      });
+      let resp: Response;
+      if (mode === "mentor") {
+        const { data: sess } = await supabase.auth.getSession();
+        const token = sess.session?.access_token;
+        if (!token) throw new Error("Nesi prisijungęs");
+        resp = await fetch("/api/mentor-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ messages: history }),
+        });
+      } else {
+        resp = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history, mode }),
+        });
+      }
       if (!resp.ok || !resp.body) throw new Error(await resp.text().catch(() => "AI klaida"));
 
-      const parse = (raw: string) =>
-        mode === "goal_clarify" ? extractGoalPayload(raw) : extractMapPayload(raw);
+      const parse = (raw: string) => {
+        if (mode === "goal_clarify") return extractGoalPayload(raw);
+        if (mode === "demartini") return extractMapPayload(raw);
+        return { clean: raw, payload: null } as const;
+      };
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -249,7 +269,7 @@ function SessionPage() {
           }
           if (p.patterns) updates.patterns = p.patterns;
           if (p.grid) updates.grid = { ...(session.grid ?? {}), ...p.grid };
-        } else {
+        } else if (mode === "goal_clarify") {
           const p = payload as import("@/lib/parse-goal-payload").GoalPayload;
           if (p.stage) updates.active_column = p.stage;
           if (p.goal_draft) updates.active_topic = p.goal_draft;
@@ -429,7 +449,9 @@ function SessionPage() {
             <p className="text-sm text-muted-foreground mt-1">
               {mode === "goal_clarify"
                 ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
-                : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
+                : mode === "mentor"
+                  ? "Mentorius atsako iš tavo įkeltos medžiagos su citatomis."
+                  : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
             </p>
           </div>
           <Button
@@ -441,7 +463,7 @@ function SessionPage() {
           >
             <Sparkles className="h-3.5 w-3.5" /> Nauja sesija
           </Button>
-          {mode === "demartini" ? (
+          {mode === "demartini" && (
             <Button
               onClick={() => setCompletionOpen(true)}
               size="sm"
@@ -450,7 +472,8 @@ function SessionPage() {
             >
               <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
             </Button>
-          ) : (
+          )}
+          {mode === "goal_clarify" && (
             <Button
               onClick={saveGoal}
               size="sm"
@@ -696,9 +719,9 @@ function SessionPage() {
       {/* Right panel */}
       {mode === "goal_clarify" ? (
         <GoalClarifier data={goalData} onSave={saveGoal} />
-      ) : (
+      ) : mode === "demartini" ? (
         <GrowthMap data={mapData} />
-      )}
+      ) : null}
 
       {session && mode === "demartini" && (
         <SessionCompletionDialog
@@ -732,7 +755,9 @@ function ModeBadge({ mode }: { mode: SessionMode }) {
   const cfg =
     mode === "goal_clarify"
       ? { label: "Tikslo išgryninimas", tone: "map-teal", Icon: Compass }
-      : { label: "Emocinis balansas", tone: "map-orange", Icon: Sparkles };
+      : mode === "mentor"
+        ? { label: "Mentorius", tone: "map-teal", Icon: BookOpen }
+        : { label: "Emocinis balansas", tone: "map-orange", Icon: Sparkles };
   const { Icon } = cfg;
   return (
     <Badge
