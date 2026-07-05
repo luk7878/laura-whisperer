@@ -14,6 +14,88 @@ export type Database = {
   }
   public: {
     Tables: {
+      goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          linked_value_id: string | null
+          progress: number
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          linked_value_id?: string | null
+          progress?: number
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          linked_value_id?: string | null
+          progress?: number
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_linked_value_id_fkey"
+            columns: ["linked_value_id"]
+            isOneToOne: false
+            referencedRelation: "values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entries: {
+        Row: {
+          created_at: string
+          id: string
+          patterns: Json
+          session_id: string | null
+          summary: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patterns?: Json
+          session_id?: string | null
+          summary: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patterns?: Json
+          session_id?: string | null
+          summary?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -49,28 +131,189 @@ export type Database = {
           },
         ]
       }
+      priorities: {
+        Row: {
+          created_at: string
+          done: boolean
+          due_date: string | null
+          id: string
+          linked_goal_id: string | null
+          linked_value_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          linked_goal_id?: string | null
+          linked_value_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          linked_goal_id?: string | null
+          linked_value_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "priorities_linked_goal_id_fkey"
+            columns: ["linked_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "priorities_linked_value_id_fkey"
+            columns: ["linked_value_id"]
+            isOneToOne: false
+            referencedRelation: "values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      progress_snapshots: {
+        Row: {
+          created_at: string
+          emotional_end: number | null
+          emotional_start: number | null
+          id: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emotional_end?: number | null
+          emotional_start?: number | null
+          id?: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emotional_end?: number | null
+          emotional_start?: number | null
+          id?: string
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "progress_snapshots_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
+          active_belief: string | null
+          active_column: string | null
+          active_topic: string | null
           client_name: string | null
           created_at: string
+          emotional_current: number | null
+          emotional_end: number | null
+          emotional_start: number | null
+          grid: Json
           id: string
+          patterns: Json
+          status: string
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          active_belief?: string | null
+          active_column?: string | null
+          active_topic?: string | null
           client_name?: string | null
           created_at?: string
+          emotional_current?: number | null
+          emotional_end?: number | null
+          emotional_start?: number | null
+          grid?: Json
           id?: string
+          patterns?: Json
+          status?: string
           title?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          active_belief?: string | null
+          active_column?: string | null
+          active_topic?: string | null
           client_name?: string | null
           created_at?: string
+          emotional_current?: number | null
+          emotional_end?: number | null
+          emotional_start?: number | null
+          grid?: Json
           id?: string
+          patterns?: Json
+          status?: string
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      values: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          rank: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          rank?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          rank?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vision: {
+        Row: {
+          content: string
+          created_at: string
+          horizon_years: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          horizon_years: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          horizon_years?: number
+          id?: string
           updated_at?: string
           user_id?: string
         }
