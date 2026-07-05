@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, LogOut, Mic, MicOff, Send, Sparkles, Loader2, Trash2, ChevronLeft } from "lucide-react";
+import { Plus, LogOut, Mic, MicOff, Send, Sparkles, Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnalysisCard, UserCard, detectStageFromMessages } from "@/components/analysis-card";
 import { Progress } from "@/components/ui/progress";
