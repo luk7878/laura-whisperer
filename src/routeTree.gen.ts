@@ -15,6 +15,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
+import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
+import { Route as ApiKnowledgeIngestRouteImport } from './routes/api/knowledge-ingest'
 import { Route as ApiGoalBreakdownRouteImport } from './routes/api/goal-breakdown'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisionRouteImport } from './routes/_authenticated/vision'
@@ -57,6 +59,16 @@ const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
 const ApiPlanSuggestRoute = ApiPlanSuggestRouteImport.update({
   id: '/api/plan-suggest',
   path: '/api/plan-suggest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMentorChatRoute = ApiMentorChatRouteImport.update({
+  id: '/api/mentor-chat',
+  path: '/api/mentor-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiKnowledgeIngestRoute = ApiKnowledgeIngestRouteImport.update({
+  id: '/api/knowledge-ingest',
+  path: '/api/knowledge-ingest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGoalBreakdownRoute = ApiGoalBreakdownRouteImport.update({
@@ -149,6 +161,8 @@ export interface FileRoutesByFullPath {
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
+  '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
+  '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -170,6 +184,8 @@ export interface FileRoutesByTo {
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
+  '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
+  '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -193,6 +209,8 @@ export interface FileRoutesById {
   '/_authenticated/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
+  '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
+  '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -216,6 +234,8 @@ export interface FileRouteTypes {
     | '/vision'
     | '/api/chat'
     | '/api/goal-breakdown'
+    | '/api/knowledge-ingest'
+    | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
@@ -237,6 +257,8 @@ export interface FileRouteTypes {
     | '/vision'
     | '/api/chat'
     | '/api/goal-breakdown'
+    | '/api/knowledge-ingest'
+    | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
@@ -259,6 +281,8 @@ export interface FileRouteTypes {
     | '/_authenticated/vision'
     | '/api/chat'
     | '/api/goal-breakdown'
+    | '/api/knowledge-ingest'
+    | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
@@ -274,6 +298,8 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiGoalBreakdownRoute: typeof ApiGoalBreakdownRoute
+  ApiKnowledgeIngestRoute: typeof ApiKnowledgeIngestRoute
+  ApiMentorChatRoute: typeof ApiMentorChatRoute
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -322,6 +348,20 @@ declare module '@tanstack/react-router' {
       path: '/api/plan-suggest'
       fullPath: '/api/plan-suggest'
       preLoaderRoute: typeof ApiPlanSuggestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mentor-chat': {
+      id: '/api/mentor-chat'
+      path: '/api/mentor-chat'
+      fullPath: '/api/mentor-chat'
+      preLoaderRoute: typeof ApiMentorChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/knowledge-ingest': {
+      id: '/api/knowledge-ingest'
+      path: '/api/knowledge-ingest'
+      fullPath: '/api/knowledge-ingest'
+      preLoaderRoute: typeof ApiKnowledgeIngestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/goal-breakdown': {
@@ -460,6 +500,8 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
   ApiGoalBreakdownRoute: ApiGoalBreakdownRoute,
+  ApiKnowledgeIngestRoute: ApiKnowledgeIngestRoute,
+  ApiMentorChatRoute: ApiMentorChatRoute,
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
