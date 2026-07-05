@@ -527,47 +527,12 @@ function PulseBadge({
 function MessageBubble({ message }: { message: Message }) {
   const time = message.created_at
     ? new Date(message.created_at).toLocaleTimeString("lt-LT", { hour: "2-digit", minute: "2-digit" })
-    : "";
+    : "dabar";
 
   if (message.role === "user") {
-    return (
-      <div className="flex justify-end">
-        <Card className="px-4 py-3 max-w-[80%] bg-primary/5 border-primary/20">
-          <div className="text-sm whitespace-pre-wrap text-foreground">{message.content}</div>
-          <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end">
-            <CheckCircle2 className="h-3 w-3" /> {time || "dabar"}
-          </div>
-        </Card>
-      </div>
-    );
+    return <UserCard content={message.content} time={time} />;
   }
-
-  const { role, meta } = classifyAssistant(message.content);
-
-  return (
-    <Card className="p-4 flex gap-3">
-      <div
-        className={cn(
-          "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
-          role.tone,
-        )}
-      >
-        <role.icon className="h-4 w-4" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm font-medium" style={{ color: `var(--color-${role.color})` }}>
-            {role.label}
-          </span>
-          {meta && <span className="text-xs text-muted-foreground">· {meta}</span>}
-          <span className="ml-auto text-[10px] text-muted-foreground">{time}</span>
-        </div>
-        <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed">
-          <ReactMarkdown>{message.content}</ReactMarkdown>
-        </div>
-      </div>
-    </Card>
-  );
+  return <AnalysisCard content={message.content} time={time} />;
 }
 
 function classifyAssistant(content: string): {
