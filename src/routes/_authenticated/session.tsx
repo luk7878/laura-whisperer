@@ -33,6 +33,8 @@ import { GrowthMap, type SessionMapData } from "@/components/growth-map";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
 import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SessionCompletionDialog } from "@/components/session-completion-dialog";
+import { CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
