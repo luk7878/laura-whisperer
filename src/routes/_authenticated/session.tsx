@@ -507,6 +507,17 @@ function SessionPage() {
 
       {/* Right map */}
       <GrowthMap data={mapData} />
+
+      {session && (
+        <SessionCompletionDialog
+          open={completionOpen}
+          onOpenChange={setCompletionOpen}
+          sessionId={session.id}
+          sessionTitle={session.title}
+          sessionTopic={session.active_topic}
+          onComplete={() => navigate({ to: "/priorities" })}
+        />
+      )}
     </div>
   );
 }
