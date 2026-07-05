@@ -207,15 +207,33 @@ function SessionPage() {
     setMessages((m) => [...m, { id: assistantId, role: "assistant", content: "" }]);
 
     try {
-      const resp = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history, mode }),
-      });
+      let resp: Response;
+      if (mode === "mentor") {
+        const { data: sess } = await supabase.auth.getSession();
+        const token = sess.session?.access_token;
+        if (!token) throw new Error("Nesi prisijungęs");
+        resp = await fetch("/api/mentor-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ messages: history }),
+        });
+      } else {
+        resp = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history, mode }),
+        });
+      }
       if (!resp.ok || !resp.body) throw new Error(await resp.text().catch(() => "AI klaida"));
 
-      const parse = (raw: string) =>
-        mode === "goal_clarify" ? extractGoalPayload(raw) : extractMapPayload(raw);
+      const parse = (raw: string) => {
+        if (mode === "goal_clarify") return extractGoalPayload(raw);
+        if (mode === "demartini") return extractMapPayload(raw);
+        return { clean: raw, payload: null } as const;
+      };
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
@@ -249,7 +267,7 @@ function SessionPage() {
           }
           if (p.patterns) updates.patterns = p.patterns;
           if (p.grid) updates.grid = { ...(session.grid ?? {}), ...p.grid };
-        } else {
+        } else if (mode === "goal_clarify") {
           const p = payload as import("@/lib/parse-goal-payload").GoalPayload;
           if (p.stage) updates.active_column = p.stage;
           if (p.goal_draft) updates.active_topic = p.goal_draft;
