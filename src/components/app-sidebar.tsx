@@ -30,6 +30,7 @@ import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { NewSessionDialog } from "@/components/new-session-dialog";
 
 const NAV = [
   { title: "Gyva sesija", to: "/session", icon: Radio },
@@ -64,15 +65,22 @@ export function AppSidebar() {
     };
   }, [pathname]);
 
-  async function newSession() {
+  const [newOpen, setNewOpen] = useState(false);
+
+  async function createSession(mode: "demartini" | "goal_clarify") {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
     const { data, error } = await supabase
       .from("sessions")
-      .insert({ user_id: userData.user.id, title: "Nauja sesija" })
+      .insert({
+        user_id: userData.user.id,
+        title: mode === "goal_clarify" ? "Tikslo išgryninimas" : "Nauja sesija",
+        mode,
+      })
       .select("id")
       .single();
     if (error) return toast.error(error.message);
+    setNewOpen(false);
     navigate({ to: "/session", search: { s: data.id } });
   }
 
@@ -93,9 +101,10 @@ export function AppSidebar() {
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">AI palydovas</div>
           </div>
         </Link>
-        <Button onClick={newSession} className="w-full gap-2 shadow-sm" size="sm">
+        <Button onClick={() => setNewOpen(true)} className="w-full gap-2 shadow-sm" size="sm">
           <Plus className="h-4 w-4" /> Nauja sesija
         </Button>
+        <NewSessionDialog open={newOpen} onOpenChange={setNewOpen} onPick={createSession} />
       </SidebarHeader>
 
       <SidebarContent>

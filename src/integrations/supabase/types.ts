@@ -279,6 +279,7 @@ export type Database = {
           emotional_start: number | null
           grid: Json
           id: string
+          mode: string
           patterns: Json
           status: string
           title: string
@@ -296,6 +297,7 @@ export type Database = {
           emotional_start?: number | null
           grid?: Json
           id?: string
+          mode?: string
           patterns?: Json
           status?: string
           title?: string
@@ -313,6 +315,7 @@ export type Database = {
           emotional_start?: number | null
           grid?: Json
           id?: string
+          mode?: string
           patterns?: Json
           status?: string
           title?: string

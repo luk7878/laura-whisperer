@@ -1,0 +1,2 @@
+ALTER TABLE public.sessions ADD COLUMN IF NOT EXISTS mode TEXT NOT NULL DEFAULT 'demartini';
+ALTER TABLE public.sessions ADD CONSTRAINT sessions_mode_check CHECK (mode IN ('demartini','goal_clarify'));
