@@ -30,6 +30,7 @@ import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { NewSessionDialog } from "@/components/new-session-dialog";
 
 const NAV = [
   { title: "Gyva sesija", to: "/session", icon: Radio },
