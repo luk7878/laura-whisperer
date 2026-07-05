@@ -24,8 +24,6 @@ import {
   Map as MapIcon,
   Puzzle,
   Ear,
-  Eye,
-  CheckCircle2,
   HelpCircle,
   Paperclip,
   Smile,
@@ -33,7 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import { GrowthMap, type SessionMapData } from "@/components/growth-map";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
-import ReactMarkdown from "react-markdown";
+import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/_authenticated/session")({
@@ -526,86 +524,14 @@ function PulseBadge({
 function MessageBubble({ message }: { message: Message }) {
   const time = message.created_at
     ? new Date(message.created_at).toLocaleTimeString("lt-LT", { hour: "2-digit", minute: "2-digit" })
-    : "";
+    : "dabar";
 
   if (message.role === "user") {
-    return (
-      <div className="flex justify-end">
-        <Card className="px-4 py-3 max-w-[80%] bg-primary/5 border-primary/20">
-          <div className="text-sm whitespace-pre-wrap text-foreground">{message.content}</div>
-          <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 justify-end">
-            <CheckCircle2 className="h-3 w-3" /> {time || "dabar"}
-          </div>
-        </Card>
-      </div>
-    );
+    return <UserCard content={message.content} time={time} />;
   }
-
-  const { role, meta } = classifyAssistant(message.content);
-
-  return (
-    <Card className="p-4 flex gap-3">
-      <div
-        className={cn(
-          "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
-          role.tone,
-        )}
-      >
-        <role.icon className="h-4 w-4" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm font-medium" style={{ color: `var(--color-${role.color})` }}>
-            {role.label}
-          </span>
-          {meta && <span className="text-xs text-muted-foreground">· {meta}</span>}
-          <span className="ml-auto text-[10px] text-muted-foreground">{time}</span>
-        </div>
-        <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed">
-          <ReactMarkdown>{message.content}</ReactMarkdown>
-        </div>
-      </div>
-    </Card>
-  );
+  return <AnalysisCard content={message.content} time={time} />;
 }
 
-function classifyAssistant(content: string): {
-  role: { label: string; icon: typeof Ear; tone: string; color: string };
-  meta: string | null;
-} {
-  const lower = content.toLowerCase();
-  const stageMatch = content.match(/\*\*Etapas:\*\*\s*([^\n]+)/i);
-  const stage = stageMatch?.[1]?.trim() ?? null;
-
-  if (/(atspindž|girdž|suprantu)/.test(lower)) {
-    return {
-      role: { label: "Klausausi", icon: Ear, tone: "bg-map-green/15 text-map-green", color: "map-green" },
-      meta: stage,
-    };
-  }
-  if (/(veidrod|matai save|kitoje pusėje)/.test(lower)) {
-    return {
-      role: { label: "Veidrodis", icon: Eye, tone: "bg-map-teal/15 text-map-teal", color: "map-teal" },
-      meta: stage,
-    };
-  }
-  if (/(patikslin|pasitikrin|teisingai suprat)/.test(lower)) {
-    return {
-      role: { label: "Pasitikrinkime", icon: CheckCircle2, tone: "bg-map-orange/15 text-map-orange", color: "map-orange" },
-      meta: stage,
-    };
-  }
-  if (/\*\*Klausimas:\*\*/i.test(content)) {
-    return {
-      role: { label: "Dabartinis klausimas", icon: HelpCircle, tone: "bg-primary/10 text-primary", color: "primary" },
-      meta: stage,
-    };
-  }
-  return {
-    role: { label: "AI vedlys", icon: Sparkles, tone: "bg-primary/10 text-primary", color: "primary" },
-    meta: stage,
-  };
-}
 
 function cleanMessage(m: Message): Message {
   const { clean } = extractMapPayload(m.content);
