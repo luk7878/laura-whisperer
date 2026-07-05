@@ -45,6 +45,7 @@ export function GrowthMap({
   progress?: { day: string; value: number }[];
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const emotionColor = emotionTone(data.emotion);
 
   if (collapsed) {
     return (
