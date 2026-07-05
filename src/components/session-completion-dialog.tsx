@@ -30,7 +30,16 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Step = { id: string; title: string; due_date: string; asPriority: boolean };
+type Step = { id: string; title: string; why?: string; due_date: string; asPriority: boolean };
+
+type SessionContext = {
+  topic?: string | null;
+  belief?: string | null;
+  column?: string | null;
+  emotion?: number | null;
+  patterns?: string[] | null;
+  messages?: { role: "user" | "assistant"; content: string }[];
+};
 
 type Props = {
   open: boolean;
@@ -38,6 +47,7 @@ type Props = {
   sessionId: string;
   sessionTitle: string;
   sessionTopic: string | null;
+  context?: SessionContext;
   onComplete?: () => void;
 };
 
