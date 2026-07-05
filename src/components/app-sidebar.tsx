@@ -64,15 +64,22 @@ export function AppSidebar() {
     };
   }, [pathname]);
 
-  async function newSession() {
+  const [newOpen, setNewOpen] = useState(false);
+
+  async function createSession(mode: "demartini" | "goal_clarify") {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
     const { data, error } = await supabase
       .from("sessions")
-      .insert({ user_id: userData.user.id, title: "Nauja sesija" })
+      .insert({
+        user_id: userData.user.id,
+        title: mode === "goal_clarify" ? "Tikslo išgryninimas" : "Nauja sesija",
+        mode,
+      })
       .select("id")
       .single();
     if (error) return toast.error(error.message);
+    setNewOpen(false);
     navigate({ to: "/session", search: { s: data.id } });
   }
 
