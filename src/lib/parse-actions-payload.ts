@@ -20,7 +20,7 @@ export function extractActionsPayload(text: string): {
     const list = Array.isArray(parsed?.suggestions) ? parsed.suggestions : [];
     const actions: ActionSuggestion[] = list
       .filter((x: unknown): x is Record<string, unknown> => !!x && typeof x === "object")
-      .map((x) => ({
+      .map((x: Record<string, unknown>) => ({
         kind: (x.kind === "goal" || x.kind === "priority" || x.kind === "task"
           ? x.kind
           : "priority") as ActionSuggestion["kind"],
