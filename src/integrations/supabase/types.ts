@@ -61,6 +61,78 @@ export type Database = {
           },
         ]
       }
+      goal_tasks: {
+        Row: {
+          ai_generated: boolean
+          created_at: string
+          depth: number
+          description: string | null
+          done: boolean
+          done_at: string | null
+          due_date: string | null
+          estimate: string | null
+          goal_id: string
+          id: string
+          parent_id: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          user_id: string
+          why: string | null
+        }
+        Insert: {
+          ai_generated?: boolean
+          created_at?: string
+          depth?: number
+          description?: string | null
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          estimate?: string | null
+          goal_id: string
+          id?: string
+          parent_id?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+          user_id: string
+          why?: string | null
+        }
+        Update: {
+          ai_generated?: boolean
+          created_at?: string
+          depth?: number
+          description?: string | null
+          done?: boolean
+          done_at?: string | null
+          due_date?: string | null
+          estimate?: string | null
+          goal_id?: string
+          id?: string
+          parent_id?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+          why?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_tasks_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_tasks_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "goal_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           created_at: string
