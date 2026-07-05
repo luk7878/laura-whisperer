@@ -41,7 +41,7 @@ Grąžink TIK JSON pagal šią schemą, be jokio papildomo teksto:
 Griežtos taisyklės:
 - 3–6 pagrindiniai etapai (milestones). Loginė seka nuo dabar iki tikslo.
 - Kiekvienas etapas turi 2–6 subtasks. Sub-užduočių pavadinimai prasideda veiksmažodžiu (parašyti, paskambinti, sukurti, susitikti, ištirti, nupirkti, publikuoti...).
-- Jei sub-užduotis pati yra sudėtinga (pvz. „sukurti interneto puslapį", „paruošti pristatymą", „susirasti klientą") – SKAIDYK ją į 2–5 mikro veiksmus per trečią lygį `subtasks`. Paprastas užduotis palik be trečio lygio.
+- Jei sub-užduotis pati yra sudėtinga (pvz. „sukurti interneto puslapį", „paruošti pristatymą", „susirasti klientą") – SKAIDYK ją į 2–5 mikro veiksmus per trečią lygį subtasks. Paprastas užduotis palik be trečio lygio.
 - Maksimalus gylis – 3 lygiai (etapas → užduotis → mikro veiksmas).
 - due_in_days atspindi tvarką: kiekvienas etapas prasideda po ankstesnio. Pirma savaite – parengiamieji, vėliau – kūrimas, gale – įtvirtinimas.
 - NE bendrybės („dirbti su savimi", „planuoti", „galvoti"). Visada matoma pasekmė.

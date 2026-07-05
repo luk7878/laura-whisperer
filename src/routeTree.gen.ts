@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
+import { Route as ApiGoalBreakdownRouteImport } from './routes/api/goal-breakdown'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisionRouteImport } from './routes/_authenticated/vision'
 import { Route as AuthenticatedSessionRouteImport } from './routes/_authenticated/session'
@@ -56,6 +57,11 @@ const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
 const ApiPlanSuggestRoute = ApiPlanSuggestRouteImport.update({
   id: '/api/plan-suggest',
   path: '/api/plan-suggest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGoalBreakdownRoute = ApiGoalBreakdownRouteImport.update({
+  id: '/api/goal-breakdown',
+  path: '/api/goal-breakdown',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/session': typeof AuthenticatedSessionRoute
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/session': typeof AuthenticatedSessionRoute
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/_authenticated/session': typeof AuthenticatedSessionRoute
   '/_authenticated/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -206,6 +215,7 @@ export interface FileRouteTypes {
     | '/session'
     | '/vision'
     | '/api/chat'
+    | '/api/goal-breakdown'
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/session'
     | '/vision'
     | '/api/chat'
+    | '/api/goal-breakdown'
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
@@ -247,6 +258,7 @@ export interface FileRouteTypes {
     | '/_authenticated/session'
     | '/_authenticated/vision'
     | '/api/chat'
+    | '/api/goal-breakdown'
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
@@ -261,6 +273,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiGoalBreakdownRoute: typeof ApiGoalBreakdownRoute
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -309,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/api/plan-suggest'
       fullPath: '/api/plan-suggest'
       preLoaderRoute: typeof ApiPlanSuggestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/goal-breakdown': {
+      id: '/api/goal-breakdown'
+      path: '/api/goal-breakdown'
+      fullPath: '/api/goal-breakdown'
+      preLoaderRoute: typeof ApiGoalBreakdownRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -439,6 +459,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiGoalBreakdownRoute: ApiGoalBreakdownRoute,
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
