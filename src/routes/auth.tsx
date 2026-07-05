@@ -78,11 +78,11 @@ function AuthPage() {
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-2 flex items-center gap-2 text-primary">
             <Sparkles className="h-6 w-6" />
-            <span className="font-semibold">Demartini Coach AI</span>
+            <span className="font-semibold">Augimo Kompasas AI</span>
           </Link>
           <CardTitle>{mode === "signin" ? "Prisijungimas" : "Registracija"}</CardTitle>
           <CardDescription>
-            {mode === "signin" ? "Prisijunkite prie koučerio asistento" : "Sukurkite naują paskyrą"}
+            {mode === "signin" ? "Prisijunkite prie savo augimo kelio" : "Sukurkite naują paskyrą"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
