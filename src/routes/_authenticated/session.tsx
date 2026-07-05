@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { GrowthMap, type SessionMapData } from "@/components/growth-map";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
 import ReactMarkdown from "react-markdown";
+import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/_authenticated/session")({
