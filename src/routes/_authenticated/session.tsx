@@ -662,10 +662,14 @@ function SessionPage() {
         </form>
       </div>
 
-      {/* Right map */}
-      <GrowthMap data={mapData} />
+      {/* Right panel */}
+      {mode === "goal_clarify" ? (
+        <GoalClarifier data={goalData} onSave={saveGoal} />
+      ) : (
+        <GrowthMap data={mapData} />
+      )}
 
-      {session && (
+      {session && mode === "demartini" && (
         <SessionCompletionDialog
           open={completionOpen}
           onOpenChange={setCompletionOpen}
@@ -683,7 +687,35 @@ function SessionPage() {
           onComplete={() => navigate({ to: "/priorities" })}
         />
       )}
+
+      <NewSessionDialog
+        open={newSessionOpen}
+        onOpenChange={setNewSessionOpen}
+        onPick={createSession}
+      />
     </div>
+  );
+}
+
+function ModeBadge({ mode }: { mode: SessionMode }) {
+  const cfg =
+    mode === "goal_clarify"
+      ? { label: "Tikslo išgryninimas", tone: "map-teal", Icon: Compass }
+      : { label: "Emocinis balansas", tone: "map-orange", Icon: Sparkles };
+  const { Icon } = cfg;
+  return (
+    <Badge
+      variant="outline"
+      className="gap-1.5 py-1 px-2 font-normal text-[11px] rounded-full"
+      style={{
+        color: `var(--color-${cfg.tone})`,
+        borderColor: `color-mix(in oklab, var(--color-${cfg.tone}) 35%, transparent)`,
+        backgroundColor: `color-mix(in oklab, var(--color-${cfg.tone}) 10%, transparent)`,
+      }}
+    >
+      <Icon className="h-3 w-3" />
+      {cfg.label}
+    </Badge>
   );
 }
 
