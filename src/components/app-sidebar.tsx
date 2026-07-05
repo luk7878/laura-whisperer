@@ -22,6 +22,7 @@ import {
   Lightbulb,
   BarChart3,
   Library,
+  MessageSquare,
   Plus,
   LogOut,
   ChevronRight,
@@ -30,17 +31,18 @@ import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { NewSessionDialog } from "@/components/new-session-dialog";
+import { NewSessionDialog, type SessionMode } from "@/components/new-session-dialog";
 
 const NAV = [
   { title: "Gyva sesija", to: "/session", icon: Radio },
+  { title: "Klausk mentoriaus", to: "/ask", icon: MessageSquare },
+  { title: "Žinių bazė", to: "/knowledge", icon: Library },
   { title: "Tikslai", to: "/goals", icon: Target },
   { title: "Vizija", to: "/vision", icon: Eye },
   { title: "Prioritetai", to: "/priorities", icon: ListChecks },
   { title: "Augimo žurnalas", to: "/journal", icon: BookOpen },
   { title: "Įžvalgos", to: "/insights", icon: Lightbulb },
   { title: "Pažanga", to: "/progress", icon: BarChart3 },
-  { title: "Resursai", to: "/resources", icon: Library },
 ] as const;
 
 type RecentSession = { id: string; title: string; updated_at: string; emotional_current: number | null };
@@ -67,16 +69,18 @@ export function AppSidebar() {
 
   const [newOpen, setNewOpen] = useState(false);
 
-  async function createSession(mode: "demartini" | "goal_clarify") {
+  async function createSession(mode: SessionMode) {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
+    const title =
+      mode === "goal_clarify"
+        ? "Tikslo išgryninimas"
+        : mode === "mentor"
+          ? "Klausk mentoriaus"
+          : "Nauja sesija";
     const { data, error } = await supabase
       .from("sessions")
-      .insert({
-        user_id: userData.user.id,
-        title: mode === "goal_clarify" ? "Tikslo išgryninimas" : "Nauja sesija",
-        mode,
-      })
+      .insert({ user_id: userData.user.id, title, mode })
       .select("id")
       .single();
     if (error) return toast.error(error.message);
