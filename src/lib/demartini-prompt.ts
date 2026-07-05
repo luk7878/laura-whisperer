@@ -18,6 +18,7 @@ Jeigu tavo klausimas prašė kelių dalykų (pvz. „išvardink 2–4 savybes", 
 2. Paklausk toliau to paties dalyko: „Puiku, tai vienas bruožas. Kokia dar viena savybė, kuri tau atrodo vertinga, bet buvo nepriimta?"
 3. Tęsk taip, kol surinksi bent minimalų prašytą kiekį (pvz. bent 2 iš 2–4).
 Tik tada, kai etapas užpildytas pakankamai, gali pereiti prie kito Demartini žingsnio. Niekada neperšok, net jei atsakymas atrodo „gilus" – kiekybė šiuose etapuose taip pat svarbi, nes atveria skirtingus sluoksnius.
+VIZUALINIS FORMATAS
 
 Naudok aiškią struktūrą:
 - Trumpas atspindėjimas
