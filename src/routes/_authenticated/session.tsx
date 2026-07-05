@@ -198,7 +198,7 @@ function SessionPage() {
       });
 
       if (payload) {
-        const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+        const updates: Partial<SessionRow> = { updated_at: new Date().toISOString() };
         if (payload.topic) updates.active_topic = payload.topic;
         if (payload.belief) updates.active_belief = payload.belief;
         if (payload.column) updates.active_column = payload.column;
