@@ -184,6 +184,7 @@ export function SessionCompletionDialog({
       const stepsPayload = cleanSteps.map((s) => ({
         id: s.id,
         title: s.title.trim(),
+        why: s.why ?? null,
         due_date: s.due_date || null,
         done: false,
       }));
