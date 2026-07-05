@@ -37,7 +37,7 @@ import { extractGoalPayload } from "@/lib/parse-goal-payload";
 import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
-import { CheckCircle2, Compass } from "lucide-react";
+import { CheckCircle2, Compass, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
