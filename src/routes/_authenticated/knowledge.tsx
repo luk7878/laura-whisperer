@@ -212,7 +212,7 @@ function KnowledgePage() {
               {pasteOpen && (
                 <div className="mt-4 space-y-3 rounded-lg border p-4 bg-muted/30">
                   <Input
-                    placeholder="Pavadinimas (pvz. „Demartini – vertybės")"
+                    placeholder='Pavadinimas (pvz. „Demartini – vertybės“)'
                     value={pasteTitle}
                     onChange={(e) => setPasteTitle(e.target.value)}
                   />
