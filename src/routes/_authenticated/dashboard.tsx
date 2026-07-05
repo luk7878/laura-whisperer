@@ -280,42 +280,53 @@ function Dashboard() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col bg-muted/20">
+        {activeId && messages.length > 0 && (
+          <div className="border-b bg-background/80 backdrop-blur px-6 py-4">
+            <div className="mx-auto max-w-3xl flex items-center gap-4">
+              <div className="flex-1 min-w-0">
+                <h1 className="font-semibold text-base truncate">
+                  {sessions.find((s) => s.id === activeId)?.title ?? "Sesija"}
+                </h1>
+                <div className="flex items-center gap-3 mt-2">
+                  <Progress
+                    value={(detectStageFromMessages(messages) / 11) * 100}
+                    className="h-1.5 flex-1"
+                  />
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {detectStageFromMessages(messages)} / 11 žingsnis
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-6 py-8 space-y-6">
+          <div className="mx-auto max-w-3xl px-6 py-8 space-y-5">
             {messages.length === 0 && (
-              <Card className="p-8 text-center border-dashed">
-                <Sparkles className="h-8 w-8 text-primary mx-auto mb-3" />
-                <h2 className="font-semibold text-lg">Įveskite kliento pasisakymą</h2>
+              <Card className="p-10 text-center border-dashed">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary mx-auto mb-4 flex items-center justify-center">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <h2 className="font-semibold text-lg">Pradėk savirefleksijos sesiją</h2>
                 <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-                  Įrašykite balsu arba parašykite, ką klientas pasakė. Asistentas
-                  atliks emocinę analizę, parinks Formą A/B, stulpelį ir pasiūlys 3
-                  galingus klausimus.
+                  Parašyk arba pasakyk temą, su kuria šiandien nori padirbėti. Vedlys
+                  ves tave po vieną žingsnį per 11 Demartini metodo etapų.
                 </p>
               </Card>
             )}
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={cn(
-                  "rounded-lg p-4",
-                  m.role === "user"
-                    ? "bg-primary/10 border border-primary/20 ml-8"
-                    : "bg-card border mr-8",
-                )}
-              >
-                <div className="text-xs font-medium uppercase tracking-wide mb-2 text-muted-foreground">
-                  {m.role === "user" ? "Kliento pasisakymas" : "AI analizė"}
-                </div>
-                {m.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="whitespace-pre-wrap text-sm">{m.content}</p>
-                )}
-              </div>
-            ))}
+            {messages.map((m) => {
+              const time = new Date().toLocaleTimeString("lt-LT", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              return m.role === "assistant" ? (
+                <AnalysisCard key={m.id} content={m.content} time={time} />
+              ) : (
+                <UserCard key={m.id} content={m.content} time={time} />
+              );
+            })}
             {streaming && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Analizuoju…
@@ -323,6 +334,7 @@ function Dashboard() {
             )}
           </div>
         </div>
+
 
         <form onSubmit={sendMessage} className="border-t bg-card/50 p-4">
           <div className="mx-auto max-w-3xl">
