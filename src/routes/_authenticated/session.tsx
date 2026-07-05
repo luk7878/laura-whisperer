@@ -33,6 +33,8 @@ import { GrowthMap, type SessionMapData } from "@/components/growth-map";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
 import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SessionCompletionDialog } from "@/components/session-completion-dialog";
+import { CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -77,6 +79,7 @@ function SessionPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const [completionOpen, setCompletionOpen] = useState(false);
 
   // Load or bootstrap active session
   useEffect(() => {
@@ -293,6 +296,14 @@ function SessionPage() {
               AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį.
             </p>
           </div>
+          <Button
+            onClick={() => setCompletionOpen(true)}
+            size="sm"
+            className="gap-2"
+            disabled={!session || messages.length < 2}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
+          </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Settings2 className="h-3.5 w-3.5" /> Sesijos nustatymai
           </Button>
@@ -496,6 +507,17 @@ function SessionPage() {
 
       {/* Right map */}
       <GrowthMap data={mapData} />
+
+      {session && (
+        <SessionCompletionDialog
+          open={completionOpen}
+          onOpenChange={setCompletionOpen}
+          sessionId={session.id}
+          sessionTitle={session.title}
+          sessionTopic={session.active_topic}
+          onComplete={() => navigate({ to: "/priorities" })}
+        />
+      )}
     </div>
   );
 }

@@ -14,11 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_plans: {
+        Row: {
+          created_at: string
+          goal_id: string | null
+          id: string
+          session_id: string | null
+          status: string
+          steps: Json
+          summary: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_id?: string | null
+          id?: string
+          session_id?: string | null
+          status?: string
+          steps?: Json
+          summary?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string | null
+          id?: string
+          session_id?: string | null
+          status?: string
+          steps?: Json
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plans_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goals: {
         Row: {
           created_at: string
           description: string | null
           id: string
+          linked_plan_id: string | null
           linked_value_id: string | null
           progress: number
           status: string
@@ -31,6 +79,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          linked_plan_id?: string | null
           linked_value_id?: string | null
           progress?: number
           status?: string
@@ -43,6 +92,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          linked_plan_id?: string | null
           linked_value_id?: string | null
           progress?: number
           status?: string
@@ -138,6 +188,7 @@ export type Database = {
           due_date: string | null
           id: string
           linked_goal_id: string | null
+          linked_plan_id: string | null
           linked_value_id: string | null
           title: string
           user_id: string
@@ -148,6 +199,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           linked_goal_id?: string | null
+          linked_plan_id?: string | null
           linked_value_id?: string | null
           title: string
           user_id: string
@@ -158,6 +210,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           linked_goal_id?: string | null
+          linked_plan_id?: string | null
           linked_value_id?: string | null
           title?: string
           user_id?: string
