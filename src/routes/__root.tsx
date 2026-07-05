@@ -79,15 +79,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Demartini Coach AI — Asistentas koučeriams" },
+      { title: "Augimo Kompasas AI — asmeninio augimo platforma" },
       {
         name: "description",
         content:
-          "AI asistentas, padedantis koučeriams taikyti Demartini metodą: emocinės analizės, Formos A/B parinkimas, stulpelio identifikavimas ir galingi klausimai.",
+          "AI palydima savirefleksijos ir augimo platforma pagal Demartini metodą: sesijos, tikslai, vizija, prioritetai ir gyvas augimo žemėlapis.",
       },
-      { name: "author", content: "Demartini Coach AI" },
-      { property: "og:title", content: "Demartini Coach AI" },
-      { property: "og:description", content: "AI asistentas Demartini metodo koučeriams." },
+      { name: "author", content: "Augimo Kompasas AI" },
+      { property: "og:title", content: "Augimo Kompasas AI" },
+      { property: "og:description", content: "Asmeninio augimo platforma su AI vedliu." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
