@@ -115,13 +115,15 @@ function SessionPage() {
   async function createSession(pickedMode: SessionMode) {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
+    const title =
+      pickedMode === "goal_clarify"
+        ? "Tikslo išgryninimas"
+        : pickedMode === "mentor"
+          ? "Klausk mentoriaus"
+          : "Nauja sesija";
     const { data: created, error } = await supabase
       .from("sessions")
-      .insert({
-        user_id: userData.user.id,
-        title: pickedMode === "goal_clarify" ? "Tikslo išgryninimas" : "Nauja sesija",
-        mode: pickedMode,
-      })
+      .insert({ user_id: userData.user.id, title, mode: pickedMode })
       .select("id")
       .single();
     if (error) return toast.error(error.message);
@@ -447,7 +449,9 @@ function SessionPage() {
             <p className="text-sm text-muted-foreground mt-1">
               {mode === "goal_clarify"
                 ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
-                : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
+                : mode === "mentor"
+                  ? "Mentorius atsako iš tavo įkeltos medžiagos su citatomis."
+                  : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
             </p>
           </div>
           <Button
@@ -459,7 +463,7 @@ function SessionPage() {
           >
             <Sparkles className="h-3.5 w-3.5" /> Nauja sesija
           </Button>
-          {mode === "demartini" ? (
+          {mode === "demartini" && (
             <Button
               onClick={() => setCompletionOpen(true)}
               size="sm"
@@ -468,7 +472,8 @@ function SessionPage() {
             >
               <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
             </Button>
-          ) : (
+          )}
+          {mode === "goal_clarify" && (
             <Button
               onClick={saveGoal}
               size="sm"
@@ -714,9 +719,9 @@ function SessionPage() {
       {/* Right panel */}
       {mode === "goal_clarify" ? (
         <GoalClarifier data={goalData} onSave={saveGoal} />
-      ) : (
+      ) : mode === "demartini" ? (
         <GrowthMap data={mapData} />
-      )}
+      ) : null}
 
       {session && mode === "demartini" && (
         <SessionCompletionDialog
@@ -750,7 +755,9 @@ function ModeBadge({ mode }: { mode: SessionMode }) {
   const cfg =
     mode === "goal_clarify"
       ? { label: "Tikslo išgryninimas", tone: "map-teal", Icon: Compass }
-      : { label: "Emocinis balansas", tone: "map-orange", Icon: Sparkles };
+      : mode === "mentor"
+        ? { label: "Mentorius", tone: "map-teal", Icon: BookOpen }
+        : { label: "Emocinis balansas", tone: "map-orange", Icon: Sparkles };
   const { Icon } = cfg;
   return (
     <Badge
