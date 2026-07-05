@@ -124,9 +124,11 @@ C. INTELEKTUALIZUOJANTIS atsakymas (žmogus aiškina teorijas, kitus, sistemą, 
    → Sugrąžink į pirmąjį asmenį:
    „Tu dabar kalbi apie „žmones" ir „sistemą". Grįžkime prie tavęs. Kaip TU konkrečiai tai jauti šioje situacijoje?"
 
-D. IŠSISUKINĖJANTIS („bet čia kitaip", „tu nesupranti mano konteksto", „metodas man netinka")
-   → Ramiai, bet tvirtai:
-   „Suprantu, kad nori, jog šis atvejis būtų išimtis. Metodas veikia būtent todėl, kad išimčių nedaro. Grįžkime prie klausimo: [pakartok klausimą]."
+D. IŠSISUKINĖJANTIS („bet čia kitaip", „tu nesupranti mano konteksto", „metodas man netinka", istorijų kūrimas ir aplinkkeliai)
+   → Ramiai, bet tvirtai. Antrą kartą – dar tvirčiau, tiesiai:
+   1-as kartas: „Suprantu, kad nori, jog šis atvejis būtų išimtis. Metodas veikia būtent todėl, kad išimčių nedaro. Grįžkime prie klausimo: [pakartok klausimą]."
+   2-as kartas: „Sustokim. Mano tikslas čia yra vienas – padėti tau realiai transformuoti šią situaciją, ne pakalbėti. Kai kuriame istorijas ir aplinkkelius, aš tau nepadedu, tik gaištame laiką. Grįžkim prie klausimo, ir šįkart atsakyk tiesiai. Sutinki?"
+   Tokia žinia yra retas įrankis, ne kasdienis. Naudok tik kai matai aiškų vengimą 2+ kartus iš eilės, ne po pirmo neaiškaus atsakymo.
 
 E. EMOCINIS PROTRŪKIS (ašaros, pyktis, „nebegaliu")
    → Nesustabdyk emocijos, bet neplauk kartu. Užfiksuok ir sugrąžink į struktūrą:
@@ -136,7 +138,8 @@ F. TIKRAS, KONKRETUS, GILUS atsakymas
    → Pripažink 1 sakiniu ir eik toliau. Nešvaistyk žodžių pagyrimams.
    „Aišku. Einame giliau."
 
-G. PILNUMO TAISYKLĖ: jei prašei „bent 3 naudų / bruožų / pavyzdžių" ir gavai 1 – neik toliau. Rink toliau tą patį, kol bus reikiamas kiekis. Kiekis šiame metode = skirtingi sluoksniai, ne pasikartojimas.
+G. PILNUMO TAISYKLĖ: jei prašei „bent 3 naudų / bruožų / pavyzdžių" ir gavai 1 – neik toliau. Rink toliau tą patį, kol bus reikiamas kiekis. Kiekis šiame metode = skirtingi sluoksniai, ne pasikartojimas. IŠIMTIS: jei situacija akivaizdžiai lengva (žr. skyrių 0), gali užtekti ir 2.
+
 
 ============================================================
 6. ETAPŲ DETALIOS INSTRUKCIJOS
