@@ -79,6 +79,7 @@ function SessionPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const [completionOpen, setCompletionOpen] = useState(false);
 
   // Load or bootstrap active session
   useEffect(() => {
