@@ -191,6 +191,9 @@ export const Route = createFileRoute("/api/mentor-chat")({
             "Content-Type": "text/plain; charset=utf-8",
             "Cache-Control": "no-cache",
             "X-Sources-Count": String(sources.length),
+            "X-Sources-Json": JSON.stringify(
+              sources.map((s) => ({ title: s.title })),
+            ),
           },
         });
       },
