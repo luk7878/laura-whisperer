@@ -535,43 +535,6 @@ function MessageBubble({ message }: { message: Message }) {
   return <AnalysisCard content={message.content} time={time} />;
 }
 
-function classifyAssistant(content: string): {
-  role: { label: string; icon: typeof Ear; tone: string; color: string };
-  meta: string | null;
-} {
-  const lower = content.toLowerCase();
-  const stageMatch = content.match(/\*\*Etapas:\*\*\s*([^\n]+)/i);
-  const stage = stageMatch?.[1]?.trim() ?? null;
-
-  if (/(atspindž|girdž|suprantu)/.test(lower)) {
-    return {
-      role: { label: "Klausausi", icon: Ear, tone: "bg-map-green/15 text-map-green", color: "map-green" },
-      meta: stage,
-    };
-  }
-  if (/(veidrod|matai save|kitoje pusėje)/.test(lower)) {
-    return {
-      role: { label: "Veidrodis", icon: Eye, tone: "bg-map-teal/15 text-map-teal", color: "map-teal" },
-      meta: stage,
-    };
-  }
-  if (/(patikslin|pasitikrin|teisingai suprat)/.test(lower)) {
-    return {
-      role: { label: "Pasitikrinkime", icon: CheckCircle2, tone: "bg-map-orange/15 text-map-orange", color: "map-orange" },
-      meta: stage,
-    };
-  }
-  if (/\*\*Klausimas:\*\*/i.test(content)) {
-    return {
-      role: { label: "Dabartinis klausimas", icon: HelpCircle, tone: "bg-primary/10 text-primary", color: "primary" },
-      meta: stage,
-    };
-  }
-  return {
-    role: { label: "AI vedlys", icon: Sparkles, tone: "bg-primary/10 text-primary", color: "primary" },
-    meta: stage,
-  };
-}
 
 function cleanMessage(m: Message): Message {
   const { clean } = extractMapPayload(m.content);
