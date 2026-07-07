@@ -31,6 +31,7 @@ import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as AuthenticatedAskIndexRouteImport } from './routes/_authenticated/ask.index'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 
@@ -145,6 +146,11 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAskIndexRoute = AuthenticatedAskIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAskRoute,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -163,7 +169,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/ask': typeof AuthenticatedAskRoute
+  '/ask': typeof AuthenticatedAskRouteWithChildren
   '/goals': typeof AuthenticatedGoalsRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/journal': typeof AuthenticatedJournalRoute
@@ -181,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -188,7 +195,6 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/ask': typeof AuthenticatedAskRoute
   '/goals': typeof AuthenticatedGoalsRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/journal': typeof AuthenticatedJournalRoute
@@ -206,6 +212,7 @@ export interface FileRoutesByTo {
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/ask': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -215,7 +222,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/_authenticated/ask': typeof AuthenticatedAskRoute
+  '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
   '/_authenticated/goals': typeof AuthenticatedGoalsRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
@@ -233,6 +240,7 @@ export interface FileRoutesById {
   '/api/transcribe': typeof ApiTranscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/ask/': typeof AuthenticatedAskIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -260,6 +268,7 @@ export interface FileRouteTypes {
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/ask/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -267,7 +276,6 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/ask'
     | '/goals'
     | '/insights'
     | '/journal'
@@ -285,6 +293,7 @@ export interface FileRouteTypes {
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/ask'
   id:
     | '__root__'
     | '/'
@@ -311,6 +320,7 @@ export interface FileRouteTypes {
     | '/api/transcribe'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/ask/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -486,6 +496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/ask/': {
+      id: '/_authenticated/ask/'
+      path: '/'
+      fullPath: '/ask/'
+      preLoaderRoute: typeof AuthenticatedAskIndexRouteImport
+      parentRoute: typeof AuthenticatedAskRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -503,8 +520,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAskRouteChildren {
+  AuthenticatedAskIndexRoute: typeof AuthenticatedAskIndexRoute
+}
+
+const AuthenticatedAskRouteChildren: AuthenticatedAskRouteChildren = {
+  AuthenticatedAskIndexRoute: AuthenticatedAskIndexRoute,
+}
+
+const AuthenticatedAskRouteWithChildren =
+  AuthenticatedAskRoute._addFileChildren(AuthenticatedAskRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAskRoute: typeof AuthenticatedAskRoute
+  AuthenticatedAskRoute: typeof AuthenticatedAskRouteWithChildren
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRoute
   AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
@@ -517,7 +545,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAskRoute: AuthenticatedAskRoute,
+  AuthenticatedAskRoute: AuthenticatedAskRouteWithChildren,
   AuthenticatedGoalsRoute: AuthenticatedGoalsRoute,
   AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
