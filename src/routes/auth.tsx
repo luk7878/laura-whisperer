@@ -25,11 +25,14 @@ const INVITE_KEY = "pending_invite_code";
 function AuthPage() {
   const { next } = Route.useSearch();
   const target = next ?? "/session";
+  const validate = useServerFn(validateInviteCode);
+  const consume = useServerFn(consumeInviteCode);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [invite, setInvite] = useState("");
   const [busy, setBusy] = useState(false);
+
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
