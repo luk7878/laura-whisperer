@@ -180,6 +180,57 @@ export type Database = {
           },
         ]
       }
+      clarity_slot_state: {
+        Row: {
+          capacity: number
+          filled: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          filled?: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          filled?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clarity_waitlist: {
+        Row: {
+          concern: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notified_at: string | null
+          status: string
+        }
+        Insert: {
+          concern?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          notified_at?: string | null
+          status?: string
+        }
+        Update: {
+          concern?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          notified_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -956,6 +1007,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      book_clarity_slot: {
+        Args: {
+          p_concern: string
+          p_consent_accepted: boolean
+          p_email: string
+          p_name: string
+          p_scheduled_at: string
+        }
+        Returns: Json
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
