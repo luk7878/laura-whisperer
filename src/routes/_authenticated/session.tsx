@@ -38,6 +38,7 @@ import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
+import { SessionIntegration } from "@/components/session-integration";
 import { CheckCircle2, Compass, BookOpen } from "lucide-react";
 
 
@@ -666,10 +667,19 @@ function SessionPage() {
               Pilnas vizualus 14 stulpelių žemėlapis. Netrukus.
             </PlaceholderView>
           )}
-          {tab === "integration" && (
-            <PlaceholderView icon={Puzzle} title="Integracija su tikslais">
-              Susiek sesijos įžvalgas su savo tikslais, prioritetais ir vizija.
-            </PlaceholderView>
+          {tab === "integration" && session && (
+            <SessionIntegration
+              session={{
+                id: session.id,
+                title: session.title,
+                active_topic: session.active_topic,
+                active_belief: session.active_belief,
+                active_column: session.active_column,
+                emotional_current: session.emotional_current,
+                patterns: (session.patterns as string[] | null) ?? [],
+              }}
+              lastInsight={lastAssistant?.content?.slice(0, 400)}
+            />
           )}
         </div>
 
