@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /auth
+Disallow: /admin
+Disallow: /sesija/
+Disallow: /unsubscribe
+Disallow: /email/
+Disallow: /lovable/
+Disallow: /api/
+
+Sitemap: https://mentor.lauraborusaite.lt/sitemap.xml
