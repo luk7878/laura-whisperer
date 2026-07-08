@@ -29,15 +29,17 @@ import {
   Smile,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GrowthMap, type SessionMapData } from "@/components/growth-map";
-import { GoalClarifier, type GoalClarifierData } from "@/components/goal-clarifier";
+import { GrowthMap, GrowthMapBody, type SessionMapData } from "@/components/growth-map";
+import { GoalClarifier, GoalClarifierBody, type GoalClarifierData } from "@/components/goal-clarifier";
 import { NewSessionDialog, type SessionMode } from "@/components/new-session-dialog";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
 import { extractGoalPayload } from "@/lib/parse-goal-payload";
 import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
 import { CheckCircle2, Compass, BookOpen } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
