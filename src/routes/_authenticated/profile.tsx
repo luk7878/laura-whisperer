@@ -414,9 +414,12 @@ function ProfilePage() {
           </div>
         </TabsContent>
       </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
+
 
 function ToggleRow({
   label,
