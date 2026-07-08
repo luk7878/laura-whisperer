@@ -25,6 +25,20 @@ function BookingPage() {
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ token: string } | null>(null);
+  const [waitlisted, setWaitlisted] = useState(false);
+  const [slots, setSlots] = useState<{ remaining: number; capacity: number } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("clarity_slot_state")
+        .select("capacity, filled")
+        .eq("id", 1)
+        .maybeSingle();
+      if (data) setSlots({ remaining: Math.max(0, data.capacity - data.filled), capacity: data.capacity });
+    })();
+  }, []);
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
