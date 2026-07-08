@@ -682,7 +682,7 @@ function SessionPage() {
                 onClick={recording ? stopRecording : startRecording}
                 disabled={streaming || transcribing}
                 className={cn(
-                  "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                  "h-10 w-10 md:h-11 md:w-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
                   recording
                     ? "bg-destructive text-destructive-foreground border-destructive"
                     : "bg-muted hover:bg-accent",
@@ -690,13 +690,14 @@ function SessionPage() {
                 title={recording ? "Sustabdyti įrašymą" : "Įrašyti balsu"}
               >
                 {transcribing ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" />
                 ) : recording ? (
-                  <MicOff className="h-5 w-5" />
+                  <MicOff className="h-4 w-4 md:h-5 md:w-5" />
                 ) : (
-                  <Mic className="h-5 w-5" />
+                  <Mic className="h-4 w-4 md:h-5 md:w-5" />
                 )}
               </button>
+
 
               <div className="flex-1 min-w-0">
                 <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground mb-1">
