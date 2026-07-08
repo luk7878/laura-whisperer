@@ -40,6 +40,7 @@ import { Route as SesijaTokenPabaigaRouteImport } from './routes/sesija.$token.p
 import { Route as AuthenticatedAskThreadIdRouteImport } from './routes/_authenticated/ask.$threadId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicClarityMessageRouteImport } from './routes/api/public/clarity/message'
 import { Route as ApiPublicClarityInterestRouteImport } from './routes/api/public/clarity/interest'
 import { Route as ApiPublicClarityFinishRouteImport } from './routes/api/public/clarity/finish'
@@ -203,6 +204,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicClarityMessageRoute = ApiPublicClarityMessageRouteImport.update({
   id: '/api/public/clarity/message',
   path: '/api/public/clarity/message',
@@ -260,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -294,6 +302,7 @@ export interface FileRoutesByTo {
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -332,6 +341,7 @@ export interface FileRoutesById {
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -441,6 +453,7 @@ export interface FileRouteTypes {
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -464,6 +477,7 @@ export interface RootRouteChildren {
   ApiPublicClarityFinishRoute: typeof ApiPublicClarityFinishRoute
   ApiPublicClarityInterestRoute: typeof ApiPublicClarityInterestRoute
   ApiPublicClarityMessageRoute: typeof ApiPublicClarityMessageRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -685,6 +699,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/clarity/message': {
       id: '/api/public/clarity/message'
       path: '/api/public/clarity/message'
@@ -796,6 +817,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicClarityFinishRoute: ApiPublicClarityFinishRoute,
   ApiPublicClarityInterestRoute: ApiPublicClarityInterestRoute,
   ApiPublicClarityMessageRoute: ApiPublicClarityMessageRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
