@@ -29,7 +29,23 @@ function SessionPage() {
   const [dismissedSafety, setDismissedSafety] = useState(false);
   const [startedAt] = useState(Date.now());
   const [now, setNow] = useState(Date.now());
+  const [sessionEnded, setSessionEnded] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  function detectClosing(text: string): boolean {
+    const t = text.toLowerCase();
+    const patterns = [
+      "ačiū už pokalbį",
+      "sėkmės tau",
+      "iki pasimatymo",
+      "iki kito karto",
+      "gerai užbaigti sesij",
+      "užbaigiame sesij",
+      "baigiame sesij",
+      "užbaikime sesij",
+    ];
+    return patterns.some((p) => t.includes(p));
+  }
 
   useEffect(() => {
     if (phase !== "chat") return;
