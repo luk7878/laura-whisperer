@@ -542,7 +542,7 @@ function SessionPage() {
         <div className="flex-1 min-h-0 overflow-hidden bg-muted/20">
           {tab === "session" && (
             <div ref={scrollRef} className="h-full overflow-y-auto">
-              <div className="max-w-3xl mx-auto px-6 py-6 space-y-4">
+              <div className="max-w-3xl mx-auto px-4 md:px-6 py-4 md:py-6 space-y-4">
                 {/* Sesijos pulsas */}
                 <Card className="p-4">
                   <div className="flex items-center gap-2 text-sm font-medium mb-3">
