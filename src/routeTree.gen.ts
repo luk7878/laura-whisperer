@@ -14,7 +14,6 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SesijaTokenRouteImport } from './routes/sesija.$token'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
 import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
@@ -34,6 +33,7 @@ import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as SesijaTokenIndexRouteImport } from './routes/sesija.$token.index'
 import { Route as AuthenticatedAskIndexRouteImport } from './routes/_authenticated/ask.index'
 import { Route as SesijaTokenPabaigaRouteImport } from './routes/sesija.$token.pabaiga'
 import { Route as AuthenticatedAskThreadIdRouteImport } from './routes/_authenticated/ask.$threadId'
@@ -66,11 +66,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SesijaTokenRoute = SesijaTokenRouteImport.update({
-  id: '/sesija/$token',
-  path: '/sesija/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
@@ -170,15 +165,20 @@ const Char91DotmcpChar93ListToolsRoute =
     path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SesijaTokenIndexRoute = SesijaTokenIndexRouteImport.update({
+  id: '/sesija/$token/',
+  path: '/sesija/$token/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAskIndexRoute = AuthenticatedAskIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAskRoute,
 } as any)
 const SesijaTokenPabaigaRoute = SesijaTokenPabaigaRouteImport.update({
-  id: '/pabaiga',
-  path: '/pabaiga',
-  getParentRoute: () => SesijaTokenRoute,
+  id: '/sesija/$token/pabaiga',
+  path: '/sesija/$token/pabaiga',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAskThreadIdRoute =
   AuthenticatedAskThreadIdRouteImport.update({
@@ -243,12 +243,12 @@ export interface FileRoutesByFullPath {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
-  '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
   '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/ask/': typeof AuthenticatedAskIndexRoute
+  '/sesija/$token/': typeof SesijaTokenIndexRoute
   '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
@@ -277,12 +277,12 @@ export interface FileRoutesByTo {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
-  '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
   '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/ask': typeof AuthenticatedAskIndexRoute
+  '/sesija/$token': typeof SesijaTokenIndexRoute
   '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
@@ -314,12 +314,12 @@ export interface FileRoutesById {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
-  '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
   '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/_authenticated/ask/': typeof AuthenticatedAskIndexRoute
+  '/sesija/$token/': typeof SesijaTokenIndexRoute
   '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
@@ -351,12 +351,12 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
-    | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/ask/$threadId'
     | '/sesija/$token/pabaiga'
     | '/ask/'
+    | '/sesija/$token/'
     | '/api/public/clarity/book'
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
@@ -385,12 +385,12 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
-    | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/ask/$threadId'
     | '/sesija/$token/pabaiga'
     | '/ask'
+    | '/sesija/$token'
     | '/api/public/clarity/book'
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
@@ -421,12 +421,12 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
-    | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/ask/$threadId'
     | '/sesija/$token/pabaiga'
     | '/_authenticated/ask/'
+    | '/sesija/$token/'
     | '/api/public/clarity/book'
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
@@ -447,9 +447,10 @@ export interface RootRouteChildren {
   ApiMentorChatRoute: typeof ApiMentorChatRoute
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
-  SesijaTokenRoute: typeof SesijaTokenRouteWithChildren
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  SesijaTokenPabaigaRoute: typeof SesijaTokenPabaigaRoute
+  SesijaTokenIndexRoute: typeof SesijaTokenIndexRoute
   ApiPublicClarityBookRoute: typeof ApiPublicClarityBookRoute
   ApiPublicClarityFinishRoute: typeof ApiPublicClarityFinishRoute
   ApiPublicClarityInterestRoute: typeof ApiPublicClarityInterestRoute
@@ -491,13 +492,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sesija/$token': {
-      id: '/sesija/$token'
-      path: '/sesija/$token'
-      fullPath: '/sesija/$token'
-      preLoaderRoute: typeof SesijaTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/transcribe': {
@@ -633,6 +627,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sesija/$token/': {
+      id: '/sesija/$token/'
+      path: '/sesija/$token'
+      fullPath: '/sesija/$token/'
+      preLoaderRoute: typeof SesijaTokenIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/ask/': {
       id: '/_authenticated/ask/'
       path: '/'
@@ -642,10 +643,10 @@ declare module '@tanstack/react-router' {
     }
     '/sesija/$token/pabaiga': {
       id: '/sesija/$token/pabaiga'
-      path: '/pabaiga'
+      path: '/sesija/$token/pabaiga'
       fullPath: '/sesija/$token/pabaiga'
       preLoaderRoute: typeof SesijaTokenPabaigaRouteImport
-      parentRoute: typeof SesijaTokenRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/ask/$threadId': {
       id: '/_authenticated/ask/$threadId'
@@ -743,18 +744,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface SesijaTokenRouteChildren {
-  SesijaTokenPabaigaRoute: typeof SesijaTokenPabaigaRoute
-}
-
-const SesijaTokenRouteChildren: SesijaTokenRouteChildren = {
-  SesijaTokenPabaigaRoute: SesijaTokenPabaigaRoute,
-}
-
-const SesijaTokenRouteWithChildren = SesijaTokenRoute._addFileChildren(
-  SesijaTokenRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -770,9 +759,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMentorChatRoute: ApiMentorChatRoute,
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
-  SesijaTokenRoute: SesijaTokenRouteWithChildren,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  SesijaTokenPabaigaRoute: SesijaTokenPabaigaRoute,
+  SesijaTokenIndexRoute: SesijaTokenIndexRoute,
   ApiPublicClarityBookRoute: ApiPublicClarityBookRoute,
   ApiPublicClarityFinishRoute: ApiPublicClarityFinishRoute,
   ApiPublicClarityInterestRoute: ApiPublicClarityInterestRoute,
