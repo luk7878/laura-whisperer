@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRight, Loader2, Sparkles, TrendingDown, Users } from "lucide-react";
+import { ArrowRight, Loader2, Sparkles, Star, TrendingDown, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/sesija/$token/pabaiga")({
