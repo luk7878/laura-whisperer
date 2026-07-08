@@ -389,6 +389,45 @@ export type Database = {
           },
         ]
       }
+      invite_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          note: string | null
+          updated_at: string
+          uses: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          note?: string | null
+          updated_at?: string
+          uses?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          note?: string | null
+          updated_at?: string
+          uses?: number
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -917,6 +956,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_invite_code: { Args: { _code: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -960,6 +1000,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      validate_invite_code: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
       app_role:
