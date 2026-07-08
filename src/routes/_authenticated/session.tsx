@@ -29,15 +29,17 @@ import {
   Smile,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GrowthMap, type SessionMapData } from "@/components/growth-map";
-import { GoalClarifier, type GoalClarifierData } from "@/components/goal-clarifier";
+import { GrowthMap, GrowthMapBody, type SessionMapData } from "@/components/growth-map";
+import { GoalClarifier, GoalClarifierBody, type GoalClarifierData } from "@/components/goal-clarifier";
 import { NewSessionDialog, type SessionMode } from "@/components/new-session-dialog";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
 import { extractGoalPayload } from "@/lib/parse-goal-payload";
 import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
 import { CheckCircle2, Compass, BookOpen } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -87,6 +89,8 @@ function SessionPage() {
   const [completionOpen, setCompletionOpen] = useState(false);
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
+  const [mapSheetOpen, setMapSheetOpen] = useState(false);
+
 
   const mode: SessionMode = (session?.mode as SessionMode) ?? "demartini";
 
@@ -432,74 +436,95 @@ function SessionPage() {
       {/* Center column */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Header */}
-        <header className="border-b bg-background/80 backdrop-blur px-6 py-4 flex items-start gap-3">
-          <SidebarTrigger className="mt-1" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="font-serif text-3xl leading-tight text-foreground">
-                {session?.title ?? "Gyva augimo sesija"}
-              </h1>
-              <ModeBadge mode={mode} />
-              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-map-green animate-pulse" />
-                Sesija aktyvi
-              </span>
-              <span className="text-sm text-muted-foreground">· {currentTime}</span>
+        <header className="border-b bg-background/80 backdrop-blur px-4 md:px-6 py-3 md:py-4">
+          <div className="flex items-start gap-2 md:gap-3">
+            <SidebarTrigger className="mt-1 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="font-serif text-xl md:text-3xl leading-tight text-foreground truncate max-w-full">
+                  {session?.title ?? "Gyva augimo sesija"}
+                </h1>
+                <ModeBadge mode={mode} />
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-map-green animate-pulse" />
+                  Sesija aktyvi
+                </span>
+                <span>· {currentTime}</span>
+              </div>
+              <p className="hidden md:block text-sm text-muted-foreground mt-1">
+                {mode === "goal_clarify"
+                  ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
+                  : mode === "mentor"
+                    ? "Mentorius atsako iš tavo įkeltos medžiagos su citatomis."
+                    : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {mode === "goal_clarify"
-                ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
-                : mode === "mentor"
-                  ? "Mentorius atsako iš tavo įkeltos medžiagos su citatomis."
-                  : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
-            </p>
-          </div>
-          <Button
-            onClick={() => setNewSessionOpen(true)}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            title="Pradėti naują sesiją kitu režimu"
-          >
-            <Sparkles className="h-3.5 w-3.5" /> Nauja sesija
-          </Button>
-          {mode === "demartini" && (
-            <Button
-              onClick={() => setCompletionOpen(true)}
-              size="sm"
-              className="gap-2"
-              disabled={!session || messages.length < 2}
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
-            </Button>
-          )}
-          {mode === "goal_clarify" && (
-            <Button
-              onClick={saveGoal}
-              size="sm"
-              className="gap-2"
-              disabled={!session || !goalData.goal_draft || savingGoal}
-            >
-              {savingGoal ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <CheckCircle2 className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                onClick={() => setNewSessionOpen(true)}
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-9 px-2 md:px-3"
+                title="Pradėti naują sesiją"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Nauja</span>
+              </Button>
+              {mode === "demartini" && (
+                <Button
+                  onClick={() => setCompletionOpen(true)}
+                  size="sm"
+                  className="gap-1.5 h-9 px-2 md:px-3"
+                  disabled={!session || messages.length < 2}
+                  title="Užbaigti ir suplanuoti"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">Užbaigti</span>
+                </Button>
               )}
-              Perkelti į Tikslus
-            </Button>
-          )}
+              {mode === "goal_clarify" && (
+                <Button
+                  onClick={saveGoal}
+                  size="sm"
+                  className="gap-1.5 h-9 px-2 md:px-3"
+                  disabled={!session || !goalData.goal_draft || savingGoal}
+                  title="Perkelti į Tikslus"
+                >
+                  {savingGoal ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  )}
+                  <span className="hidden md:inline">Perkelti</span>
+                </Button>
+              )}
+              {(mode === "demartini" || mode === "goal_clarify") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="lg:hidden h-9 w-9 p-0"
+                  onClick={() => setMapSheetOpen(true)}
+                  title="Augimo žemėlapis"
+                >
+                  <MapIcon className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
         </header>
 
 
         {/* Tabs */}
-        <div className="border-b bg-background px-6">
-          <div className="flex gap-6">
+        <div className="border-b bg-background px-4 md:px-6 overflow-x-auto">
+          <div className="flex gap-4 md:gap-6 min-w-max">
             {TABS.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  "flex items-center gap-2 py-3 text-sm font-medium border-b-2 -mb-px transition-colors",
+                  "flex items-center gap-1.5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap",
                   tab === t.key
                     ? "border-primary text-primary"
                     : "border-transparent text-muted-foreground hover:text-foreground",
@@ -512,11 +537,12 @@ function SessionPage() {
           </div>
         </div>
 
+
         {/* Body */}
         <div className="flex-1 min-h-0 overflow-hidden bg-muted/20">
           {tab === "session" && (
             <div ref={scrollRef} className="h-full overflow-y-auto">
-              <div className="max-w-3xl mx-auto px-6 py-6 space-y-4">
+              <div className="max-w-3xl mx-auto px-4 md:px-6 py-4 md:py-6 space-y-4">
                 {/* Sesijos pulsas */}
                 <Card className="p-4">
                   <div className="flex items-center gap-2 text-sm font-medium mb-3">
@@ -570,53 +596,54 @@ function SessionPage() {
 
                 {/* Gyvas fokusas – tik demartini režime */}
                 {mode === "demartini" && messages.length > 0 && (
-                  <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                  <Card className="p-4 md:p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium">Gyvas fokusas</span>
-                      <span className="text-xs text-muted-foreground">· Sustokime čia</span>
+                      <span className="text-xs text-muted-foreground hidden sm:inline">· Sustokime čia</span>
                     </div>
-                    <div className="text-center py-3">
-                      <Quote className="h-6 w-6 text-primary/40 mx-auto mb-2" />
-                      <blockquote className="font-serif text-2xl leading-snug text-foreground max-w-xl mx-auto">
+                    <div className="text-center py-2 md:py-3">
+                      <Quote className="h-5 w-5 md:h-6 md:w-6 text-primary/40 mx-auto mb-2" />
+                      <blockquote className="font-serif text-lg md:text-2xl leading-snug text-foreground max-w-xl mx-auto">
                         „{focusQuote}."
                       </blockquote>
-                      <p className="text-sm text-muted-foreground mt-3 max-w-md mx-auto">
+                      <p className="text-xs md:text-sm text-muted-foreground mt-3 max-w-md mx-auto">
                         Tai atrodo kaip giluminis įsitikinimas, kuris stipriai tave stabdo.
                       </p>
                     </div>
                     <div className="flex gap-2 justify-center mt-4 flex-wrap">
-                      <Button size="sm" className="gap-1.5">
-                        <Sparkles className="h-3.5 w-3.5" /> Gilinam šią vietą
+                      <Button size="sm" className="gap-1.5 text-xs">
+                        <Sparkles className="h-3.5 w-3.5" /> Gilinam
                       </Button>
-                      <Button size="sm" variant="outline" className="gap-1.5">
-                        <HelpCircle className="h-3.5 w-3.5" /> Paaiškink paprasčiau
+                      <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                        <HelpCircle className="h-3.5 w-3.5" /> Paprasčiau
                       </Button>
-                      <Button size="sm" variant="outline" className="gap-1.5">
-                        Eikime toliau <ChevronRight className="h-3.5 w-3.5" />
+                      <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                        Toliau <ChevronRight className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </Card>
                 )}
 
                 {messages.length === 0 && (
-                  <Card className="p-10 text-center border-dashed">
+                  <Card className="p-6 md:p-10 text-center border-dashed">
                     <div className={cn(
-                      "h-14 w-14 rounded-2xl mx-auto mb-4 flex items-center justify-center",
-                      mode === "goal_clarify" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary",
+                      "h-12 w-12 md:h-14 md:w-14 rounded-2xl mx-auto mb-4 flex items-center justify-center",
+                      "bg-primary/10 text-primary",
                     )}>
-                      {mode === "goal_clarify" ? <Compass className="h-7 w-7" /> : <Sparkles className="h-7 w-7" />}
+                      {mode === "goal_clarify" ? <Compass className="h-6 w-6 md:h-7 md:w-7" /> : <Sparkles className="h-6 w-6 md:h-7 md:w-7" />}
                     </div>
-                    <h2 className="font-serif text-2xl">
+                    <h2 className="font-serif text-xl md:text-2xl">
                       {mode === "goal_clarify" ? "Pradėk tikslo išgryninimą" : "Pradėk savirefleksijos sesiją"}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
                       {mode === "goal_clarify"
-                        ? "Parašyk savo norą ar tikslą tokį, kokį jį girdi galvoje. Vedlys per 8 etapus jį padarys konkretų, subalansuotą su tavo vertybėmis ir su pirmu žingsniu."
-                        : "Parašyk arba pasakyk temą, su kuria šiandien nori padirbėti. Vedlys ves tave po vieną žingsnį per 11 Demartini metodo etapų."}
+                        ? "Parašyk savo norą ar tikslą tokį, kokį jį girdi galvoje. Vedlys per 8 etapus jį padarys konkretų."
+                        : "Parašyk arba pasakyk temą, su kuria šiandien nori padirbėti."}
                     </p>
                   </Card>
                 )}
+
 
 
                 {/* Messages */}
@@ -647,15 +674,16 @@ function SessionPage() {
         </div>
 
         {/* Composer */}
-        <form onSubmit={sendMessage} className="border-t bg-background p-4">
+        <form onSubmit={sendMessage} className="border-t bg-background p-3 md:p-4">
           <div className="max-w-3xl mx-auto">
-            <Card className="p-3 flex items-start gap-3">
+            <Card className="p-2.5 md:p-3 flex items-start gap-2 md:gap-3">
+
               <button
                 type="button"
                 onClick={recording ? stopRecording : startRecording}
                 disabled={streaming || transcribing}
                 className={cn(
-                  "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                  "h-10 w-10 md:h-11 md:w-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
                   recording
                     ? "bg-destructive text-destructive-foreground border-destructive"
                     : "bg-muted hover:bg-accent",
@@ -663,16 +691,17 @@ function SessionPage() {
                 title={recording ? "Sustabdyti įrašymą" : "Įrašyti balsu"}
               >
                 {transcribing ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-4 w-4 md:h-5 md:w-5 animate-spin" />
                 ) : recording ? (
-                  <MicOff className="h-5 w-5" />
+                  <MicOff className="h-4 w-4 md:h-5 md:w-5" />
                 ) : (
-                  <Mic className="h-5 w-5" />
+                  <Mic className="h-4 w-4 md:h-5 md:w-5" />
                 )}
               </button>
 
+
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground mb-1">
                   <span className="flex items-center gap-1">
                     <span className={cn("h-1.5 w-1.5 rounded-full", recording ? "bg-destructive animate-pulse" : "bg-map-green")} />
                     {recording ? "Įrašoma…" : "Balso režimas aktyvus"}
@@ -686,7 +715,7 @@ function SessionPage() {
                   placeholder="Pasakyk, kas dabar kyla mintyse…"
                   rows={2}
                   disabled={streaming || transcribing}
-                  className="resize-none border-0 shadow-none focus-visible:ring-0 p-0 text-base"
+                  className="resize-none border-0 shadow-none focus-visible:ring-0 p-0 text-base min-h-[44px]"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -694,7 +723,7 @@ function SessionPage() {
                     }
                   }}
                 />
-                <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+                <div className="hidden md:flex items-center gap-2 mt-2 text-muted-foreground">
                   <button type="button" className="p-1 hover:text-foreground" title="Priedas">
                     <Paperclip className="h-4 w-4" />
                   </button>
@@ -707,21 +736,47 @@ function SessionPage() {
                 </div>
               </div>
 
-              <Button type="submit" disabled={streaming || !input.trim()} className="h-11 gap-1.5 shrink-0">
+
+              <Button
+                type="submit"
+                disabled={streaming || !input.trim()}
+                className="h-11 gap-1.5 shrink-0 px-3 md:px-4"
+              >
                 {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                Siųsti
+                <span className="hidden md:inline">Siųsti</span>
               </Button>
             </Card>
           </div>
         </form>
       </div>
 
-      {/* Right panel */}
+      {/* Right panel — desktop */}
       {mode === "goal_clarify" ? (
         <GoalClarifier data={goalData} onSave={saveGoal} />
       ) : mode === "demartini" ? (
         <GrowthMap data={mapData} />
       ) : null}
+
+      {/* Mobile map sheet */}
+      {(mode === "demartini" || mode === "goal_clarify") && (
+        <Sheet open={mapSheetOpen} onOpenChange={setMapSheetOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+            <SheetHeader className="px-4 py-3 border-b">
+              <SheetTitle className="text-left font-serif text-lg">
+                {mode === "goal_clarify" ? "Tikslo išgryninimas" : "Augimo žemėlapis"}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+              {mode === "goal_clarify" ? (
+                <GoalClarifierBody data={goalData} onSave={saveGoal} />
+              ) : (
+                <GrowthMapBody data={mapData} />
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
 
       {session && mode === "demartini" && (
         <SessionCompletionDialog

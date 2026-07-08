@@ -27,7 +27,7 @@ export type Msg = {
 export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: ActionSuggestion) => void }) {
   const isUser = msg.role === "user";
   return (
-    <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
+    <div className={cn("flex gap-2 md:gap-3", isUser && "flex-row-reverse")}>
       <div
         className={cn(
           "h-8 w-8 rounded-full flex items-center justify-center shrink-0 mt-0.5",
@@ -39,10 +39,10 @@ export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: Actio
       <div className={cn("flex-1 min-w-0 space-y-2", isUser && "flex flex-col items-end")}>
         <div
           className={cn(
-            "rounded-2xl px-4 py-3 max-w-[92%] text-sm",
+            "rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm break-words",
             isUser
-              ? "bg-primary text-primary-foreground rounded-tr-sm"
-              : "bg-card border rounded-tl-sm shadow-sm",
+              ? "bg-primary text-primary-foreground rounded-tr-sm max-w-[85%]"
+              : "bg-card border rounded-tl-sm shadow-sm w-full",
           )}
         >
           {isUser ? (
@@ -63,15 +63,17 @@ export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: Actio
                 key={i}
                 size="sm"
                 variant="outline"
-                className="gap-1.5 h-8 text-xs"
+                className="gap-1.5 h-8 text-xs max-w-full"
                 onClick={() => onAction(a)}
               >
                 {a.kind === "goal" ? (
-                  <Target className="h-3.5 w-3.5 text-primary" />
+                  <Target className="h-3.5 w-3.5 text-primary shrink-0" />
                 ) : (
-                  <ListChecks className="h-3.5 w-3.5 text-primary" />
+                  <ListChecks className="h-3.5 w-3.5 text-primary shrink-0" />
                 )}
-                {a.kind === "goal" ? "→ Tikslas" : "→ Prioritetas"}: {a.title}
+                <span className="truncate">
+                  {a.kind === "goal" ? "→ Tikslas" : "→ Prioritetas"}: {a.title}
+                </span>
               </Button>
             ))}
           </div>
@@ -79,7 +81,7 @@ export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: Actio
 
         {!isUser && msg.sources && msg.sources.length > 0 && (
           <div className="flex flex-wrap gap-1.5 items-center">
-            <BookOpen className="h-3 w-3 text-muted-foreground" />
+            <BookOpen className="h-3 w-3 text-muted-foreground shrink-0" />
             {msg.sources.map((s) => (
               <Badge
                 key={s.n}
@@ -96,6 +98,7 @@ export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: Actio
     </div>
   );
 }
+
 
 export function SaveActionDialog({
   action, onClose,

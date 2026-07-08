@@ -13,7 +13,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { User, Shield, Bell, KeyRound, Trash2 } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -129,21 +131,29 @@ function ProfilePage() {
   const initials = (profile.display_name || email || "AK").slice(0, 2).toUpperCase();
 
   return (
-    <div className="mx-auto max-w-4xl p-6 space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl">Profilis ir nustatymai</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Valdyk savo duomenis, privatumą ir pranešimus.
-        </p>
-      </div>
+    <div className="flex-1 flex flex-col min-w-0">
+      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 md:gap-3">
+        <SidebarTrigger className="shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h1 className="font-serif text-xl md:text-2xl leading-tight truncate">
+            Profilis ir nustatymai
+          </h1>
+          <p className="text-xs md:text-sm text-muted-foreground truncate">
+            Duomenys, privatumas, pranešimai
+          </p>
+        </div>
+      </header>
 
-      <Tabs defaultValue="profile" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="profile" className="gap-2"><User className="h-4 w-4" /> Profilis</TabsTrigger>
-          <TabsTrigger value="privacy" className="gap-2"><Shield className="h-4 w-4" /> Privatumas</TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-2"><Bell className="h-4 w-4" /> Pranešimai</TabsTrigger>
-          <TabsTrigger value="account" className="gap-2"><KeyRound className="h-4 w-4" /> Paskyra</TabsTrigger>
-        </TabsList>
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl p-3 md:p-6 space-y-4 md:space-y-6">
+          <Tabs defaultValue="profile" className="space-y-4">
+            <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+              <TabsTrigger value="profile" className="gap-1.5 shrink-0"><User className="h-4 w-4" /> <span className="hidden sm:inline">Profilis</span></TabsTrigger>
+              <TabsTrigger value="privacy" className="gap-1.5 shrink-0"><Shield className="h-4 w-4" /> <span className="hidden sm:inline">Privatumas</span></TabsTrigger>
+              <TabsTrigger value="notifications" className="gap-1.5 shrink-0"><Bell className="h-4 w-4" /> <span className="hidden sm:inline">Pranešimai</span></TabsTrigger>
+              <TabsTrigger value="account" className="gap-1.5 shrink-0"><KeyRound className="h-4 w-4" /> <span className="hidden sm:inline">Paskyra</span></TabsTrigger>
+            </TabsList>
+
 
         {/* PROFILE */}
         <TabsContent value="profile">
@@ -404,9 +414,12 @@ function ProfilePage() {
           </div>
         </TabsContent>
       </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
+
 
 function ToggleRow({
   label,

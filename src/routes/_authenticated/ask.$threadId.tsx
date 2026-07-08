@@ -139,8 +139,8 @@ function ThreadView() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col">
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-6 py-6">
-        <div className="max-w-3xl mx-auto space-y-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-6">
+        <div className="max-w-3xl mx-auto space-y-5">
           {loading && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Kraunama…
@@ -157,7 +157,7 @@ function ThreadView() {
         </div>
       </div>
 
-      <form onSubmit={send} className="border-t bg-background/95 backdrop-blur p-4">
+      <form onSubmit={send} className="border-t bg-background/95 backdrop-blur p-3 md:p-4">
         <div className="max-w-3xl mx-auto flex gap-2 items-end">
           <Textarea
             ref={inputRef}
@@ -169,13 +169,14 @@ function ThreadView() {
             }}
             placeholder="Rašyk toliau…"
             rows={2}
-            className="resize-none rounded-2xl bg-muted/50 border-muted"
+            className="resize-none rounded-2xl bg-muted/50 border-muted text-base"
           />
           <Button type="submit" size="icon" disabled={busy || !input.trim()} className="rounded-full h-11 w-11 shrink-0">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
       </form>
+
 
       <SaveActionDialog action={action} onClose={() => setAction(null)} />
     </div>

@@ -163,26 +163,28 @@ function GoalsPage() {
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <header className="border-b bg-background/80 backdrop-blur px-6 py-4 flex items-center gap-3">
-        <SidebarTrigger />
-        <div className="flex-1">
-          <h1 className="font-serif text-2xl leading-tight">Tikslai</h1>
-          <p className="text-sm text-muted-foreground">
-            Kiekvienas tikslas – su AI sudėliotu užduočių medžiu, kuris tave atveda iki rezultato.
+      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 md:gap-3">
+        <SidebarTrigger className="shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h1 className="font-serif text-xl md:text-2xl leading-tight">Tikslai</h1>
+          <p className="text-xs md:text-sm text-muted-foreground hidden sm:block truncate">
+            AI sudėlioja kelią nuo tikslo iki rezultato.
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" /> Naujas tikslas
+            <Button className="gap-1.5 h-9 px-2 md:px-3 shrink-0">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Naujas tikslas</span>
             </Button>
           </DialogTrigger>
           <NewGoalDialog onCreated={() => { setOpen(false); load(); }} />
         </Dialog>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-6 bg-muted/20">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-muted/20">
         <div className="max-w-4xl mx-auto space-y-3">
+
           {loading && <div className="text-sm text-muted-foreground">Kraunama…</div>}
           {!loading && goals.length === 0 && (
             <Card className="p-10 text-center border-dashed">
@@ -206,11 +208,11 @@ function GoalsPage() {
             const isExpanded = expanded.has(g.id);
             const hasTasks = goalTasks.length > 0;
             return (
-              <Card key={g.id} className="p-4">
-                <div className="flex items-start gap-3">
+              <Card key={g.id} className="p-3 md:p-4">
+                <div className="flex items-start gap-2 md:gap-3">
                   <button
                     onClick={() => toggleExpanded(g.id)}
-                    className="mt-0.5 text-muted-foreground hover:text-foreground"
+                    className="mt-1 text-muted-foreground hover:text-foreground shrink-0"
                     title={isExpanded ? "Suskleisti" : "Išskleisti"}
                   >
                     {isExpanded ? (
@@ -219,12 +221,12 @@ function GoalsPage() {
                       <ChevronRight className="h-4 w-4" />
                     )}
                   </button>
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <Target className="h-5 w-5" />
+                  <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <Target className="h-4 w-4 md:h-5 md:w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-medium">{g.title}</h3>
+                      <h3 className="font-medium text-sm md:text-base break-words">{g.title}</h3>
                       <Badge variant="outline" className="text-[10px]">
                         {g.status === "active" ? "Aktyvus" : g.status}
                       </Badge>
@@ -235,17 +237,17 @@ function GoalsPage() {
                       )}
                       {hasTasks && (
                         <Badge variant="secondary" className="text-[10px]">
-                          {goalTasks.filter((t) => t.done).length}/{goalTasks.length} užduotys
+                          {goalTasks.filter((t) => t.done).length}/{goalTasks.length}
                         </Badge>
                       )}
                     </div>
                     {g.description && (
-                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                      <p className="text-xs md:text-sm text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-3">
                         {g.description}
                       </p>
                     )}
-                    <div className="mt-2 flex items-center gap-3">
-                      <Progress value={g.progress} className="h-1.5 flex-1" />
+                    <div className="mt-2 flex items-center gap-2 md:gap-3 flex-wrap">
+                      <Progress value={g.progress} className="h-1.5 flex-1 min-w-[100px]" />
                       <span className="text-xs text-muted-foreground">{g.progress}%</span>
                       {g.target_date && (
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -254,25 +256,26 @@ function GoalsPage() {
                         </span>
                       )}
                     </div>
+                    {!hasTasks && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => generateBreakdown(g)}
+                        disabled={generatingFor === g.id}
+                        className="gap-1.5 mt-2 h-8 text-xs"
+                        title="AI suskaidys šį tikslą į užduotis"
+                      >
+                        {generatingFor === g.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Wand2 className="h-3.5 w-3.5" />
+                        )}
+                        Skaidyti su AI
+                      </Button>
+                    )}
                   </div>
-                  {!hasTasks && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => generateBreakdown(g)}
-                      disabled={generatingFor === g.id}
-                      className="gap-2"
-                      title="AI suskaidys šį tikslą į užduotis"
-                    >
-                      {generatingFor === g.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Wand2 className="h-3.5 w-3.5" />
-                      )}
-                      Skaidyti su AI
-                    </Button>
-                  )}
                 </div>
+
 
                 {isExpanded && (
                   <div className="mt-4 pl-11 border-l ml-5">

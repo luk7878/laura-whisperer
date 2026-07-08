@@ -67,7 +67,7 @@ export function GoalClarifier({
   }
 
   return (
-    <aside className="border-l bg-background w-[340px] shrink-0 flex flex-col min-h-0">
+    <aside className="hidden lg:flex border-l bg-background w-[340px] shrink-0 flex-col min-h-0">
       <div className="border-b p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -89,6 +89,22 @@ export function GoalClarifier({
         </button>
       </div>
 
+      <GoalClarifierBody data={data} onSave={onSave} />
+    </aside>
+  );
+}
+
+export function GoalClarifierBody({
+  data,
+  onSave,
+}: {
+  data: GoalClarifierData;
+  onSave: () => void;
+}) {
+  const stageIndex = data.stage ? STAGES.findIndex((s) => data.stage?.includes(s)) : -1;
+  const progress = stageIndex >= 0 ? Math.round(((stageIndex + 1) / STAGES.length) * 100) : 0;
+  return (
+    <>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {/* Progresas */}
         <Card className="p-3">
@@ -181,9 +197,10 @@ export function GoalClarifier({
           Sukursim tikslą + pirmą žingsnį prioritetuose.
         </p>
       </div>
-    </aside>
+    </>
   );
 }
+
 
 function Section({
   icon: Icon,
