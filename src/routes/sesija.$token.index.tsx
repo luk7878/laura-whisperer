@@ -333,12 +333,20 @@ function SafetyBanner({
 
 function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => void }) {
   const [preferredAt, setPreferredAt] = useState(defaultPreferredAt());
+  const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    const trimmedPhone = phone.trim();
+    if (!/^[+0-9\s()\-]{5,32}$/.test(trimmedPhone)) {
+      setError("Įvesk galiojantį telefono numerį.");
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch("/api/public/clarity/interest", {
@@ -349,12 +357,14 @@ function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => 
           wants_human_session: true,
           human_session_preferred_at: preferredAt ? new Date(preferredAt).toISOString() : null,
           human_session_note: note.trim() || null,
+          phone: trimmedPhone,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
       setDone(true);
     } catch (err) {
       console.error(err);
+      setError("Nepavyko išsiųsti. Bandyk dar kartą.");
     } finally {
       setBusy(false);
     }
@@ -405,6 +415,20 @@ function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => 
             />
 
             <label className="mt-4 block text-sm font-medium text-clarity-ink mb-2">
+              Telefono numeris
+            </label>
+            <input
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+3706..."
+              inputMode="tel"
+              maxLength={32}
+              className="w-full rounded-xl border border-clarity-line bg-clarity-bg px-4 py-3 text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors"
+            />
+
+            <label className="mt-4 block text-sm font-medium text-clarity-ink mb-2">
               Pastaba (nebūtinai)
             </label>
             <textarea
@@ -415,6 +439,8 @@ function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => 
               placeholder="Ką norėtum aptarti?"
               className="w-full resize-none rounded-xl border border-clarity-line bg-clarity-bg px-4 py-3 text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors"
             />
+
+            {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 
             <div className="mt-6 flex items-center justify-end gap-2">
               <button

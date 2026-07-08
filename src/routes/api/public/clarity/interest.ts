@@ -7,6 +7,7 @@ const bodySchema = z.object({
   wants_human_session: z.boolean().optional(),
   human_session_preferred_at: z.string().datetime().optional().nullable(),
   human_session_note: z.string().trim().max(1000).optional().nullable(),
+  phone: z.string().trim().min(5).max(32).regex(/^[+0-9\s()\-]+$/, "Netinkamas telefono numeris").optional().nullable(),
 });
 
 export const Route = createFileRoute("/api/public/clarity/interest")({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/api/public/clarity/interest")({
           human_session_requested_at?: string;
           human_session_preferred_at?: string | null;
           human_session_note?: string | null;
+          phone?: string | null;
         } = {};
         if (parsed.data.wants_subscription != null) update.wants_subscription = parsed.data.wants_subscription;
         if (parsed.data.wants_human_session != null) {
@@ -38,6 +40,9 @@ export const Route = createFileRoute("/api/public/clarity/interest")({
         }
         if (parsed.data.human_session_note !== undefined) {
           update.human_session_note = parsed.data.human_session_note;
+        }
+        if (parsed.data.phone !== undefined) {
+          update.phone = parsed.data.phone;
         }
         if (Object.keys(update).length === 0) return Response.json({ ok: true });
 
