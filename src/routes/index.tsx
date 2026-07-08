@@ -157,21 +157,6 @@ function ForWhom() {
   );
 }
 
-function Disclaimer() {
-  return (
-    <section className="bg-clarity-surface/60 py-16 border-y border-clarity-line">
-      <div className="mx-auto max-w-2xl px-6 text-center">
-        <h3 className="font-clarity-serif text-2xl text-clarity-ink">Tai nėra terapija</h3>
-        <p className="mt-4 text-clarity-ink-soft leading-relaxed">
-          Aiškumo sesija — palydėjimas savirefleksijai. Tai nėra medicininė ar psichoterapinė
-          pagalba. Jei jauti stiprų emocinį krūvį, savižudybės mintis ar krizę — kreipkis į
-          Jaunimo liniją <span className="font-medium text-clarity-ink">8 800 28 888</span> arba
-          Vilties liniją <span className="font-medium text-clarity-ink">116 123</span>.
-        </p>
-      </div>
-    </section>
-  );
-}
 
 function Faq() {
   const items = [
