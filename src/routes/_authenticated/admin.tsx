@@ -192,7 +192,10 @@ function AdminPage() {
         onChange={(e) => setQ(e.target.value)}
       />
 
+      <SlotsPanel />
+
       <InviteCodesPanel />
+
 
 
       {loading ? (
