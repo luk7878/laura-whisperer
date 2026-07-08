@@ -733,21 +733,46 @@ function SessionPage() {
                 </div>
               </div>
 
-              <Button type="submit" disabled={streaming || !input.trim()} className="h-11 gap-1.5 shrink-0">
+              <Button
+                type="submit"
+                disabled={streaming || !input.trim()}
+                className="h-11 gap-1.5 shrink-0 px-3 md:px-4"
+              >
                 {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                Siųsti
+                <span className="hidden md:inline">Siųsti</span>
               </Button>
             </Card>
           </div>
         </form>
       </div>
 
-      {/* Right panel */}
+      {/* Right panel — desktop */}
       {mode === "goal_clarify" ? (
         <GoalClarifier data={goalData} onSave={saveGoal} />
       ) : mode === "demartini" ? (
         <GrowthMap data={mapData} />
       ) : null}
+
+      {/* Mobile map sheet */}
+      {(mode === "demartini" || mode === "goal_clarify") && (
+        <Sheet open={mapSheetOpen} onOpenChange={setMapSheetOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+            <SheetHeader className="px-4 py-3 border-b">
+              <SheetTitle className="text-left font-serif text-lg">
+                {mode === "goal_clarify" ? "Tikslo išgryninimas" : "Augimo žemėlapis"}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+              {mode === "goal_clarify" ? (
+                <GoalClarifierBody data={goalData} onSave={saveGoal} />
+              ) : (
+                <GrowthMapBody data={mapData} />
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
 
       {session && mode === "demartini" && (
         <SessionCompletionDialog
