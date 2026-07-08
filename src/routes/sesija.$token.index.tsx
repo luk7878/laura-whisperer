@@ -4,7 +4,7 @@ import { Loader2, Send, Sparkles, Clock, AlertCircle, Phone, X, ChevronRight } f
 import { CRISIS_RESOURCES } from "@/lib/crisis-resources";
 import type { SafetyCheck } from "@/lib/clarity-safety";
 
-export const Route = createFileRoute("/sesija/$token")({
+export const Route = createFileRoute("/sesija/$token/")({
   head: () => ({
     meta: [
       { title: "Aiškumo sesija" },
