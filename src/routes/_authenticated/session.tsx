@@ -596,53 +596,54 @@ function SessionPage() {
 
                 {/* Gyvas fokusas – tik demartini režime */}
                 {mode === "demartini" && messages.length > 0 && (
-                  <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                  <Card className="p-4 md:p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium">Gyvas fokusas</span>
-                      <span className="text-xs text-muted-foreground">· Sustokime čia</span>
+                      <span className="text-xs text-muted-foreground hidden sm:inline">· Sustokime čia</span>
                     </div>
-                    <div className="text-center py-3">
-                      <Quote className="h-6 w-6 text-primary/40 mx-auto mb-2" />
-                      <blockquote className="font-serif text-2xl leading-snug text-foreground max-w-xl mx-auto">
+                    <div className="text-center py-2 md:py-3">
+                      <Quote className="h-5 w-5 md:h-6 md:w-6 text-primary/40 mx-auto mb-2" />
+                      <blockquote className="font-serif text-lg md:text-2xl leading-snug text-foreground max-w-xl mx-auto">
                         „{focusQuote}."
                       </blockquote>
-                      <p className="text-sm text-muted-foreground mt-3 max-w-md mx-auto">
+                      <p className="text-xs md:text-sm text-muted-foreground mt-3 max-w-md mx-auto">
                         Tai atrodo kaip giluminis įsitikinimas, kuris stipriai tave stabdo.
                       </p>
                     </div>
                     <div className="flex gap-2 justify-center mt-4 flex-wrap">
-                      <Button size="sm" className="gap-1.5">
-                        <Sparkles className="h-3.5 w-3.5" /> Gilinam šią vietą
+                      <Button size="sm" className="gap-1.5 text-xs">
+                        <Sparkles className="h-3.5 w-3.5" /> Gilinam
                       </Button>
-                      <Button size="sm" variant="outline" className="gap-1.5">
-                        <HelpCircle className="h-3.5 w-3.5" /> Paaiškink paprasčiau
+                      <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                        <HelpCircle className="h-3.5 w-3.5" /> Paprasčiau
                       </Button>
-                      <Button size="sm" variant="outline" className="gap-1.5">
-                        Eikime toliau <ChevronRight className="h-3.5 w-3.5" />
+                      <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                        Toliau <ChevronRight className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </Card>
                 )}
 
                 {messages.length === 0 && (
-                  <Card className="p-10 text-center border-dashed">
+                  <Card className="p-6 md:p-10 text-center border-dashed">
                     <div className={cn(
-                      "h-14 w-14 rounded-2xl mx-auto mb-4 flex items-center justify-center",
-                      mode === "goal_clarify" ? "bg-primary/10 text-primary" : "bg-primary/10 text-primary",
+                      "h-12 w-12 md:h-14 md:w-14 rounded-2xl mx-auto mb-4 flex items-center justify-center",
+                      "bg-primary/10 text-primary",
                     )}>
-                      {mode === "goal_clarify" ? <Compass className="h-7 w-7" /> : <Sparkles className="h-7 w-7" />}
+                      {mode === "goal_clarify" ? <Compass className="h-6 w-6 md:h-7 md:w-7" /> : <Sparkles className="h-6 w-6 md:h-7 md:w-7" />}
                     </div>
-                    <h2 className="font-serif text-2xl">
+                    <h2 className="font-serif text-xl md:text-2xl">
                       {mode === "goal_clarify" ? "Pradėk tikslo išgryninimą" : "Pradėk savirefleksijos sesiją"}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
                       {mode === "goal_clarify"
-                        ? "Parašyk savo norą ar tikslą tokį, kokį jį girdi galvoje. Vedlys per 8 etapus jį padarys konkretų, subalansuotą su tavo vertybėmis ir su pirmu žingsniu."
-                        : "Parašyk arba pasakyk temą, su kuria šiandien nori padirbėti. Vedlys ves tave po vieną žingsnį per 11 Demartini metodo etapų."}
+                        ? "Parašyk savo norą ar tikslą tokį, kokį jį girdi galvoje. Vedlys per 8 etapus jį padarys konkretų."
+                        : "Parašyk arba pasakyk temą, su kuria šiandien nori padirbėti."}
                     </p>
                   </Card>
                 )}
+
 
 
                 {/* Messages */}
