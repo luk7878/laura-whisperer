@@ -89,6 +89,8 @@ function SessionPage() {
   const [completionOpen, setCompletionOpen] = useState(false);
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
+  const [mapSheetOpen, setMapSheetOpen] = useState(false);
+
 
   const mode: SessionMode = (session?.mode as SessionMode) ?? "demartini";
 
