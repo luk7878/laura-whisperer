@@ -26,6 +26,7 @@ import {
   Plus,
   LogOut,
   ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
