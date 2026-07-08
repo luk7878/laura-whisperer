@@ -956,7 +956,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      consume_invite_code: { Args: { _code: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -965,13 +964,6 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
-      }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
       }
       match_knowledge: {
         Args: { match_count?: number; query_embedding: string }
@@ -1000,7 +992,6 @@ export type Database = {
           read_ct: number
         }[]
       }
-      validate_invite_code: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
       app_role:
