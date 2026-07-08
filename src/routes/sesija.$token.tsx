@@ -95,6 +95,9 @@ function SessionPage() {
         setSafety(data.safety);
         setDismissedSafety(false);
       }
+      if (detectClosing(data.reply)) {
+        setSessionEnded(true);
+      }
     } catch (err) {
       console.error(err);
       setMessages((m) => [
