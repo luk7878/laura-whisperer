@@ -5,8 +5,8 @@ export const Route = createFileRoute("/unsubscribe")({
   component: UnsubscribePage,
   head: () => ({
     meta: [
-      { title: "Atsisakymas prenumeratos | Laura Borušaitė" },
-      { name: "description", content: "Atsisakykite laiškų iš Laura Borušaitė." },
+      { title: "Atsisakymas prenumeratos | Laura Borusaitė" },
+      { name: "description", content: "Atsisakykite laiškų iš Laura Borusaitė." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

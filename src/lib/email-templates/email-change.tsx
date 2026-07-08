@@ -23,7 +23,7 @@ export const EmailChangeEmail = ({ siteName, oldEmail, newEmail, confirmationUrl
         </Text>
         <Text style={text}>Paspauskite mygtuką, kad patvirtintumėte:</Text>
         <Button style={button} href={confirmationUrl}>Patvirtinti pakeitimą</Button>
-        <Text style={signature}>Su šiluma,<br /><strong>Laura Borušaitė</strong></Text>
+        <Text style={signature}>Su šiluma,<br /><strong>Laura Borusaitė</strong></Text>
         <Text style={footer}>Jei šio pakeitimo neprašėte, nedelsdami apsaugokite savo paskyrą.</Text>
       </Container>
     </Body>

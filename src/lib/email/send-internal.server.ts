@@ -5,7 +5,7 @@ import * as React from "react";
 import { render } from "@react-email/render";
 import { TEMPLATES } from "@/lib/email-templates/registry";
 
-const SITE_NAME = "Laura Borušaitė";
+const SITE_NAME = "Laura Borusaitė";
 const SENDER_DOMAIN = "notify.lauraborusaite.lt";
 const FROM_DOMAIN = "lauraborusaite.lt";
 

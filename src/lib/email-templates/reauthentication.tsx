@@ -12,7 +12,7 @@ export const ReauthenticationEmail = ({ token }: Props) => (
         <Heading style={h1}>Patvirtinimo kodas</Heading>
         <Text style={text}>Naudokite šį kodą tapatybei patvirtinti:</Text>
         <Text style={codeStyle}>{token}</Text>
-        <Text style={signature}>Su šiluma,<br /><strong>Laura Borušaitė</strong></Text>
+        <Text style={signature}>Su šiluma,<br /><strong>Laura Borusaitė</strong></Text>
         <Text style={footer}>Kodas greitai nustos galioti. Jei kodo neprašėte, laišką galite ignoruoti.</Text>
       </Container>
     </Body>

@@ -69,7 +69,7 @@ const ClarityBookingConfirmation = ({ name, sessionUrl, scheduledAt }: Props) =>
           <Text style={signature}>
             Su šiluma,
             <br />
-            <strong>Laura Borušaitė</strong>
+            <strong>Laura Borusaitė</strong>
           </Text>
         </Container>
       </Body>

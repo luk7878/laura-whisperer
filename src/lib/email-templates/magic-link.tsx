@@ -12,7 +12,7 @@ export const MagicLinkEmail = ({ siteName, confirmationUrl }: Props) => (
         <Heading style={h1}>Prisijungimo nuoroda</Heading>
         <Text style={text}>Paspauskite mygtuką, kad prisijungtumėte prie {siteName}. Nuoroda greitai nustos galioti.</Text>
         <Button style={button} href={confirmationUrl}>Prisijungti</Button>
-        <Text style={signature}>Su šiluma,<br /><strong>Laura Borušaitė</strong></Text>
+        <Text style={signature}>Su šiluma,<br /><strong>Laura Borusaitė</strong></Text>
         <Text style={footer}>Jei nuorodos neprašėte, šį laišką galite ignoruoti.</Text>
       </Container>
     </Body>
