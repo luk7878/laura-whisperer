@@ -7,7 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Sparkles, ShieldAlert, Star } from "lucide-react";
+import { Loader2, Sparkles, ShieldAlert, Star, KeyRound, Plus, Trash2, Copy } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -182,6 +184,9 @@ function AdminPage() {
         onChange={(e) => setQ(e.target.value)}
       />
 
+      <InviteCodesPanel />
+
+
       {loading ? (
         <div className="p-8 flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Kraunama…
@@ -343,3 +348,177 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+type InviteCode = {
+  id: string;
+  code: string;
+  note: string | null;
+  active: boolean;
+  max_uses: number | null;
+  uses: number;
+  expires_at: string | null;
+  created_at: string;
+};
+
+function InviteCodesPanel() {
+  const [codes, setCodes] = useState<InviteCode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [newCode, setNewCode] = useState("");
+  const [newNote, setNewNote] = useState("");
+  const [newMax, setNewMax] = useState<string>("");
+
+  async function load() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("invite_codes")
+      .select("id, code, note, active, max_uses, uses, expires_at, created_at")
+      .order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    setCodes((data ?? []) as InviteCode[]);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  function randomCode() {
+    const s = Math.random().toString(36).slice(2, 8).toUpperCase();
+    setNewCode(`LB-${s}`);
+  }
+
+  async function create() {
+    const code = newCode.trim();
+    if (!code) {
+      toast.error("Įveskite kodą");
+      return;
+    }
+    const { error } = await supabase.from("invite_codes").insert({
+      code,
+      note: newNote.trim() || null,
+      max_uses: newMax ? Number(newMax) : null,
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNewCode("");
+    setNewNote("");
+    setNewMax("");
+    toast.success("Kodas sukurtas");
+    load();
+  }
+
+  async function toggle(id: string, active: boolean) {
+    const { error } = await supabase.from("invite_codes").update({ active }).eq("id", id);
+    if (error) toast.error(error.message);
+    else setCodes((cs) => cs.map((c) => (c.id === id ? { ...c, active } : c)));
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Ištrinti kodą?")) return;
+    const { error } = await supabase.from("invite_codes").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else setCodes((cs) => cs.filter((c) => c.id !== id));
+  }
+
+  return (
+    <Card className="p-4">
+      <button
+        className="w-full flex items-center justify-between"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <div className="flex items-center gap-2">
+          <KeyRound className="h-4 w-4 text-primary" />
+          <span className="font-medium">Pakvietimo kodai</span>
+          <Badge variant="secondary">{codes.filter((c) => c.active).length} aktyvūs</Badge>
+        </div>
+        <span className="text-xs text-muted-foreground">{open ? "Slėpti" : "Rodyti"}</span>
+      </button>
+
+      {open && (
+        <div className="mt-4 space-y-4">
+          <div className="rounded-md border p-3 space-y-2 bg-muted/30">
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Naujas kodas
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Input
+                placeholder="Kodas (pvz. LB-ALFA)"
+                value={newCode}
+                onChange={(e) => setNewCode(e.target.value)}
+                className="flex-1 min-w-[160px]"
+              />
+              <Button type="button" size="sm" variant="ghost" onClick={randomCode}>
+                Generuoti
+              </Button>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Input
+                placeholder="Pastaba (kam skirtas)"
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                className="flex-1 min-w-[160px]"
+              />
+              <Input
+                type="number"
+                min={1}
+                placeholder="Max. panaudojimų (tuščia = neribota)"
+                value={newMax}
+                onChange={(e) => setNewMax(e.target.value)}
+                className="w-56"
+              />
+              <Button size="sm" onClick={create}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Sukurti
+              </Button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Loader2 className="h-4 w-4 animate-spin" /> Kraunama…
+            </div>
+          ) : codes.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Kodų dar nėra.</p>
+          ) : (
+            <div className="divide-y">
+              {codes.map((c) => (
+                <div key={c.id} className="py-2 flex items-center gap-3 flex-wrap">
+                  <code className="font-mono text-sm bg-muted px-2 py-1 rounded">{c.code}</code>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      navigator.clipboard.writeText(c.code);
+                      toast.success("Nukopijuota");
+                    }}
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                  <div className="text-xs text-muted-foreground flex-1 min-w-[120px]">
+                    {c.note || "—"} · panaudota {c.uses}
+                    {c.max_uses ? `/${c.max_uses}` : ""}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {c.active ? "Aktyvus" : "Išjungtas"}
+                    </span>
+                    <Switch
+                      checked={c.active}
+                      onCheckedChange={(v) => toggle(c.id, v)}
+                    />
+                    <Button size="sm" variant="ghost" onClick={() => remove(c.id)}>
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
+
