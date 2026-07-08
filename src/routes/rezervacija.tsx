@@ -127,6 +127,13 @@ function BookingPage() {
       <div className="mx-auto max-w-xl px-6 py-12">
         <h1 className="font-clarity-serif text-4xl text-clarity-ink">Rezervuoti sesiją</h1>
         <p className="mt-3 text-clarity-ink-soft">15 minučių. Nemokamai. Be paskyros.</p>
+        {slots && (
+          <p className="mt-4 inline-block rounded-full border border-clarity-line px-4 py-1.5 text-sm text-clarity-ink-soft">
+            {slots.remaining > 0
+              ? `Liko ${slots.remaining} iš ${slots.capacity} vietų`
+              : `Visos ${slots.capacity} vietos užimtos — palik el. paštą laukiančiųjų sąraše`}
+          </p>
+        )}
 
         <form onSubmit={submit} className="mt-10 space-y-6">
           <Field label="Vardas">
