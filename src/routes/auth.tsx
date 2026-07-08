@@ -1,13 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { validateInviteCode, consumeInviteCode } from "@/lib/invite.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Sparkles, KeyRound } from "lucide-react";
+
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -22,11 +25,14 @@ const INVITE_KEY = "pending_invite_code";
 function AuthPage() {
   const { next } = Route.useSearch();
   const target = next ?? "/session";
+  const validate = useServerFn(validateInviteCode);
+  const consume = useServerFn(consumeInviteCode);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [invite, setInvite] = useState("");
   const [busy, setBusy] = useState(false);
+
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -35,7 +41,7 @@ function AuthPage() {
       const pending = sessionStorage.getItem(INVITE_KEY);
       if (pending) {
         try {
-          await supabase.rpc("consume_invite_code", { _code: pending });
+          await consume({ data: { code: pending } });
         } catch {}
         sessionStorage.removeItem(INVITE_KEY);
       }
@@ -49,12 +55,18 @@ function AuthPage() {
       toast.error("Įveskite pakvietimo kodą");
       return false;
     }
-    const { data, error } = await supabase.rpc("validate_invite_code", { _code: code });
-    if (error || !data) {
-      toast.error("Neteisingas arba nebegaliojantis pakvietimo kodas");
+    try {
+      const res = await validate({ data: { code } });
+      if (!res.valid) {
+        toast.error("Neteisingas arba nebegaliojantis pakvietimo kodas");
+        return false;
+      }
+      return true;
+    } catch {
+      toast.error("Nepavyko patikrinti pakvietimo kodo");
       return false;
     }
-    return true;
+
   }
 
   async function handleEmail(e: React.FormEvent) {
@@ -73,7 +85,7 @@ function AuthPage() {
         // Consume for the newly-signed-in session (if auto-confirmed) or remember for confirm redirect
         const { data: s } = await supabase.auth.getSession();
         if (s.session) {
-          await supabase.rpc("consume_invite_code", { _code: code });
+          await consume({ data: { code } });
         } else {
           sessionStorage.setItem(INVITE_KEY, code);
         }
@@ -114,7 +126,7 @@ function AuthPage() {
       // Fallback: session set directly
       const pending = sessionStorage.getItem(INVITE_KEY);
       if (pending) {
-        await supabase.rpc("consume_invite_code", { _code: pending });
+        await consume({ data: { code: pending } });
         sessionStorage.removeItem(INVITE_KEY);
       }
       window.location.href = target;
