@@ -9,12 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as RezervacijaRouteImport } from './routes/rezervacija'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SesijaTokenRouteImport } from './routes/sesija.$token'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
 import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
@@ -38,15 +40,23 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as SesijaTokenIndexRouteImport } from './routes/sesija.$token.index'
 import { Route as AuthenticatedAskIndexRouteImport } from './routes/_authenticated/ask.index'
 import { Route as SesijaTokenPabaigaRouteImport } from './routes/sesija.$token.pabaiga'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedAskThreadIdRouteImport } from './routes/_authenticated/ask.$threadId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicClarityMessageRouteImport } from './routes/api/public/clarity/message'
 import { Route as ApiPublicClarityInterestRouteImport } from './routes/api/public/clarity/interest'
 import { Route as ApiPublicClarityFinishRouteImport } from './routes/api/public/clarity/finish'
 import { Route as ApiPublicClarityBookRouteImport } from './routes/api/public/clarity/book'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RezervacijaRoute = RezervacijaRouteImport.update({
   id: '/rezervacija',
   path: '/rezervacija',
@@ -74,6 +84,11 @@ const IndexRoute = IndexRouteImport.update({
 const SesijaTokenRoute = SesijaTokenRouteImport.update({
   id: '/sesija/$token',
   path: '/sesija/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
@@ -193,6 +208,11 @@ const SesijaTokenPabaigaRoute = SesijaTokenPabaigaRouteImport.update({
   path: '/pabaiga',
   getParentRoute: () => SesijaTokenRoute,
 } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAskThreadIdRoute =
   AuthenticatedAskThreadIdRouteImport.update({
     id: '/$threadId',
@@ -210,6 +230,18 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -243,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
   '/rezervacija': typeof RezervacijaRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -263,10 +296,12 @@ export interface FileRoutesByFullPath {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/ask/': typeof AuthenticatedAskIndexRoute
   '/sesija/$token/': typeof SesijaTokenIndexRoute
@@ -275,12 +310,15 @@ export interface FileRoutesByFullPath {
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
   '/rezervacija': typeof RezervacijaRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -300,9 +338,11 @@ export interface FileRoutesByTo {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/ask': typeof AuthenticatedAskIndexRoute
   '/sesija/$token': typeof SesijaTokenIndexRoute
@@ -311,6 +351,8 @@ export interface FileRoutesByTo {
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -319,6 +361,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
   '/rezervacija': typeof RezervacijaRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -339,10 +382,12 @@ export interface FileRoutesById {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/_authenticated/ask/': typeof AuthenticatedAskIndexRoute
   '/sesija/$token/': typeof SesijaTokenIndexRoute
@@ -351,6 +396,8 @@ export interface FileRoutesById {
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -359,6 +406,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mcp'
     | '/rezervacija'
+    | '/unsubscribe'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin'
@@ -379,10 +427,12 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/email/unsubscribe'
     | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/ask/$threadId'
+    | '/lovable/email/suppression'
     | '/sesija/$token/pabaiga'
     | '/ask/'
     | '/sesija/$token/'
@@ -391,12 +441,15 @@ export interface FileRouteTypes {
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/mcp'
     | '/rezervacija'
+    | '/unsubscribe'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin'
@@ -416,9 +469,11 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/email/unsubscribe'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/ask/$threadId'
+    | '/lovable/email/suppression'
     | '/sesija/$token/pabaiga'
     | '/ask'
     | '/sesija/$token'
@@ -427,6 +482,8 @@ export interface FileRouteTypes {
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -434,6 +491,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/mcp'
     | '/rezervacija'
+    | '/unsubscribe'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
@@ -454,10 +512,12 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/email/unsubscribe'
     | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/ask/$threadId'
+    | '/lovable/email/suppression'
     | '/sesija/$token/pabaiga'
     | '/_authenticated/ask/'
     | '/sesija/$token/'
@@ -466,6 +526,8 @@ export interface FileRouteTypes {
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -474,6 +536,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   McpRoute: typeof McpRoute
   RezervacijaRoute: typeof RezervacijaRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -482,18 +545,29 @@ export interface RootRouteChildren {
   ApiMentorChatRoute: typeof ApiMentorChatRoute
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   SesijaTokenRoute: typeof SesijaTokenRouteWithChildren
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicClarityBookRoute: typeof ApiPublicClarityBookRoute
   ApiPublicClarityFinishRoute: typeof ApiPublicClarityFinishRoute
   ApiPublicClarityInterestRoute: typeof ApiPublicClarityInterestRoute
   ApiPublicClarityMessageRoute: typeof ApiPublicClarityMessageRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rezervacija': {
       id: '/rezervacija'
       path: '/rezervacija'
@@ -534,6 +608,13 @@ declare module '@tanstack/react-router' {
       path: '/sesija/$token'
       fullPath: '/sesija/$token'
       preLoaderRoute: typeof SesijaTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/transcribe': {
@@ -697,6 +778,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SesijaTokenPabaigaRouteImport
       parentRoute: typeof SesijaTokenRoute
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/ask/$threadId': {
       id: '/_authenticated/ask/$threadId'
       path: '/$threadId'
@@ -716,6 +804,20 @@ declare module '@tanstack/react-router' {
       path: '/.lovable/oauth/consent'
       fullPath: '/.lovable/oauth/consent'
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
@@ -822,6 +924,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   McpRoute: McpRoute,
   RezervacijaRoute: RezervacijaRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
@@ -831,14 +934,18 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMentorChatRoute: ApiMentorChatRoute,
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   SesijaTokenRoute: SesijaTokenRouteWithChildren,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicClarityBookRoute: ApiPublicClarityBookRoute,
   ApiPublicClarityFinishRoute: ApiPublicClarityFinishRoute,
   ApiPublicClarityInterestRoute: ApiPublicClarityInterestRoute,
   ApiPublicClarityMessageRoute: ApiPublicClarityMessageRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
