@@ -178,7 +178,7 @@ function Faq() {
   const items = [
     { q: "Ar tikrai nemokama?", a: "Taip. Pirma sesija — 15 minučių — nemokama, be įsipareigojimų. Nereikia įvesti kortelės." },
     { q: "Ar galiu būti anonimiškai?", a: "Vardas nebūtinai turi būti tikras. Reikia el. pašto, kad galėtume atsiųsti sesijos nuorodą." },
-    { q: "Kas tas virtualus mentorius?", a: "Dirbtinio intelekto asistentas, apmokytas Demartini ir kitų augimo metodų. Ne terapeutas ir ne draugas — struktūruotas klausimų tinklas." },
+    { q: "Kas tas virtualus mentorius?", a: "Dirbtinio intelekto asistentas, sukurtas remiantis giluminės savirefleksijos ir sąmoningumo principais. Ne terapeutas ir ne draugas — struktūruotas klausimų tinklas." },
     { q: "Kas nutinka su tuo, ką parašau?", a: "Tavo pokalbis saugomas šifruotai ir naudojamas tik tam, kad mentorius atsimintų kontekstą sesijos metu. Duomenys nedalinami tretiesiems asmenims." },
     { q: "O jei bus per sunku?", a: "Jei mentorius atpažįsta, kad tema per sunki AI pokalbiui, jis pasiūlys tęsti su tikru žmogumi." },
   ];
