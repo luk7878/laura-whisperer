@@ -84,6 +84,9 @@ export const Route = createFileRoute("/api/public/clarity/finish")({
             completed_at: new Date().toISOString(),
             emotional_end: parsed.data.emotional_end ?? undefined,
             feedback: parsed.data.feedback ?? undefined,
+            helpfulness_rating: parsed.data.helpfulness_rating ?? undefined,
+            phone: parsed.data.phone ?? undefined,
+            contact_email: parsed.data.contact_email ?? undefined,
             summary: summary ?? undefined,
           })
           .eq("id", booking.id);
