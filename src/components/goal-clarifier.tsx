@@ -89,6 +89,22 @@ export function GoalClarifier({
         </button>
       </div>
 
+      <GoalClarifierBody data={data} onSave={onSave} />
+    </aside>
+  );
+}
+
+export function GoalClarifierBody({
+  data,
+  onSave,
+}: {
+  data: GoalClarifierData;
+  onSave: () => void;
+}) {
+  const stageIndex = data.stage ? STAGES.findIndex((s) => data.stage?.includes(s)) : -1;
+  const progress = stageIndex >= 0 ? Math.round(((stageIndex + 1) / STAGES.length) * 100) : 0;
+  return (
+    <>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {/* Progresas */}
         <Card className="p-3">
@@ -181,9 +197,10 @@ export function GoalClarifier({
           Sukursim tikslą + pirmą žingsnį prioritetuose.
         </p>
       </div>
-    </aside>
+    </>
   );
 }
+
 
 function Section({
   icon: Icon,
