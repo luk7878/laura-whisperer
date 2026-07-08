@@ -23,6 +23,7 @@ import { Route as AuthenticatedVisionRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedSessionRouteImport } from './routes/_authenticated/session'
 import { Route as AuthenticatedResourcesRouteImport } from './routes/_authenticated/resources'
 import { Route as AuthenticatedProgressRouteImport } from './routes/_authenticated/progress'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPrioritiesRouteImport } from './routes/_authenticated/priorities'
 import { Route as AuthenticatedKnowledgeRouteImport } from './routes/_authenticated/knowledge'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
@@ -105,6 +106,11 @@ const AuthenticatedProgressRoute = AuthenticatedProgressRouteImport.update({
   path: '/progress',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPrioritiesRoute = AuthenticatedPrioritiesRouteImport.update({
   id: '/priorities',
   path: '/priorities',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/journal': typeof AuthenticatedJournalRoute
   '/knowledge': typeof AuthenticatedKnowledgeRoute
   '/priorities': typeof AuthenticatedPrioritiesRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/progress': typeof AuthenticatedProgressRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/session': typeof AuthenticatedSessionRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByTo {
   '/journal': typeof AuthenticatedJournalRoute
   '/knowledge': typeof AuthenticatedKnowledgeRoute
   '/priorities': typeof AuthenticatedPrioritiesRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/progress': typeof AuthenticatedProgressRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/session': typeof AuthenticatedSessionRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/knowledge': typeof AuthenticatedKnowledgeRoute
   '/_authenticated/priorities': typeof AuthenticatedPrioritiesRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/progress': typeof AuthenticatedProgressRoute
   '/_authenticated/resources': typeof AuthenticatedResourcesRoute
   '/_authenticated/session': typeof AuthenticatedSessionRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/journal'
     | '/knowledge'
     | '/priorities'
+    | '/profile'
     | '/progress'
     | '/resources'
     | '/session'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/journal'
     | '/knowledge'
     | '/priorities'
+    | '/profile'
     | '/progress'
     | '/resources'
     | '/session'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/_authenticated/journal'
     | '/_authenticated/knowledge'
     | '/_authenticated/priorities'
+    | '/_authenticated/profile'
     | '/_authenticated/progress'
     | '/_authenticated/resources'
     | '/_authenticated/session'
@@ -453,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProgressRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/priorities': {
       id: '/_authenticated/priorities'
       path: '/priorities'
@@ -560,6 +579,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedKnowledgeRoute: typeof AuthenticatedKnowledgeRoute
   AuthenticatedPrioritiesRoute: typeof AuthenticatedPrioritiesRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedProgressRoute: typeof AuthenticatedProgressRoute
   AuthenticatedResourcesRoute: typeof AuthenticatedResourcesRoute
   AuthenticatedSessionRoute: typeof AuthenticatedSessionRoute
@@ -573,6 +593,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedKnowledgeRoute: AuthenticatedKnowledgeRoute,
   AuthenticatedPrioritiesRoute: AuthenticatedPrioritiesRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedProgressRoute: AuthenticatedProgressRoute,
   AuthenticatedResourcesRoute: AuthenticatedResourcesRoute,
   AuthenticatedSessionRoute: AuthenticatedSessionRoute,
