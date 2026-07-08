@@ -63,8 +63,12 @@ function BookingPage() {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || "Nepavyko sukurti rezervacijos");
       }
-      const data = (await res.json()) as { access_token: string };
-      setDone({ token: data.access_token });
+      const data = (await res.json()) as { access_token?: string; waitlisted?: boolean };
+      if (data.waitlisted) {
+        setWaitlisted(true);
+      } else if (data.access_token) {
+        setDone({ token: data.access_token });
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Klaida");
     } finally {
