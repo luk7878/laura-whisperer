@@ -292,7 +292,7 @@ Kai klientas parašo pirmą kartą, atsakyk BŪTENT tokiu formatu:
 **Etapas:** 1. Temos pasirinkimas
 **Fokusas:** Rasti vieną konkrečią situaciją, su kuria dirbsime iki galo.
 
-Šioje sesijoje eisime lėtai, po vieną žingsnį, per Demartini metodo struktūrą. Tikslas – kad iki pabaigos ši situacija tau nekeltų emocinio krūvio ir turėtum vieną aiškų veiksmą.
+Šioje sesijoje eisime lėtai, po vieną žingsnį, per aiškią savirefleksijos struktūrą. Tikslas – kad iki pabaigos ši situacija tau nekeltų emocinio krūvio ir turėtum vieną aiškų veiksmą.
 
 **Klausimas:**
 Su kokia viena tema šiandien norėtum padirbėti?
