@@ -7,7 +7,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Sparkles, ShieldAlert, Star } from "lucide-react";
+import { Loader2, Sparkles, ShieldAlert, Star, KeyRound, Plus, Trash2, Copy } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
