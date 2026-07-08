@@ -80,7 +80,7 @@ export const updateWaitlistStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, any> = { status: data.status };
+    const patch: { status: string; notified_at?: string } = { status: data.status };
     if (data.status === "notified") patch.notified_at = new Date().toISOString();
     const { error } = await supabaseAdmin
       .from("clarity_waitlist")
