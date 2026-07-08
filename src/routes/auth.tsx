@@ -55,12 +55,18 @@ function AuthPage() {
       toast.error("Įveskite pakvietimo kodą");
       return false;
     }
-    const { data, error } = await supabase.rpc("validate_invite_code", { _code: code });
-    if (error || !data) {
-      toast.error("Neteisingas arba nebegaliojantis pakvietimo kodas");
+    try {
+      const res = await validate({ data: { code } });
+      if (!res.valid) {
+        toast.error("Neteisingas arba nebegaliojantis pakvietimo kodas");
+        return false;
+      }
+      return true;
+    } catch {
+      toast.error("Nepavyko patikrinti pakvietimo kodo");
       return false;
     }
-    return true;
+
   }
 
   async function handleEmail(e: React.FormEvent) {
