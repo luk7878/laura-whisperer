@@ -432,74 +432,95 @@ function SessionPage() {
       {/* Center column */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Header */}
-        <header className="border-b bg-background/80 backdrop-blur px-6 py-4 flex items-start gap-3">
-          <SidebarTrigger className="mt-1" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="font-serif text-3xl leading-tight text-foreground">
-                {session?.title ?? "Gyva augimo sesija"}
-              </h1>
-              <ModeBadge mode={mode} />
-              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <span className="h-2 w-2 rounded-full bg-map-green animate-pulse" />
-                Sesija aktyvi
-              </span>
-              <span className="text-sm text-muted-foreground">· {currentTime}</span>
+        <header className="border-b bg-background/80 backdrop-blur px-4 md:px-6 py-3 md:py-4">
+          <div className="flex items-start gap-2 md:gap-3">
+            <SidebarTrigger className="mt-1 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="font-serif text-xl md:text-3xl leading-tight text-foreground truncate max-w-full">
+                  {session?.title ?? "Gyva augimo sesija"}
+                </h1>
+                <ModeBadge mode={mode} />
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-map-green animate-pulse" />
+                  Sesija aktyvi
+                </span>
+                <span>· {currentTime}</span>
+              </div>
+              <p className="hidden md:block text-sm text-muted-foreground mt-1">
+                {mode === "goal_clarify"
+                  ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
+                  : mode === "mentor"
+                    ? "Mentorius atsako iš tavo įkeltos medžiagos su citatomis."
+                    : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {mode === "goal_clarify"
-                ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
-                : mode === "mentor"
-                  ? "Mentorius atsako iš tavo įkeltos medžiagos su citatomis."
-                  : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
-            </p>
-          </div>
-          <Button
-            onClick={() => setNewSessionOpen(true)}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            title="Pradėti naują sesiją kitu režimu"
-          >
-            <Sparkles className="h-3.5 w-3.5" /> Nauja sesija
-          </Button>
-          {mode === "demartini" && (
-            <Button
-              onClick={() => setCompletionOpen(true)}
-              size="sm"
-              className="gap-2"
-              disabled={!session || messages.length < 2}
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" /> Užbaigti ir suplanuoti
-            </Button>
-          )}
-          {mode === "goal_clarify" && (
-            <Button
-              onClick={saveGoal}
-              size="sm"
-              className="gap-2"
-              disabled={!session || !goalData.goal_draft || savingGoal}
-            >
-              {savingGoal ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <CheckCircle2 className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                onClick={() => setNewSessionOpen(true)}
+                variant="outline"
+                size="sm"
+                className="gap-1.5 h-9 px-2 md:px-3"
+                title="Pradėti naują sesiją"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Nauja</span>
+              </Button>
+              {mode === "demartini" && (
+                <Button
+                  onClick={() => setCompletionOpen(true)}
+                  size="sm"
+                  className="gap-1.5 h-9 px-2 md:px-3"
+                  disabled={!session || messages.length < 2}
+                  title="Užbaigti ir suplanuoti"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">Užbaigti</span>
+                </Button>
               )}
-              Perkelti į Tikslus
-            </Button>
-          )}
+              {mode === "goal_clarify" && (
+                <Button
+                  onClick={saveGoal}
+                  size="sm"
+                  className="gap-1.5 h-9 px-2 md:px-3"
+                  disabled={!session || !goalData.goal_draft || savingGoal}
+                  title="Perkelti į Tikslus"
+                >
+                  {savingGoal ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  )}
+                  <span className="hidden md:inline">Perkelti</span>
+                </Button>
+              )}
+              {(mode === "demartini" || mode === "goal_clarify") && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="lg:hidden h-9 w-9 p-0"
+                  onClick={() => setMapSheetOpen(true)}
+                  title="Augimo žemėlapis"
+                >
+                  <MapIcon className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
         </header>
 
 
         {/* Tabs */}
-        <div className="border-b bg-background px-6">
-          <div className="flex gap-6">
+        <div className="border-b bg-background px-4 md:px-6 overflow-x-auto">
+          <div className="flex gap-4 md:gap-6 min-w-max">
             {TABS.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  "flex items-center gap-2 py-3 text-sm font-medium border-b-2 -mb-px transition-colors",
+                  "flex items-center gap-1.5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap",
                   tab === t.key
                     ? "border-primary text-primary"
                     : "border-transparent text-muted-foreground hover:text-foreground",
@@ -511,6 +532,7 @@ function SessionPage() {
             ))}
           </div>
         </div>
+
 
         {/* Body */}
         <div className="flex-1 min-h-0 overflow-hidden bg-muted/20">
