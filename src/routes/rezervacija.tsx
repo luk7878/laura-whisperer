@@ -76,6 +76,25 @@ function BookingPage() {
     }
   }
 
+  if (waitlisted) {
+    return (
+      <div className="clarity-scope min-h-screen flex flex-col">
+        <TopBar />
+        <div className="flex-1 flex items-center justify-center px-6 py-16">
+          <div className="max-w-lg text-center">
+            <h1 className="mt-6 font-clarity-serif text-4xl text-clarity-ink">Esi laukiančiųjų sąraše</h1>
+            <p className="mt-4 text-clarity-ink-soft leading-relaxed">
+              Šiuo metu visos 30 vietų užimtos. Kai atsilaisvins vieta, parašysime į <span className="text-clarity-ink">{email}</span>.
+            </p>
+            <Link to="/" className="mt-8 inline-flex items-center gap-2 rounded-full border border-clarity-line px-6 py-3 text-clarity-ink hover:bg-clarity-line/30 transition-colors">
+              Grįžti į pradžią
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (done) {
     return (
       <div className="clarity-scope min-h-screen flex flex-col">
