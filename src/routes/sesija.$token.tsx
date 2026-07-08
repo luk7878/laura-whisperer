@@ -29,7 +29,23 @@ function SessionPage() {
   const [dismissedSafety, setDismissedSafety] = useState(false);
   const [startedAt] = useState(Date.now());
   const [now, setNow] = useState(Date.now());
+  const [sessionEnded, setSessionEnded] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  function detectClosing(text: string): boolean {
+    const t = text.toLowerCase();
+    const patterns = [
+      "ačiū už pokalbį",
+      "sėkmės tau",
+      "iki pasimatymo",
+      "iki kito karto",
+      "gerai užbaigti sesij",
+      "užbaigiame sesij",
+      "baigiame sesij",
+      "užbaikime sesij",
+    ];
+    return patterns.some((p) => t.includes(p));
+  }
 
   useEffect(() => {
     if (phase !== "chat") return;
@@ -78,6 +94,9 @@ function SessionPage() {
       if (data.safety.level !== "none") {
         setSafety(data.safety);
         setDismissedSafety(false);
+      }
+      if (detectClosing(data.reply)) {
+        setSessionEnded(true);
       }
     } catch (err) {
       console.error(err);
@@ -186,8 +205,22 @@ function SessionPage() {
               <Loader2 className="h-3.5 w-3.5 animate-spin" /> Mentorius rašo…
             </div>
           )}
+          {sessionEnded && !sending && (
+            <div className="mt-6 rounded-2xl border-2 border-clarity-terra bg-clarity-terra/5 p-5 text-center">
+              <Sparkles className="h-5 w-5 mx-auto text-clarity-terra" />
+              <p className="mt-2 font-clarity-serif text-lg text-clarity-ink">Sesija baigėsi</p>
+              <p className="mt-1 text-sm text-clarity-ink-soft">Prieš atsisveikinant — trumpas įvertinimas ir tavo santrauka.</p>
+              <button
+                onClick={() => navigate({ to: "/sesija/$token/pabaiga", params: { token } })}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-clarity-terra px-6 py-2.5 text-sm text-white hover:bg-clarity-ink transition-colors"
+              >
+                Įvertinti ir gauti santrauką <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
 
       {/* Composer */}
       <form
