@@ -163,26 +163,28 @@ function GoalsPage() {
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <header className="border-b bg-background/80 backdrop-blur px-6 py-4 flex items-center gap-3">
-        <SidebarTrigger />
-        <div className="flex-1">
-          <h1 className="font-serif text-2xl leading-tight">Tikslai</h1>
-          <p className="text-sm text-muted-foreground">
-            Kiekvienas tikslas – su AI sudėliotu užduočių medžiu, kuris tave atveda iki rezultato.
+      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 md:gap-3">
+        <SidebarTrigger className="shrink-0" />
+        <div className="flex-1 min-w-0">
+          <h1 className="font-serif text-xl md:text-2xl leading-tight">Tikslai</h1>
+          <p className="text-xs md:text-sm text-muted-foreground hidden sm:block truncate">
+            AI sudėlioja kelią nuo tikslo iki rezultato.
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" /> Naujas tikslas
+            <Button className="gap-1.5 h-9 px-2 md:px-3 shrink-0">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Naujas tikslas</span>
             </Button>
           </DialogTrigger>
           <NewGoalDialog onCreated={() => { setOpen(false); load(); }} />
         </Dialog>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-6 bg-muted/20">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-muted/20">
         <div className="max-w-4xl mx-auto space-y-3">
+
           {loading && <div className="text-sm text-muted-foreground">Kraunama…</div>}
           {!loading && goals.length === 0 && (
             <Card className="p-10 text-center border-dashed">
