@@ -10,14 +10,17 @@ export const Route = createFileRoute("/")({
         content:
           "15 minučių virtualus pokalbis, kuris padeda pamatyti tai, kas iš tikrųjų slegia, ir išeiti su vienu aiškiu žingsniu.",
       },
-      { property: "og:title", content: "Nemokama aiškumo sesija" },
+      { property: "og:title", content: "Nemokama aiškumo sesija — 15 min pokalbis" },
       {
         property: "og:description",
         content: "Papasakok, kas slegia — mentorius padės pamatyti aiškiau per 15 minučių.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://mentor.lauraborusaite.lt/" },
     ],
+    links: [{ rel: "canonical", href: "https://mentor.lauraborusaite.lt/" }],
   }),
+
   component: Landing,
 });
 
