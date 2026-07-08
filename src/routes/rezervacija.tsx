@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
 
 export const Route = createFileRoute("/rezervacija")({
   head: () => ({
@@ -23,6 +25,20 @@ function BookingPage() {
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ token: string } | null>(null);
+  const [waitlisted, setWaitlisted] = useState(false);
+  const [slots, setSlots] = useState<{ remaining: number; capacity: number } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("clarity_slot_state")
+        .select("capacity, filled")
+        .eq("id", 1)
+        .maybeSingle();
+      if (data) setSlots({ remaining: Math.max(0, data.capacity - data.filled), capacity: data.capacity });
+    })();
+  }, []);
+
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,13 +63,36 @@ function BookingPage() {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || "Nepavyko sukurti rezervacijos");
       }
-      const data = (await res.json()) as { access_token: string };
-      setDone({ token: data.access_token });
+      const data = (await res.json()) as { access_token?: string; waitlisted?: boolean };
+      if (data.waitlisted) {
+        setWaitlisted(true);
+      } else if (data.access_token) {
+        setDone({ token: data.access_token });
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Klaida");
     } finally {
       setBusy(false);
     }
+  }
+
+  if (waitlisted) {
+    return (
+      <div className="clarity-scope min-h-screen flex flex-col">
+        <TopBar />
+        <div className="flex-1 flex items-center justify-center px-6 py-16">
+          <div className="max-w-lg text-center">
+            <h1 className="mt-6 font-clarity-serif text-4xl text-clarity-ink">Esi laukiančiųjų sąraše</h1>
+            <p className="mt-4 text-clarity-ink-soft leading-relaxed">
+              Šiuo metu visos 30 vietų užimtos. Kai atsilaisvins vieta, parašysime į <span className="text-clarity-ink">{email}</span>.
+            </p>
+            <Link to="/" className="mt-8 inline-flex items-center gap-2 rounded-full border border-clarity-line px-6 py-3 text-clarity-ink hover:bg-clarity-line/30 transition-colors">
+              Grįžti į pradžią
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (done) {
@@ -88,6 +127,13 @@ function BookingPage() {
       <div className="mx-auto max-w-xl px-6 py-12">
         <h1 className="font-clarity-serif text-4xl text-clarity-ink">Rezervuoti sesiją</h1>
         <p className="mt-3 text-clarity-ink-soft">15 minučių. Nemokamai. Be paskyros.</p>
+        {slots && (
+          <p className="mt-4 inline-block rounded-full border border-clarity-line px-4 py-1.5 text-sm text-clarity-ink-soft">
+            {slots.remaining > 0
+              ? `Liko ${slots.remaining} iš ${slots.capacity} vietų`
+              : `Visos ${slots.capacity} vietos užimtos — palik el. paštą laukiančiųjų sąraše`}
+          </p>
+        )}
 
         <form onSubmit={submit} className="mt-10 space-y-6">
           <Field label="Vardas">

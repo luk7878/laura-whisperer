@@ -25,22 +25,28 @@ export const Route = createFileRoute("/api/public/clarity/book")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data, error } = await supabaseAdmin
-          .from("clarity_bookings")
-          .insert({
-            name: parsed.data.name,
-            email: parsed.data.email,
-            concern: parsed.data.concern ?? null,
-            scheduled_at: parsed.data.scheduled_at ?? null,
-            consent_accepted: parsed.data.consent_accepted,
-            status: "booked",
-          })
-          .select("id, access_token")
-          .single();
+        const { data: rpcData, error } = await supabaseAdmin.rpc("book_clarity_slot", {
+          p_name: parsed.data.name,
+          p_email: parsed.data.email,
+          p_concern: parsed.data.concern ?? "",
+          p_scheduled_at: parsed.data.scheduled_at ?? new Date().toISOString(),
+          p_consent_accepted: parsed.data.consent_accepted,
+        });
 
-        if (error || !data) {
-          console.error("clarity_book insert error", error);
+        if (error || !rpcData) {
+          console.error("clarity_book rpc error", error);
           return Response.json({ error: "Nepavyko sukurti rezervacijos" }, { status: 500 });
+        }
+
+        const data = rpcData as {
+          waitlisted: boolean;
+          id?: string;
+          access_token?: string;
+          waitlist_id?: string;
+        };
+
+        if (data.waitlisted) {
+          return Response.json({ waitlisted: true });
         }
 
         // Send confirmation email with session link (fire-and-forget style; log failures)

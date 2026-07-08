@@ -2,15 +2,23 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listClarityBookings, generateBookingSummary } from "@/lib/admin.functions";
+import {
+  getSlotState,
+  updateSlotCapacity,
+  resetSlotFilled,
+  listWaitlist,
+  updateWaitlistStatus,
+} from "@/lib/slots.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Sparkles, ShieldAlert, Star, KeyRound, Plus, Trash2, Copy } from "lucide-react";
+import { Loader2, Sparkles, ShieldAlert, Star, KeyRound, Plus, Trash2, Copy, Users, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -184,7 +192,10 @@ function AdminPage() {
         onChange={(e) => setQ(e.target.value)}
       />
 
+      <SlotsPanel />
+
       <InviteCodesPanel />
+
 
 
       {loading ? (
@@ -522,3 +533,185 @@ function InviteCodesPanel() {
   );
 }
 
+
+type WaitlistEntry = {
+  id: string;
+  name: string;
+  email: string;
+  concern: string | null;
+  status: string;
+  notified_at: string | null;
+  created_at: string;
+};
+
+function SlotsPanel() {
+  const getState = useServerFn(getSlotState);
+  const updateCap = useServerFn(updateSlotCapacity);
+  const resetFilled = useServerFn(resetSlotFilled);
+  const listWl = useServerFn(listWaitlist);
+  const updWl = useServerFn(updateWaitlistStatus);
+
+  const [state, setState] = useState<{ capacity: number; filled: number } | null>(null);
+  const [wl, setWl] = useState<WaitlistEntry[]>([]);
+  const [capInput, setCapInput] = useState("");
+  const [open, setOpen] = useState(true);
+  const [busy, setBusy] = useState(false);
+
+  async function load() {
+    try {
+      const [s, w] = await Promise.all([getState(), listWl()]);
+      setState({ capacity: s.capacity, filled: s.filled });
+      setCapInput(String(s.capacity));
+      setWl(w.entries as WaitlistEntry[]);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Klaida");
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function saveCapacity() {
+    const n = Number(capInput);
+    if (!Number.isFinite(n) || n < 0) {
+      toast.error("Netinkamas skaičius");
+      return;
+    }
+    setBusy(true);
+    try {
+      await updateCap({ data: { capacity: n } });
+      toast.success("Limitas atnaujintas");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Klaida");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doReset() {
+    if (!confirm("Atstatyti užimtų vietų skaičių į 0?")) return;
+    setBusy(true);
+    try {
+      await resetFilled();
+      toast.success("Vietos atnaujintos");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Klaida");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function setStatus(id: string, status: "waiting" | "notified" | "converted" | "cancelled") {
+    try {
+      await updWl({ data: { id, status } });
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Klaida");
+    }
+  }
+
+  const remaining = state ? Math.max(0, state.capacity - state.filled) : 0;
+  const pct = state && state.capacity > 0 ? Math.min(100, (state.filled / state.capacity) * 100) : 0;
+
+  return (
+    <Card className="p-4">
+      <button className="w-full flex items-center justify-between" onClick={() => setOpen((o) => !o)}>
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary" />
+          <span className="font-medium">Sesijų vietos</span>
+          {state && (
+            <Badge variant="secondary">
+              {state.filled}/{state.capacity} užimta · liko {remaining}
+            </Badge>
+          )}
+          {wl.filter((e) => e.status === "waiting").length > 0 && (
+            <Badge className="bg-amber-600 hover:bg-amber-600">
+              {wl.filter((e) => e.status === "waiting").length} laukia
+            </Badge>
+          )}
+        </div>
+        <span className="text-xs text-muted-foreground">{open ? "Slėpti" : "Rodyti"}</span>
+      </button>
+
+      {open && (
+        <div className="mt-4 space-y-4">
+          {state && (
+            <div className="rounded-md border p-3 bg-muted/30 space-y-3">
+              <div>
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Užimtumas</span>
+                  <span>{state.filled} / {state.capacity}</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+              <div className="flex gap-2 flex-wrap items-end">
+                <div className="flex-1 min-w-[160px]">
+                  <label className="text-xs text-muted-foreground">Bendras limitas</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={capInput}
+                    onChange={(e) => setCapInput(e.target.value)}
+                  />
+                </div>
+                <Button size="sm" onClick={saveCapacity} disabled={busy}>
+                  Išsaugoti limitą
+                </Button>
+                <Button size="sm" variant="outline" onClick={doReset} disabled={busy}>
+                  <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Atstatyti (filled = 0)
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-2">
+              Laukiančiųjų sąrašas ({wl.length})
+            </div>
+            {wl.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nieko nelaukia.</p>
+            ) : (
+              <div className="divide-y">
+                {wl.map((e) => (
+                  <div key={e.id} className="py-2 flex flex-wrap items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium">{e.name}</span>
+                        <span className="text-xs text-muted-foreground">{e.email}</span>
+                        <Badge variant={e.status === "waiting" ? "secondary" : "outline"}>{e.status}</Badge>
+                      </div>
+                      {e.concern && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{e.concern}</p>}
+                      <div className="text-xs text-muted-foreground mt-0.5">{fmt(e.created_at)}</div>
+                    </div>
+                    <div className="flex gap-1">
+                      {e.status === "waiting" && (
+                        <Button size="sm" variant="outline" onClick={() => setStatus(e.id, "notified")}>
+                          Pranešta
+                        </Button>
+                      )}
+                      {e.status !== "converted" && (
+                        <Button size="sm" variant="outline" onClick={() => setStatus(e.id, "converted")}>
+                          Užsiregistravo
+                        </Button>
+                      )}
+                      {e.status !== "cancelled" && (
+                        <Button size="sm" variant="ghost" onClick={() => setStatus(e.id, "cancelled")}>
+                          Atmesti
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
