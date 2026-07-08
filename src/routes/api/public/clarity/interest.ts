@@ -19,7 +19,13 @@ export const Route = createFileRoute("/api/public/clarity/interest")({
         if (!parsed.success) return new Response("Netinkami duomenys", { status: 400 });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const update: Record<string, unknown> = {};
+        const update: {
+          wants_subscription?: boolean;
+          wants_human_session?: boolean;
+          human_session_requested_at?: string;
+          human_session_preferred_at?: string | null;
+          human_session_note?: string | null;
+        } = {};
         if (parsed.data.wants_subscription != null) update.wants_subscription = parsed.data.wants_subscription;
         if (parsed.data.wants_human_session != null) {
           update.wants_human_session = parsed.data.wants_human_session;
