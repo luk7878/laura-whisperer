@@ -446,6 +446,78 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          allow_analytics: boolean
+          avatar_url: string | null
+          bio: string | null
+          birth_date: string | null
+          created_at: string
+          display_name: string | null
+          email_notifications: boolean
+          goal_reminders: boolean
+          id: string
+          language: string | null
+          location: string | null
+          marketing_emails: boolean
+          mentor_replies: boolean
+          profile_visibility: string
+          reminder_time: string | null
+          session_reminders: boolean
+          share_insights: boolean
+          share_progress: boolean
+          timezone: string | null
+          updated_at: string
+          weekly_summary: boolean
+        }
+        Insert: {
+          allow_analytics?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          birth_date?: string | null
+          created_at?: string
+          display_name?: string | null
+          email_notifications?: boolean
+          goal_reminders?: boolean
+          id: string
+          language?: string | null
+          location?: string | null
+          marketing_emails?: boolean
+          mentor_replies?: boolean
+          profile_visibility?: string
+          reminder_time?: string | null
+          session_reminders?: boolean
+          share_insights?: boolean
+          share_progress?: boolean
+          timezone?: string | null
+          updated_at?: string
+          weekly_summary?: boolean
+        }
+        Update: {
+          allow_analytics?: boolean
+          avatar_url?: string | null
+          bio?: string | null
+          birth_date?: string | null
+          created_at?: string
+          display_name?: string | null
+          email_notifications?: boolean
+          goal_reminders?: boolean
+          id?: string
+          language?: string | null
+          location?: string | null
+          marketing_emails?: boolean
+          mentor_replies?: boolean
+          profile_visibility?: string
+          reminder_time?: string | null
+          session_reminders?: boolean
+          share_insights?: boolean
+          share_progress?: boolean
+          timezone?: string | null
+          updated_at?: string
+          weekly_summary?: boolean
+        }
+        Relationships: []
+      }
       progress_snapshots: {
         Row: {
           created_at: string
