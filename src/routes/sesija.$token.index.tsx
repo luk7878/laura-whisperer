@@ -333,12 +333,20 @@ function SafetyBanner({
 
 function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => void }) {
   const [preferredAt, setPreferredAt] = useState(defaultPreferredAt());
+  const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    const trimmedPhone = phone.trim();
+    if (!/^[+0-9\s()\-]{5,32}$/.test(trimmedPhone)) {
+      setError("Įvesk galiojantį telefono numerį.");
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch("/api/public/clarity/interest", {
@@ -349,12 +357,14 @@ function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => 
           wants_human_session: true,
           human_session_preferred_at: preferredAt ? new Date(preferredAt).toISOString() : null,
           human_session_note: note.trim() || null,
+          phone: trimmedPhone,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
       setDone(true);
     } catch (err) {
       console.error(err);
+      setError("Nepavyko išsiųsti. Bandyk dar kartą.");
     } finally {
       setBusy(false);
     }
