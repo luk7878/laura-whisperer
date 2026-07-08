@@ -673,9 +673,10 @@ function SessionPage() {
         </div>
 
         {/* Composer */}
-        <form onSubmit={sendMessage} className="border-t bg-background p-4">
+        <form onSubmit={sendMessage} className="border-t bg-background p-3 md:p-4">
           <div className="max-w-3xl mx-auto">
-            <Card className="p-3 flex items-start gap-3">
+            <Card className="p-2.5 md:p-3 flex items-start gap-2 md:gap-3">
+
               <button
                 type="button"
                 onClick={recording ? stopRecording : startRecording}
