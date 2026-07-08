@@ -281,65 +281,181 @@ function SafetyBanner({
   token: string;
   onDismiss: () => void;
 }) {
+  const [showBooking, setShowBooking] = useState(false);
+  return (
+    <>
+      <div className={`border-b ${safety.level === "crisis" ? "bg-destructive/5 border-destructive/30" : "bg-clarity-surface border-clarity-line"}`}>
+        <div className="mx-auto max-w-2xl px-4 py-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${safety.level === "crisis" ? "text-destructive" : "text-clarity-terra"}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-clarity-ink leading-relaxed">
+                Atrodo, kad ši tema tau labai jautri. Jei nori, gali pratęsti su žmogumi, kuris padės saugiau.
+              </p>
+              {safety.level === "crisis" && (
+                <div className="mt-3 rounded-lg bg-clarity-bg border border-clarity-line p-3 space-y-1.5">
+                  <p className="text-xs font-medium text-clarity-ink">Krizės atveju skambink dabar:</p>
+                  {CRISIS_RESOURCES.map((r) => (
+                    <div key={r.name} className="flex items-center gap-2 text-xs text-clarity-ink-soft">
+                      <Phone className="h-3 w-3" />
+                      <span className="text-clarity-ink">{r.name}</span>
+                      <a href={`tel:${r.phone.replace(/\s+/g, "")}`} className="font-medium text-clarity-terra">{r.phone}</a>
+                      {r.note && <span className="text-clarity-ink-soft/70">· {r.note}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  onClick={() => setShowBooking(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-clarity-ink text-clarity-bg px-4 py-2 text-xs hover:bg-clarity-terra transition-colors"
+                >
+                  Rezervuoti sesiją su žmogumi <ChevronRight className="h-3 w-3" />
+                </button>
+                <button
+                  onClick={onDismiss}
+                  className="rounded-full border border-clarity-line px-4 py-2 text-xs text-clarity-ink-soft hover:text-clarity-ink transition-colors"
+                >
+                  Tęsti su AI
+                </button>
+              </div>
+            </div>
+            <button onClick={onDismiss} className="text-clarity-ink-soft/60 hover:text-clarity-ink" aria-label="Uždaryti">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+      {showBooking && <HumanBookingDialog token={token} onClose={() => setShowBooking(false)} />}
+    </>
+  );
+}
+
+function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => void }) {
+  const [preferredAt, setPreferredAt] = useState(defaultPreferredAt());
+  const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
-  async function bookHuman() {
+  const [done, setDone] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
     setBusy(true);
     try {
-      await fetch("/api/public/clarity/interest", {
+      const res = await fetch("/api/public/clarity/interest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, wants_human_session: true }),
+        body: JSON.stringify({
+          token,
+          wants_human_session: true,
+          human_session_preferred_at: preferredAt ? new Date(preferredAt).toISOString() : null,
+          human_session_note: note.trim() || null,
+        }),
       });
-      window.location.href = "mailto:pagalba@funnelium.lt?subject=Noriu%20sesijos%20su%20zmogumi";
+      if (!res.ok) throw new Error(await res.text());
+      setDone(true);
+    } catch (err) {
+      console.error(err);
     } finally {
       setBusy(false);
     }
   }
+
   return (
-    <div className={`border-b ${safety.level === "crisis" ? "bg-destructive/5 border-destructive/30" : "bg-clarity-surface border-clarity-line"}`}>
-      <div className="mx-auto max-w-2xl px-4 py-4">
-        <div className="flex items-start gap-3">
-          <AlertCircle className={`h-5 w-5 shrink-0 mt-0.5 ${safety.level === "crisis" ? "text-destructive" : "text-clarity-terra"}`} />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-clarity-ink leading-relaxed">
-              Atrodo, kad ši tema tau labai jautri. Jei nori, gali pratęsti su žmogumi, kuris padės saugiau.
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-clarity-ink/40 backdrop-blur-sm p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md rounded-2xl bg-clarity-bg border border-clarity-line shadow-xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {done ? (
+          <div className="text-center py-4">
+            <Sparkles className="h-6 w-6 mx-auto text-clarity-terra" />
+            <h2 className="mt-3 font-clarity-serif text-2xl text-clarity-ink">Rezervacija priimta</h2>
+            <p className="mt-2 text-sm text-clarity-ink-soft leading-relaxed">
+              Susisieksime el. paštu per artimiausias 24 val., kad patvirtintume laiką.
             </p>
-            {safety.level === "crisis" && (
-              <div className="mt-3 rounded-lg bg-clarity-bg border border-clarity-line p-3 space-y-1.5">
-                <p className="text-xs font-medium text-clarity-ink">Krizės atveju skambink dabar:</p>
-                {CRISIS_RESOURCES.map((r) => (
-                  <div key={r.name} className="flex items-center gap-2 text-xs text-clarity-ink-soft">
-                    <Phone className="h-3 w-3" />
-                    <span className="text-clarity-ink">{r.name}</span>
-                    <a href={`tel:${r.phone.replace(/\s+/g, "")}`} className="font-medium text-clarity-terra">{r.phone}</a>
-                    {r.note && <span className="text-clarity-ink-soft/70">· {r.note}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                onClick={bookHuman}
-                disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-full bg-clarity-ink text-clarity-bg px-4 py-2 text-xs hover:bg-clarity-terra transition-colors"
-              >
-                Rezervuoti sesiją su žmogumi <ChevronRight className="h-3 w-3" />
-              </button>
-              <button
-                onClick={onDismiss}
-                className="rounded-full border border-clarity-line px-4 py-2 text-xs text-clarity-ink-soft hover:text-clarity-ink transition-colors"
-              >
-                Tęsti su AI
+            <button
+              onClick={onClose}
+              className="mt-6 rounded-full bg-clarity-terra px-6 py-2.5 text-sm text-white hover:bg-clarity-ink transition-colors"
+            >
+              Uždaryti
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit}>
+            <div className="flex items-start justify-between">
+              <h2 className="font-clarity-serif text-2xl text-clarity-ink">Sesija su žmogumi</h2>
+              <button type="button" onClick={onClose} aria-label="Uždaryti" className="text-clarity-ink-soft/60 hover:text-clarity-ink">
+                <X className="h-4 w-4" />
               </button>
             </div>
-          </div>
-          <button onClick={onDismiss} className="text-clarity-ink-soft/60 hover:text-clarity-ink" aria-label="Uždaryti">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+            <p className="mt-2 text-sm text-clarity-ink-soft leading-relaxed">
+              Pasirink tau tinkamą laiką. Susisieksime el. paštu, kad patvirtintume ir atsiųstume nuorodą.
+            </p>
+
+            <label className="mt-5 block text-sm font-medium text-clarity-ink mb-2">
+              Pageidaujamas laikas
+            </label>
+            <input
+              type="datetime-local"
+              required
+              value={preferredAt}
+              onChange={(e) => setPreferredAt(e.target.value)}
+              min={minPreferredAt()}
+              className="w-full rounded-xl border border-clarity-line bg-clarity-bg px-4 py-3 text-clarity-ink focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors"
+            />
+
+            <label className="mt-4 block text-sm font-medium text-clarity-ink mb-2">
+              Pastaba (nebūtinai)
+            </label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={3}
+              maxLength={500}
+              placeholder="Ką norėtum aptarti?"
+              className="w-full resize-none rounded-xl border border-clarity-line bg-clarity-bg px-4 py-3 text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors"
+            />
+
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full border border-clarity-line px-5 py-2.5 text-sm text-clarity-ink-soft hover:text-clarity-ink transition-colors"
+              >
+                Atšaukti
+              </button>
+              <button
+                type="submit"
+                disabled={busy}
+                className="inline-flex items-center gap-1.5 rounded-full bg-clarity-terra px-6 py-2.5 text-sm text-white hover:bg-clarity-ink transition-colors disabled:opacity-60"
+              >
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Rezervuoti
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
+}
+
+function defaultPreferredAt() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(18, 0, 0, 0);
+  return toLocalInput(d);
+}
+
+function minPreferredAt() {
+  const d = new Date();
+  d.setHours(d.getHours() + 2);
+  return toLocalInput(d);
+}
+
+function toLocalInput(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function MinimalTop() {

@@ -5,6 +5,8 @@ const bodySchema = z.object({
   token: z.string().uuid(),
   wants_subscription: z.boolean().optional(),
   wants_human_session: z.boolean().optional(),
+  human_session_preferred_at: z.string().datetime().optional().nullable(),
+  human_session_note: z.string().trim().max(1000).optional().nullable(),
 });
 
 export const Route = createFileRoute("/api/public/clarity/interest")({
@@ -17,9 +19,26 @@ export const Route = createFileRoute("/api/public/clarity/interest")({
         if (!parsed.success) return new Response("Netinkami duomenys", { status: 400 });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const update: { wants_subscription?: boolean; wants_human_session?: boolean } = {};
+        const update: {
+          wants_subscription?: boolean;
+          wants_human_session?: boolean;
+          human_session_requested_at?: string;
+          human_session_preferred_at?: string | null;
+          human_session_note?: string | null;
+        } = {};
         if (parsed.data.wants_subscription != null) update.wants_subscription = parsed.data.wants_subscription;
-        if (parsed.data.wants_human_session != null) update.wants_human_session = parsed.data.wants_human_session;
+        if (parsed.data.wants_human_session != null) {
+          update.wants_human_session = parsed.data.wants_human_session;
+          if (parsed.data.wants_human_session === true) {
+            update.human_session_requested_at = new Date().toISOString();
+          }
+        }
+        if (parsed.data.human_session_preferred_at !== undefined) {
+          update.human_session_preferred_at = parsed.data.human_session_preferred_at;
+        }
+        if (parsed.data.human_session_note !== undefined) {
+          update.human_session_note = parsed.data.human_session_note;
+        }
         if (Object.keys(update).length === 0) return Response.json({ ok: true });
 
         const { error } = await supabaseAdmin

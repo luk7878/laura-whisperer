@@ -74,6 +74,9 @@ export type Database = {
           emotional_start: number | null
           feedback: string | null
           helpfulness_rating: number | null
+          human_session_note: string | null
+          human_session_preferred_at: string | null
+          human_session_requested_at: string | null
           id: string
           name: string
           phone: string | null
@@ -99,6 +102,9 @@ export type Database = {
           emotional_start?: number | null
           feedback?: string | null
           helpfulness_rating?: number | null
+          human_session_note?: string | null
+          human_session_preferred_at?: string | null
+          human_session_requested_at?: string | null
           id?: string
           name: string
           phone?: string | null
@@ -124,6 +130,9 @@ export type Database = {
           emotional_start?: number | null
           feedback?: string | null
           helpfulness_rating?: number | null
+          human_session_note?: string | null
+          human_session_preferred_at?: string | null
+          human_session_requested_at?: string | null
           id?: string
           name?: string
           phone?: string | null
