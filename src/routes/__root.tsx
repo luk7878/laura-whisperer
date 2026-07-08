@@ -79,22 +79,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Asistentas koučeriams" },
+      { title: "Aiškumo sesija — nemokamas 15 min pokalbis" },
       {
         name: "description",
         content:
-          "AI palydima savirefleksijos ir augimo platforma pagal Demartini metodą: sesijos, tikslai, vizija, prioritetai ir gyvas augimo žemėlapis.",
+          "Nemokama 15 minučių aiškumo sesija su virtualiu mentoriumi. Papasakok, kas slegia, ir išeik su vienu konkrečiu žingsniu.",
       },
-      { name: "author", content: "Augimo Kompasas AI" },
-      { property: "og:title", content: "Asistentas koučeriams" },
-      { property: "og:description", content: "Test test" },
+      { name: "author", content: "Laura Borusaitė" },
+      { property: "og:title", content: "Aiškumo sesija — nemokamas 15 min pokalbis" },
+      { property: "og:description", content: "Nemokama 15 minučių aiškumo sesija su virtualiu mentoriumi. Vienas aiškumas, vienas žingsnis." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Aiškumo sesija" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Asistentas koučeriams" },
-      { name: "description", content: "Test test" },
-      { name: "twitter:description", content: "Test test" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a5d0176e-0e5e-464d-8028-c94886373d16/id-preview-dc282df2--2e6b3724-a25f-4aca-be05-b54dcec3defe.lovable.app-1783264011073.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a5d0176e-0e5e-464d-8028-c94886373d16/id-preview-dc282df2--2e6b3724-a25f-4aca-be05-b54dcec3defe.lovable.app-1783264011073.png" },
+      { name: "twitter:title", content: "Aiškumo sesija — nemokamas 15 min pokalbis" },
+      { name: "twitter:description", content: "Nemokama 15 minučių aiškumo sesija su virtualiu mentoriumi. Vienas aiškumas, vienas žingsnis." },
+
     ],
     links: [
       { rel: "stylesheet", href: appCss },
