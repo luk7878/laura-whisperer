@@ -28,7 +28,6 @@ function Landing() {
       <Hero />
       <HowItWorks />
       <ForWhom />
-      <Disclaimer />
       <Faq />
       <Footer />
     </div>
