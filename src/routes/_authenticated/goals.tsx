@@ -208,11 +208,11 @@ function GoalsPage() {
             const isExpanded = expanded.has(g.id);
             const hasTasks = goalTasks.length > 0;
             return (
-              <Card key={g.id} className="p-4">
-                <div className="flex items-start gap-3">
+              <Card key={g.id} className="p-3 md:p-4">
+                <div className="flex items-start gap-2 md:gap-3">
                   <button
                     onClick={() => toggleExpanded(g.id)}
-                    className="mt-0.5 text-muted-foreground hover:text-foreground"
+                    className="mt-1 text-muted-foreground hover:text-foreground shrink-0"
                     title={isExpanded ? "Suskleisti" : "Išskleisti"}
                   >
                     {isExpanded ? (
@@ -221,12 +221,12 @@ function GoalsPage() {
                       <ChevronRight className="h-4 w-4" />
                     )}
                   </button>
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <Target className="h-5 w-5" />
+                  <div className="h-9 w-9 md:h-10 md:w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <Target className="h-4 w-4 md:h-5 md:w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-medium">{g.title}</h3>
+                      <h3 className="font-medium text-sm md:text-base break-words">{g.title}</h3>
                       <Badge variant="outline" className="text-[10px]">
                         {g.status === "active" ? "Aktyvus" : g.status}
                       </Badge>
@@ -237,17 +237,17 @@ function GoalsPage() {
                       )}
                       {hasTasks && (
                         <Badge variant="secondary" className="text-[10px]">
-                          {goalTasks.filter((t) => t.done).length}/{goalTasks.length} užduotys
+                          {goalTasks.filter((t) => t.done).length}/{goalTasks.length}
                         </Badge>
                       )}
                     </div>
                     {g.description && (
-                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                      <p className="text-xs md:text-sm text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-3">
                         {g.description}
                       </p>
                     )}
-                    <div className="mt-2 flex items-center gap-3">
-                      <Progress value={g.progress} className="h-1.5 flex-1" />
+                    <div className="mt-2 flex items-center gap-2 md:gap-3 flex-wrap">
+                      <Progress value={g.progress} className="h-1.5 flex-1 min-w-[100px]" />
                       <span className="text-xs text-muted-foreground">{g.progress}%</span>
                       {g.target_date && (
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -256,25 +256,26 @@ function GoalsPage() {
                         </span>
                       )}
                     </div>
+                    {!hasTasks && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => generateBreakdown(g)}
+                        disabled={generatingFor === g.id}
+                        className="gap-1.5 mt-2 h-8 text-xs"
+                        title="AI suskaidys šį tikslą į užduotis"
+                      >
+                        {generatingFor === g.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Wand2 className="h-3.5 w-3.5" />
+                        )}
+                        Skaidyti su AI
+                      </Button>
+                    )}
                   </div>
-                  {!hasTasks && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => generateBreakdown(g)}
-                      disabled={generatingFor === g.id}
-                      className="gap-2"
-                      title="AI suskaidys šį tikslą į užduotis"
-                    >
-                      {generatingFor === g.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Wand2 className="h-3.5 w-3.5" />
-                      )}
-                      Skaidyti su AI
-                    </Button>
-                  )}
                 </div>
+
 
                 {isExpanded && (
                   <div className="mt-4 pl-11 border-l ml-5">
