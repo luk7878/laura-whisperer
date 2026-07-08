@@ -41,7 +41,7 @@ function AuthPage() {
       const pending = sessionStorage.getItem(INVITE_KEY);
       if (pending) {
         try {
-          await supabase.rpc("consume_invite_code", { _code: pending });
+          await consume({ data: { code: pending } });
         } catch {}
         sessionStorage.removeItem(INVITE_KEY);
       }
@@ -79,7 +79,7 @@ function AuthPage() {
         // Consume for the newly-signed-in session (if auto-confirmed) or remember for confirm redirect
         const { data: s } = await supabase.auth.getSession();
         if (s.session) {
-          await supabase.rpc("consume_invite_code", { _code: code });
+          await consume({ data: { code } });
         } else {
           sessionStorage.setItem(INVITE_KEY, code);
         }
@@ -120,7 +120,7 @@ function AuthPage() {
       // Fallback: session set directly
       const pending = sessionStorage.getItem(INVITE_KEY);
       if (pending) {
-        await supabase.rpc("consume_invite_code", { _code: pending });
+        await consume({ data: { code: pending } });
         sessionStorage.removeItem(INVITE_KEY);
       }
       window.location.href = target;
