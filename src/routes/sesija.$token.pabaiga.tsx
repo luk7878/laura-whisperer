@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRight, Loader2, Sparkles, TrendingDown, Users } from "lucide-react";
+import { ArrowRight, Loader2, Sparkles, Star, TrendingDown, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/sesija/$token/pabaiga")({
@@ -20,9 +20,17 @@ function EndPage() {
   const [phase, setPhase] = useState<"rating" | "loading" | "done">("rating");
   const [emotionalEnd, setEmotionalEnd] = useState<number>(5);
   const [feedback, setFeedback] = useState("");
+  const [rating, setRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [phone, setPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [summary, setSummary] = useState<Summary | null>(null);
 
   async function finish() {
+    if (rating === 0) {
+      toast.error("Prašome įvertinti sesiją žvaigždutėmis.");
+      return;
+    }
     setPhase("loading");
     try {
       const res = await fetch("/api/public/clarity/finish", {
@@ -32,6 +40,9 @@ function EndPage() {
           token,
           emotional_end: emotionalEnd,
           feedback: feedback.trim() || null,
+          helpfulness_rating: rating,
+          phone: phone.trim() || null,
+          contact_email: contactEmail.trim() || null,
         }),
       });
       if (!res.ok) throw new Error("Nepavyko užbaigti");
@@ -61,9 +72,12 @@ function EndPage() {
         <TopBar />
         <div className="flex-1 flex items-center justify-center px-6 py-12">
           <div className="max-w-lg w-full">
-            <h1 className="font-clarity-serif text-4xl text-clarity-ink text-center">Kaip jautiesi dabar?</h1>
-            <p className="mt-3 text-center text-clarity-ink-soft">Nuo 1 (labai ramus) iki 10 (labai sunku).</p>
+            <h1 className="font-clarity-serif text-4xl text-clarity-ink text-center">Prieš užbaigiant</h1>
+            <p className="mt-3 text-center text-clarity-ink-soft">Kelios trumpos akimirkos — padės mums ir tau pačiam.</p>
+
+            {/* Emotional load */}
             <div className="mt-10">
+              <label className="block text-sm font-medium text-clarity-ink mb-3">Kaip jautiesi dabar? <span className="text-clarity-ink-soft/70 font-normal">(1 – ramu, 10 – sunku)</span></label>
               <div className="flex items-center justify-between text-xs text-clarity-ink-soft mb-2">
                 <span>Ramu</span>
                 <span className="font-clarity-serif text-3xl text-clarity-terra">{emotionalEnd}</span>
@@ -71,10 +85,70 @@ function EndPage() {
               </div>
               <input type="range" min={1} max={10} value={emotionalEnd} onChange={(e) => setEmotionalEnd(Number(e.target.value))} className="w-full accent-clarity-terra" />
             </div>
+
+            {/* Helpfulness rating */}
             <div className="mt-8">
-              <label className="block text-sm font-medium text-clarity-ink mb-2">Kas buvo naudingiausia? (nebūtinai)</label>
+              <label className="block text-sm font-medium text-clarity-ink mb-3">
+                Kiek ši sesija tau padėjo? <span className="text-clarity-terra">*</span>
+              </label>
+              <div className="flex items-center justify-center gap-2" onMouseLeave={() => setHoverRating(0)}>
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const active = (hoverRating || rating) >= n;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setRating(n)}
+                      onMouseEnter={() => setHoverRating(n)}
+                      className="p-1 transition-transform hover:scale-110"
+                      aria-label={`${n} iš 5`}
+                    >
+                      <Star className={`h-9 w-9 ${active ? "fill-clarity-terra text-clarity-terra" : "text-clarity-line"}`} />
+                    </button>
+                  );
+                })}
+              </div>
+              {rating > 0 && (
+                <p className="mt-2 text-center text-xs text-clarity-ink-soft">
+                  {rating === 1 && "Visai nepadėjo"}
+                  {rating === 2 && "Šiek tiek"}
+                  {rating === 3 && "Vidutiniškai"}
+                  {rating === 4 && "Labai padėjo"}
+                  {rating === 5 && "Buvo tai, ko reikėjo"}
+                </p>
+              )}
+            </div>
+
+            {/* Feedback */}
+            <div className="mt-8">
+              <label className="block text-sm font-medium text-clarity-ink mb-2">Kas buvo naudingiausia? <span className="text-clarity-ink-soft/70 font-normal">(nebūtinai)</span></label>
               <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} maxLength={1000} rows={3} className="w-full resize-none rounded-xl border border-clarity-line bg-clarity-bg px-4 py-3 text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra" placeholder="Kelios eilutės…" />
             </div>
+
+            {/* Contact */}
+            <div className="mt-8 rounded-2xl border border-clarity-line bg-clarity-surface/40 p-5">
+              <p className="text-sm font-medium text-clarity-ink">Palik kontaktą (nebūtinai)</p>
+              <p className="mt-1 text-xs text-clarity-ink-soft">Jei norėtum, kad susisiektume — pasiūlyti tęsti su mentoriumi arba pakviesti į gyvą sesiją.</p>
+              <div className="mt-4 space-y-3">
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  maxLength={50}
+                  placeholder="Telefonas (+370…)"
+                  className="w-full rounded-xl border border-clarity-line bg-clarity-bg px-4 py-2.5 text-sm text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra"
+                />
+                <input
+                  type="email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  maxLength={255}
+                  placeholder="Kitas el. paštas (jei skiriasi nuo rezervacijos)"
+                  className="w-full rounded-xl border border-clarity-line bg-clarity-bg px-4 py-2.5 text-sm text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra"
+                />
+              </div>
+            </div>
+
             <button onClick={finish} className="mt-8 w-full rounded-full bg-clarity-terra px-8 py-4 text-lg text-white hover:bg-clarity-ink transition-colors">
               Užbaigti sesiją
             </button>
