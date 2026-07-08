@@ -28,8 +28,8 @@ export const Route = createFileRoute("/api/public/clarity/book")({
         const { data: rpcData, error } = await supabaseAdmin.rpc("book_clarity_slot", {
           p_name: parsed.data.name,
           p_email: parsed.data.email,
-          p_concern: parsed.data.concern ?? null,
-          p_scheduled_at: parsed.data.scheduled_at ?? null,
+          p_concern: parsed.data.concern ?? "",
+          p_scheduled_at: parsed.data.scheduled_at ?? new Date().toISOString(),
           p_consent_accepted: parsed.data.consent_accepted,
         });
 
