@@ -16,7 +16,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: Props) => (
           Paspauskite mygtuką, kad priimtumėte kvietimą ir susikurtumėte paskyrą.
         </Text>
         <Button style={button} href={confirmationUrl}>Priimti kvietimą</Button>
-        <Text style={signature}>Su šiluma,<br /><strong>Laura Borušaitė</strong></Text>
+        <Text style={signature}>Su šiluma,<br /><strong>Laura Borusaitė</strong></Text>
         <Text style={footer}>Jei kvietimo nesitikėjote, šį laišką galite ignoruoti.</Text>
       </Container>
     </Body>

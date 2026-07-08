@@ -12,7 +12,7 @@ export const RecoveryEmail = ({ siteName, confirmationUrl }: Props) => (
         <Heading style={h1}>Atkurti slaptažodį</Heading>
         <Text style={text}>Gavome prašymą atkurti Jūsų slaptažodį {siteName}. Paspauskite mygtuką, kad nustatytumėte naują slaptažodį.</Text>
         <Button style={button} href={confirmationUrl}>Atkurti slaptažodį</Button>
-        <Text style={signature}>Su šiluma,<br /><strong>Laura Borušaitė</strong></Text>
+        <Text style={signature}>Su šiluma,<br /><strong>Laura Borusaitė</strong></Text>
         <Text style={footer}>Jei prašymo nekūrėte, laišką galite ignoruoti — slaptažodis nebus pakeistas.</Text>
       </Container>
     </Body>

@@ -24,7 +24,7 @@ export const SignupEmail = ({ siteName, siteUrl, recipient, confirmationUrl }: P
           paspausdami mygtuką:
         </Text>
         <Button style={button} href={confirmationUrl}>Patvirtinti el. paštą</Button>
-        <Text style={signature}>Su šiluma,<br /><strong>Laura Borušaitė</strong></Text>
+        <Text style={signature}>Su šiluma,<br /><strong>Laura Borusaitė</strong></Text>
         <Text style={footer}>Jei paskyros nekūrėte, šį laišką galite ignoruoti.</Text>
       </Container>
     </Body>
