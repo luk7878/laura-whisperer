@@ -50,6 +50,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicClaritySlotsRouteImport } from './routes/api/public/clarity/slots'
 import { Route as ApiPublicClarityMessageRouteImport } from './routes/api/public/clarity/message'
 import { Route as ApiPublicClarityInterestRouteImport } from './routes/api/public/clarity/interest'
 import { Route as ApiPublicClarityFinishRouteImport } from './routes/api/public/clarity/finish'
@@ -266,6 +267,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicClaritySlotsRoute = ApiPublicClaritySlotsRouteImport.update({
+  id: '/api/public/clarity/slots',
+  path: '/api/public/clarity/slots',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicClarityMessageRoute = ApiPublicClarityMessageRouteImport.update({
   id: '/api/public/clarity/message',
   path: '/api/public/clarity/message',
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
+  '/api/public/clarity/slots': typeof ApiPublicClaritySlotsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -372,6 +379,7 @@ export interface FileRoutesByTo {
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
+  '/api/public/clarity/slots': typeof ApiPublicClaritySlotsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -420,6 +428,7 @@ export interface FileRoutesById {
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
+  '/api/public/clarity/slots': typeof ApiPublicClaritySlotsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -468,6 +477,7 @@ export interface FileRouteTypes {
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
+    | '/api/public/clarity/slots'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -512,6 +522,7 @@ export interface FileRouteTypes {
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
+    | '/api/public/clarity/slots'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -559,6 +570,7 @@ export interface FileRouteTypes {
     | '/api/public/clarity/finish'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
+    | '/api/public/clarity/slots'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -591,6 +603,7 @@ export interface RootRouteChildren {
   ApiPublicClarityFinishRoute: typeof ApiPublicClarityFinishRoute
   ApiPublicClarityInterestRoute: typeof ApiPublicClarityInterestRoute
   ApiPublicClarityMessageRoute: typeof ApiPublicClarityMessageRoute
+  ApiPublicClaritySlotsRoute: typeof ApiPublicClaritySlotsRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -887,6 +900,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/clarity/slots': {
+      id: '/api/public/clarity/slots'
+      path: '/api/public/clarity/slots'
+      fullPath: '/api/public/clarity/slots'
+      preLoaderRoute: typeof ApiPublicClaritySlotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/clarity/message': {
       id: '/api/public/clarity/message'
       path: '/api/public/clarity/message'
@@ -1004,6 +1024,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicClarityFinishRoute: ApiPublicClarityFinishRoute,
   ApiPublicClarityInterestRoute: ApiPublicClarityInterestRoute,
   ApiPublicClarityMessageRoute: ApiPublicClarityMessageRoute,
+  ApiPublicClaritySlotsRoute: ApiPublicClaritySlotsRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
