@@ -699,7 +699,7 @@ function SessionPage() {
               </button>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground mb-1">
                   <span className="flex items-center gap-1">
                     <span className={cn("h-1.5 w-1.5 rounded-full", recording ? "bg-destructive animate-pulse" : "bg-map-green")} />
                     {recording ? "Įrašoma…" : "Balso režimas aktyvus"}
@@ -713,7 +713,7 @@ function SessionPage() {
                   placeholder="Pasakyk, kas dabar kyla mintyse…"
                   rows={2}
                   disabled={streaming || transcribing}
-                  className="resize-none border-0 shadow-none focus-visible:ring-0 p-0 text-base"
+                  className="resize-none border-0 shadow-none focus-visible:ring-0 p-0 text-base min-h-[44px]"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -721,7 +721,7 @@ function SessionPage() {
                     }
                   }}
                 />
-                <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+                <div className="hidden md:flex items-center gap-2 mt-2 text-muted-foreground">
                   <button type="button" className="p-1 hover:text-foreground" title="Priedas">
                     <Paperclip className="h-4 w-4" />
                   </button>
@@ -733,6 +733,7 @@ function SessionPage() {
                   </span>
                 </div>
               </div>
+
 
               <Button
                 type="submit"
