@@ -13,7 +13,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { User, Shield, Bell, KeyRound, Trash2 } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
