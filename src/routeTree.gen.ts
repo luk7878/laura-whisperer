@@ -9,10 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RezervacijaRouteImport } from './routes/rezervacija'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SesijaTokenRouteImport } from './routes/sesija.$token'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
 import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
@@ -33,10 +35,20 @@ import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/as
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedAskIndexRouteImport } from './routes/_authenticated/ask.index'
+import { Route as SesijaTokenPabaigaRouteImport } from './routes/sesija.$token.pabaiga'
 import { Route as AuthenticatedAskThreadIdRouteImport } from './routes/_authenticated/ask.$threadId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicClarityMessageRouteImport } from './routes/api/public/clarity/message'
+import { Route as ApiPublicClarityInterestRouteImport } from './routes/api/public/clarity/interest'
+import { Route as ApiPublicClarityFinishRouteImport } from './routes/api/public/clarity/finish'
+import { Route as ApiPublicClarityBookRouteImport } from './routes/api/public/clarity/book'
 
+const RezervacijaRoute = RezervacijaRouteImport.update({
+  id: '/rezervacija',
+  path: '/rezervacija',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
@@ -54,6 +66,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SesijaTokenRoute = SesijaTokenRouteImport.update({
+  id: '/sesija/$token',
+  path: '/sesija/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
@@ -158,6 +175,11 @@ const AuthenticatedAskIndexRoute = AuthenticatedAskIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAskRoute,
 } as any)
+const SesijaTokenPabaigaRoute = SesijaTokenPabaigaRouteImport.update({
+  id: '/pabaiga',
+  path: '/pabaiga',
+  getParentRoute: () => SesijaTokenRoute,
+} as any)
 const AuthenticatedAskThreadIdRoute =
   AuthenticatedAskThreadIdRouteImport.update({
     id: '/$threadId',
@@ -175,11 +197,33 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicClarityMessageRoute = ApiPublicClarityMessageRouteImport.update({
+  id: '/api/public/clarity/message',
+  path: '/api/public/clarity/message',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicClarityInterestRoute =
+  ApiPublicClarityInterestRouteImport.update({
+    id: '/api/public/clarity/interest',
+    path: '/api/public/clarity/interest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicClarityFinishRoute = ApiPublicClarityFinishRouteImport.update({
+  id: '/api/public/clarity/finish',
+  path: '/api/public/clarity/finish',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicClarityBookRoute = ApiPublicClarityBookRouteImport.update({
+  id: '/api/public/clarity/book',
+  path: '/api/public/clarity/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
+  '/rezervacija': typeof RezervacijaRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/ask': typeof AuthenticatedAskRouteWithChildren
@@ -199,15 +243,22 @@ export interface FileRoutesByFullPath {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/ask/': typeof AuthenticatedAskIndexRoute
+  '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
+  '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
+  '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
+  '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
+  '/rezervacija': typeof RezervacijaRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/goals': typeof AuthenticatedGoalsRoute
@@ -226,10 +277,16 @@ export interface FileRoutesByTo {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/ask': typeof AuthenticatedAskIndexRoute
+  '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
+  '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
+  '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
+  '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -237,6 +294,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/mcp': typeof McpRoute
+  '/rezervacija': typeof RezervacijaRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
@@ -256,10 +314,16 @@ export interface FileRoutesById {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/ask/$threadId': typeof AuthenticatedAskThreadIdRoute
+  '/sesija/$token/pabaiga': typeof SesijaTokenPabaigaRoute
   '/_authenticated/ask/': typeof AuthenticatedAskIndexRoute
+  '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
+  '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
+  '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
+  '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -267,6 +331,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/mcp'
+    | '/rezervacija'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/ask'
@@ -286,15 +351,22 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/ask/$threadId'
+    | '/sesija/$token/pabaiga'
     | '/ask/'
+    | '/api/public/clarity/book'
+    | '/api/public/clarity/finish'
+    | '/api/public/clarity/interest'
+    | '/api/public/clarity/message'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/mcp'
+    | '/rezervacija'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/goals'
@@ -313,16 +385,23 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/ask/$threadId'
+    | '/sesija/$token/pabaiga'
     | '/ask'
+    | '/api/public/clarity/book'
+    | '/api/public/clarity/finish'
+    | '/api/public/clarity/interest'
+    | '/api/public/clarity/message'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/mcp'
+    | '/rezervacija'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/ask'
@@ -342,10 +421,16 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/sesija/$token'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/ask/$threadId'
+    | '/sesija/$token/pabaiga'
     | '/_authenticated/ask/'
+    | '/api/public/clarity/book'
+    | '/api/public/clarity/finish'
+    | '/api/public/clarity/interest'
+    | '/api/public/clarity/message'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -353,6 +438,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   McpRoute: typeof McpRoute
+  RezervacijaRoute: typeof RezervacijaRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -361,12 +447,24 @@ export interface RootRouteChildren {
   ApiMentorChatRoute: typeof ApiMentorChatRoute
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  SesijaTokenRoute: typeof SesijaTokenRouteWithChildren
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicClarityBookRoute: typeof ApiPublicClarityBookRoute
+  ApiPublicClarityFinishRoute: typeof ApiPublicClarityFinishRoute
+  ApiPublicClarityInterestRoute: typeof ApiPublicClarityInterestRoute
+  ApiPublicClarityMessageRoute: typeof ApiPublicClarityMessageRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rezervacija': {
+      id: '/rezervacija'
+      path: '/rezervacija'
+      fullPath: '/rezervacija'
+      preLoaderRoute: typeof RezervacijaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mcp': {
       id: '/mcp'
       path: '/mcp'
@@ -393,6 +491,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sesija/$token': {
+      id: '/sesija/$token'
+      path: '/sesija/$token'
+      fullPath: '/sesija/$token'
+      preLoaderRoute: typeof SesijaTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/transcribe': {
@@ -535,6 +640,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAskIndexRouteImport
       parentRoute: typeof AuthenticatedAskRoute
     }
+    '/sesija/$token/pabaiga': {
+      id: '/sesija/$token/pabaiga'
+      path: '/pabaiga'
+      fullPath: '/sesija/$token/pabaiga'
+      preLoaderRoute: typeof SesijaTokenPabaigaRouteImport
+      parentRoute: typeof SesijaTokenRoute
+    }
     '/_authenticated/ask/$threadId': {
       id: '/_authenticated/ask/$threadId'
       path: '/$threadId'
@@ -554,6 +666,34 @@ declare module '@tanstack/react-router' {
       path: '/.lovable/oauth/consent'
       fullPath: '/.lovable/oauth/consent'
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/clarity/message': {
+      id: '/api/public/clarity/message'
+      path: '/api/public/clarity/message'
+      fullPath: '/api/public/clarity/message'
+      preLoaderRoute: typeof ApiPublicClarityMessageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/clarity/interest': {
+      id: '/api/public/clarity/interest'
+      path: '/api/public/clarity/interest'
+      fullPath: '/api/public/clarity/interest'
+      preLoaderRoute: typeof ApiPublicClarityInterestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/clarity/finish': {
+      id: '/api/public/clarity/finish'
+      path: '/api/public/clarity/finish'
+      fullPath: '/api/public/clarity/finish'
+      preLoaderRoute: typeof ApiPublicClarityFinishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/clarity/book': {
+      id: '/api/public/clarity/book'
+      path: '/api/public/clarity/book'
+      fullPath: '/api/public/clarity/book'
+      preLoaderRoute: typeof ApiPublicClarityBookRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -603,11 +743,24 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface SesijaTokenRouteChildren {
+  SesijaTokenPabaigaRoute: typeof SesijaTokenPabaigaRoute
+}
+
+const SesijaTokenRouteChildren: SesijaTokenRouteChildren = {
+  SesijaTokenPabaigaRoute: SesijaTokenPabaigaRoute,
+}
+
+const SesijaTokenRouteWithChildren = SesijaTokenRoute._addFileChildren(
+  SesijaTokenRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   McpRoute: McpRoute,
+  RezervacijaRoute: RezervacijaRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
@@ -617,8 +770,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMentorChatRoute: ApiMentorChatRoute,
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  SesijaTokenRoute: SesijaTokenRouteWithChildren,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicClarityBookRoute: ApiPublicClarityBookRoute,
+  ApiPublicClarityFinishRoute: ApiPublicClarityFinishRoute,
+  ApiPublicClarityInterestRoute: ApiPublicClarityInterestRoute,
+  ApiPublicClarityMessageRoute: ApiPublicClarityMessageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

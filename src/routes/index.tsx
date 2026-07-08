@@ -1,18 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Sparkles, Brain, Mic, Target, ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles, HeartHandshake, Compass, Leaf } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Demartini Coach AI — Asistentas koučeriams" },
+      { title: "Nemokama aiškumo sesija — kai galvoje per daug" },
       {
         name: "description",
         content:
-          "Dirbtinio intelekto asistentas, padedantis koučeriams taikyti Demartini metodą: nustato emocinį krūvį, parenka Formą A/B, stulpelį ir siūlo galingus klausimus.",
+          "15 minučių virtualus pokalbis, kuris padeda pamatyti tai, kas iš tikrųjų slegia, ir išeiti su vienu aiškiu žingsniu.",
       },
-      { property: "og:title", content: "Demartini Coach AI" },
-      { property: "og:description", content: "AI asistentas Demartini metodo koučeriams." },
+      { property: "og:title", content: "Nemokama aiškumo sesija" },
+      {
+        property: "og:description",
+        content: "Papasakok, kas slegia — mentorius padės pamatyti aiškiau per 15 minučių.",
+      },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: Landing,
@@ -20,48 +23,200 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-2 text-primary">
-          <Sparkles className="h-6 w-6" />
-          <span className="font-semibold">Demartini Coach AI</span>
-        </div>
-        <Link to="/auth">
-          <Button variant="ghost" size="sm">Prisijungti</Button>
+    <div className="clarity-scope min-h-screen">
+      <Nav />
+      <Hero />
+      <HowItWorks />
+      <ForWhom />
+      <Disclaimer />
+      <Faq />
+      <Footer />
+    </div>
+  );
+}
+
+function Nav() {
+  return (
+    <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
+      <div className="flex items-center gap-2">
+        <span className="font-clarity-serif text-xl">Aiškumo sesija</span>
+      </div>
+      <div className="flex items-center gap-2 text-sm">
+        <Link
+          to="/auth"
+          className="rounded-full px-4 py-2 text-clarity-ink-soft hover:text-clarity-ink transition-colors"
+        >
+          Prisijungti
         </Link>
-      </header>
+        <Link
+          to="/rezervacija"
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-clarity-ink px-5 py-2 text-clarity-bg hover:bg-clarity-ink-soft transition-colors"
+        >
+          Rezervuoti
+        </Link>
+      </div>
+    </nav>
+  );
+}
 
-      <main className="mx-auto max-w-4xl px-6 pt-16 pb-24 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-foreground">
-          AI asistentas <span className="text-primary">Demartini metodo</span> koučeriams
-        </h1>
-        <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Įrašykite arba parašykite kliento pasisakymą — asistentas realiu laiku
-          nustato emocinį krūvį, parenka tinkamą Formą (A ar B), tikslinį stulpelį
-          ir pasiūlo 3 galingus klausimus sesijai.
+function Hero() {
+  return (
+    <section className="mx-auto max-w-4xl px-6 pt-16 pb-24 text-center">
+      <div className="inline-flex items-center gap-2 rounded-full border border-clarity-line bg-clarity-surface/60 px-4 py-1.5 text-xs text-clarity-ink-soft">
+        <Sparkles className="h-3.5 w-3.5" />
+        Nemokama · 15 minučių · Be paskyros
+      </div>
+      <h1 className="mt-8 font-clarity-serif text-5xl sm:text-6xl md:text-7xl leading-[1.05] tracking-tight text-clarity-ink">
+        Kai galvoje per daug,
+        <br />
+        <span className="italic text-clarity-terra">o aiškumo mažai</span>
+      </h1>
+      <p className="mx-auto mt-8 max-w-2xl text-lg text-clarity-ink-soft leading-relaxed">
+        Aprašyk, kas šiuo metu slegia. Virtualus mentorius užduos kelis tikslius klausimus, kad
+        pamatytum situaciją aiškiau — ir išeitum su vienu konkrečiu žingsniu.
+      </p>
+      <div className="mt-10 flex flex-col items-center gap-3">
+        <Link
+          to="/rezervacija"
+          className="group inline-flex items-center gap-2 rounded-full bg-clarity-terra px-8 py-4 text-lg text-white shadow-lg shadow-clarity-terra/20 hover:bg-clarity-ink transition-all hover:shadow-xl"
+        >
+          Rezervuoti nemokamą sesiją
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </Link>
+        <p className="text-xs text-clarity-ink-soft/70">
+          Nereikia registruotis · Nereikia mokėjimo · Konfidencialu
         </p>
-        <div className="mt-10 flex items-center justify-center gap-3">
-          <Link to="/auth">
-            <Button size="lg" className="gap-2">
-              Pradėti sesiją <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
+      </div>
+    </section>
+  );
+}
 
-        <div className="mt-20 grid gap-6 sm:grid-cols-3 text-left">
-          {[
-            { icon: Brain, title: "Emocinė analizė", desc: "Nustato krūvį nuo −10 iki +10 ir dominuojančią emociją." },
-            { icon: Target, title: "Forma A / B & stulpelis", desc: "Parenka teisingą formą ir stulpelį iš 14 galimų." },
-            { icon: Mic, title: "Balso įvestis", desc: "Įrašykite sesiją balsu — transkribuosime automatiškai." },
-          ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-xl border bg-card p-6 shadow-sm">
-              <Icon className="h-6 w-6 text-primary" />
-              <h3 className="mt-3 font-semibold">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{desc}</p>
+function HowItWorks() {
+  const steps = [
+    {
+      n: "01",
+      title: "Papasakok, kas slegia",
+      body: "Trumpas aprašymas rezervacijos formoje — tiek, kiek nori atskleisti. Nereikia sudėtingų žodžių.",
+    },
+    {
+      n: "02",
+      title: "Mentorius užduos tikslius klausimus",
+      body: "Ne patarimų sąrašas. Klausimai, kurie padeda pamatyti tai, ko iki šiol nematei.",
+    },
+    {
+      n: "03",
+      title: "Išeini su vienu aiškiu žingsniu",
+      body: "Sesijos pabaigoje — santrauka: pagrindinė tema, naujas suvokimas ir vienas veiksmas šiai savaitei.",
+    },
+  ];
+  return (
+    <section className="border-y border-clarity-line bg-clarity-surface/40 py-24">
+      <div className="mx-auto max-w-5xl px-6">
+        <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">Kaip tai vyksta</h2>
+        <p className="mx-auto mt-4 max-w-xl text-center text-clarity-ink-soft">
+          Trys žingsniai. Iš viso apie 15 minučių tavo laiko.
+        </p>
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {steps.map((s) => (
+            <div key={s.n} className="rounded-2xl bg-clarity-bg p-8 shadow-sm border border-clarity-line">
+              <div className="font-clarity-serif text-2xl text-clarity-terra">{s.n}</div>
+              <h3 className="mt-3 font-clarity-serif text-2xl text-clarity-ink">{s.title}</h3>
+              <p className="mt-3 text-clarity-ink-soft leading-relaxed">{s.body}</p>
             </div>
           ))}
         </div>
-      </main>
-    </div>
+      </div>
+    </section>
+  );
+}
+
+function ForWhom() {
+  const cases = [
+    { icon: HeartHandshake, title: "Santykių sunkumai", body: "Užstrigo pokalbis su artimu žmogumi. Nesupranti, ko iš tikrųjų nori pati/-s." },
+    { icon: Compass, title: "Karjeros kryžkelė", body: "Reikia priimti sprendimą, bet visos pusės atrodo blogai. Neaišku, kas iš tikrųjų svarbu." },
+    { icon: Leaf, title: "Per didelis krūvis", body: "Diena baigėsi, o galvoje viskas kunkuliuoja. Nori bent minutę tylos ir aiškumo." },
+    { icon: Sparkles, title: "Savivertė", body: "Vidinis balsas per griežtas. Nori pamatyti save švelniau, be sacharino." },
+  ];
+  return (
+    <section className="py-24">
+      <div className="mx-auto max-w-5xl px-6">
+        <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">Kam tai</h2>
+        <p className="mx-auto mt-4 max-w-xl text-center text-clarity-ink-soft">
+          Nebūtinai turi būti krizė. Užtenka to, kad kažkas nusėda nemaloniai.
+        </p>
+        <div className="mt-14 grid gap-6 sm:grid-cols-2">
+          {cases.map(({ icon: Icon, title, body }) => (
+            <div key={title} className="rounded-2xl border border-clarity-line bg-clarity-bg p-8">
+              <Icon className="h-6 w-6 text-clarity-terra" />
+              <h3 className="mt-4 font-clarity-serif text-2xl text-clarity-ink">{title}</h3>
+              <p className="mt-2 text-clarity-ink-soft leading-relaxed">{body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Disclaimer() {
+  return (
+    <section className="bg-clarity-surface/60 py-16 border-y border-clarity-line">
+      <div className="mx-auto max-w-2xl px-6 text-center">
+        <h3 className="font-clarity-serif text-2xl text-clarity-ink">Tai nėra terapija</h3>
+        <p className="mt-4 text-clarity-ink-soft leading-relaxed">
+          Aiškumo sesija — palydėjimas savirefleksijai. Tai nėra medicininė ar psichoterapinė
+          pagalba. Jei jauti stiprų emocinį krūvį, savižudybės mintis ar krizę — kreipkis į
+          Jaunimo liniją <span className="font-medium text-clarity-ink">8 800 28 888</span> arba
+          Vilties liniją <span className="font-medium text-clarity-ink">116 123</span>.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function Faq() {
+  const items = [
+    { q: "Ar tikrai nemokama?", a: "Taip. Pirma sesija — 15 minučių — nemokama, be įsipareigojimų. Nereikia įvesti kortelės." },
+    { q: "Ar galiu būti anonimiškai?", a: "Vardas nebūtinai turi būti tikras. Reikia el. pašto, kad galėtume atsiųsti sesijos nuorodą." },
+    { q: "Kas tas virtualus mentorius?", a: "Dirbtinio intelekto asistentas, apmokytas Demartini ir kitų augimo metodų. Ne terapeutas ir ne draugas — struktūruotas klausimų tinklas." },
+    { q: "Kas nutinka su tuo, ką parašau?", a: "Tavo pokalbis saugomas šifruotai ir naudojamas tik tam, kad mentorius atsimintų kontekstą sesijos metu. Duomenys nedalinami tretiesiems asmenims." },
+    { q: "O jei bus per sunku?", a: "Jei mentorius atpažįsta, kad tema per sunki AI pokalbiui, jis pasiūlys tęsti su tikru žmogumi." },
+  ];
+  return (
+    <section className="py-24">
+      <div className="mx-auto max-w-2xl px-6">
+        <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">Dažni klausimai</h2>
+        <div className="mt-12 space-y-6">
+          {items.map((it) => (
+            <details key={it.q} className="group rounded-2xl border border-clarity-line bg-clarity-bg p-6 open:bg-clarity-surface/40 transition-colors">
+              <summary className="cursor-pointer list-none font-clarity-serif text-lg text-clarity-ink flex items-center justify-between">
+                {it.q}
+                <span className="ml-4 text-clarity-terra transition-transform group-open:rotate-45">+</span>
+              </summary>
+              <p className="mt-3 text-clarity-ink-soft leading-relaxed">{it.a}</p>
+            </details>
+          ))}
+        </div>
+        <div className="mt-16 text-center">
+          <Link
+            to="/rezervacija"
+            className="inline-flex items-center gap-2 rounded-full bg-clarity-terra px-8 py-4 text-lg text-white hover:bg-clarity-ink transition-colors"
+          >
+            Rezervuoti nemokamą sesiją <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-clarity-line py-10">
+      <div className="mx-auto max-w-5xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-clarity-ink-soft">
+        <span className="font-clarity-serif text-lg text-clarity-ink">Aiškumo sesija</span>
+        <span>© {new Date().getFullYear()} · Konfidencialu · Ne terapija</span>
+      </div>
+    </footer>
   );
 }

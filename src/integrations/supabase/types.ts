@@ -61,6 +61,107 @@ export type Database = {
           },
         ]
       }
+      clarity_bookings: {
+        Row: {
+          access_token: string
+          completed_at: string | null
+          concern: string | null
+          consent_accepted: boolean
+          created_at: string
+          email: string
+          emotional_end: number | null
+          emotional_start: number | null
+          feedback: string | null
+          id: string
+          name: string
+          safety_reason: string | null
+          safety_triggered: boolean
+          scheduled_at: string | null
+          started_at: string | null
+          status: string
+          summary: Json | null
+          updated_at: string
+          wants_human_session: boolean
+          wants_subscription: boolean
+        }
+        Insert: {
+          access_token?: string
+          completed_at?: string | null
+          concern?: string | null
+          consent_accepted?: boolean
+          created_at?: string
+          email: string
+          emotional_end?: number | null
+          emotional_start?: number | null
+          feedback?: string | null
+          id?: string
+          name: string
+          safety_reason?: string | null
+          safety_triggered?: boolean
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          summary?: Json | null
+          updated_at?: string
+          wants_human_session?: boolean
+          wants_subscription?: boolean
+        }
+        Update: {
+          access_token?: string
+          completed_at?: string | null
+          concern?: string | null
+          consent_accepted?: boolean
+          created_at?: string
+          email?: string
+          emotional_end?: number | null
+          emotional_start?: number | null
+          feedback?: string | null
+          id?: string
+          name?: string
+          safety_reason?: string | null
+          safety_triggered?: boolean
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          summary?: Json | null
+          updated_at?: string
+          wants_human_session?: boolean
+          wants_subscription?: boolean
+        }
+        Relationships: []
+      }
+      clarity_messages: {
+        Row: {
+          booking_id: string
+          content: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          booking_id: string
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          booking_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clarity_messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "clarity_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_tasks: {
         Row: {
           ai_generated: boolean
