@@ -38,6 +38,7 @@ import { AnalysisCard, UserCard } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
+import { SessionIntegration } from "@/components/session-integration";
 import { CheckCircle2, Compass, BookOpen } from "lucide-react";
 
 
