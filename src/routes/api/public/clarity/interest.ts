@@ -7,6 +7,7 @@ const bodySchema = z.object({
   wants_human_session: z.boolean().optional(),
   human_session_preferred_at: z.string().datetime().optional().nullable(),
   human_session_note: z.string().trim().max(1000).optional().nullable(),
+  phone: z.string().trim().min(5).max(32).regex(/^[+0-9\s()\-]+$/, "Netinkamas telefono numeris").optional().nullable(),
 });
 
 export const Route = createFileRoute("/api/public/clarity/interest")({
