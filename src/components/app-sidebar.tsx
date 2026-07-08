@@ -57,7 +57,19 @@ export function AppSidebar() {
 
   useEffect(() => {
     let alive = true;
-    supabase.auth.getUser().then(({ data }) => alive && setEmail(data.user?.email ?? null));
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!alive) return;
+      setEmail(data.user?.email ?? null);
+      if (data.user) {
+        const { data: r } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (alive) setIsAdmin(!!r);
+      }
+    });
     supabase
       .from("sessions")
       .select("id, title, updated_at, emotional_current")
