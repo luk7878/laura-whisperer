@@ -6,6 +6,9 @@ const bodySchema = z.object({
   token: z.string().uuid(),
   emotional_end: z.number().int().min(1).max(10).optional().nullable(),
   feedback: z.string().trim().max(1000).optional().nullable(),
+  helpfulness_rating: z.number().int().min(1).max(5).optional().nullable(),
+  phone: z.string().trim().max(50).optional().nullable(),
+  contact_email: z.string().trim().email().max(255).optional().nullable(),
 });
 
 const SUMMARY_PROMPT = `Iš pokalbio ištrauk trumpą santrauką. Grąžink TIK JSON objektą su laukais:
