@@ -415,6 +415,20 @@ function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => 
             />
 
             <label className="mt-4 block text-sm font-medium text-clarity-ink mb-2">
+              Telefono numeris
+            </label>
+            <input
+              type="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+3706..."
+              inputMode="tel"
+              maxLength={32}
+              className="w-full rounded-xl border border-clarity-line bg-clarity-bg px-4 py-3 text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors"
+            />
+
+            <label className="mt-4 block text-sm font-medium text-clarity-ink mb-2">
               Pastaba (nebūtinai)
             </label>
             <textarea
@@ -425,6 +439,8 @@ function HumanBookingDialog({ token, onClose }: { token: string; onClose: () => 
               placeholder="Ką norėtum aptarti?"
               className="w-full resize-none rounded-xl border border-clarity-line bg-clarity-bg px-4 py-3 text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors"
             />
+
+            {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 
             <div className="mt-6 flex items-center justify-end gap-2">
               <button
