@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { MessageSquare, Library, Plus, Loader2, Trash2 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { MessageSquare, Library, Plus, Loader2, Trash2, PanelLeft } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +27,7 @@ function AskLayout() {
   const activeId = params.threadId;
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   async function load() {
     const { data, error } = await supabase
@@ -40,6 +49,7 @@ function AskLayout() {
   }, []);
 
   async function createNew() {
+    setSheetOpen(false);
     navigate({ to: "/ask" });
   }
 
@@ -52,80 +62,106 @@ function AskLayout() {
     load();
   }
 
+  function openThread(id: string) {
+    setSheetOpen(false);
+    navigate({ to: "/ask/$threadId", params: { threadId: id } });
+  }
+
+  const ThreadList = (
+    <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      {loading && (
+        <div className="text-xs text-muted-foreground p-2">
+          <Loader2 className="h-3 w-3 animate-spin inline mr-1" /> Kraunama…
+        </div>
+      )}
+      {!loading && threads.length === 0 && (
+        <p className="text-xs text-muted-foreground p-2">Dar nėra pokalbių.</p>
+      )}
+      {threads.map((t) => (
+        <div
+          key={t.id}
+          onClick={() => openThread(t.id)}
+          className={cn(
+            "group flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm cursor-pointer hover:bg-accent transition-colors",
+            activeId === t.id && "bg-accent",
+          )}
+        >
+          <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <span className="flex-1 truncate">{t.title}</span>
+          <button
+            onClick={(e) => remove(t.id, e)}
+            className="opacity-60 md:opacity-0 md:group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
+            aria-label="Ištrinti"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-gradient-to-b from-background to-muted/30">
-      <header className="border-b bg-background/80 backdrop-blur px-4 md:px-6 py-3 flex items-center gap-3">
-        <SidebarTrigger />
-        <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-2.5 md:py-3 flex items-center gap-2">
+        <SidebarTrigger className="shrink-0" />
+        <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
           <MessageSquare className="h-4 w-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="font-serif text-lg leading-tight">Klausk mentoriaus</h1>
-          <p className="text-[11px] text-muted-foreground">Atsakymai iš tavo įkeltos medžiagos</p>
+          <h1 className="font-serif text-base md:text-lg leading-tight truncate">
+            Klausk mentoriaus
+          </h1>
+          <p className="text-[10px] md:text-[11px] text-muted-foreground truncate">
+            Atsakymai iš tavo įkeltos medžiagos
+          </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="gap-2">
-          <Link to="/knowledge"><Library className="h-3.5 w-3.5" /> Žinių bazė</Link>
+
+        {/* Mobile thread menu */}
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="md:hidden h-9 w-9 p-0 shrink-0" title="Pokalbiai">
+              <PanelLeft className="h-4 w-4" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[85vw] max-w-xs p-0 flex flex-col">
+            <SheetHeader className="p-3 border-b">
+              <SheetTitle className="text-left font-serif text-lg">Pokalbiai</SheetTitle>
+            </SheetHeader>
+            <div className="p-3 border-b">
+              <SheetClose asChild>
+                <Button onClick={createNew} className="w-full gap-2" size="sm">
+                  <Plus className="h-4 w-4" /> Naujas pokalbis
+                </Button>
+              </SheetClose>
+            </div>
+            {ThreadList}
+          </SheetContent>
+        </Sheet>
+
+        <Button asChild variant="outline" size="sm" className="gap-1.5 h-9 px-2 md:px-3 shrink-0">
+          <Link to="/knowledge">
+            <Library className="h-3.5 w-3.5" />
+            <span className="hidden md:inline">Žinių bazė</span>
+          </Link>
         </Button>
       </header>
 
       <div className="flex-1 min-h-0 flex">
-        {/* Thread list */}
+        {/* Thread list — desktop */}
         <aside className="hidden md:flex w-64 shrink-0 border-r flex-col bg-background/50">
           <div className="p-3 border-b">
             <Button onClick={createNew} className="w-full gap-2" size="sm">
               <Plus className="h-4 w-4" /> Naujas pokalbis
             </Button>
           </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {loading && <div className="text-xs text-muted-foreground p-2"><Loader2 className="h-3 w-3 animate-spin inline mr-1" /> Kraunama…</div>}
-            {!loading && threads.length === 0 && (
-              <p className="text-xs text-muted-foreground p-2">Dar nėra pokalbių.</p>
-            )}
-            {threads.map((t) => (
-              <div
-                key={t.id}
-                onClick={() => navigate({ to: "/ask/$threadId", params: { threadId: t.id } })}
-                className={cn(
-                  "group flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs cursor-pointer hover:bg-accent transition-colors",
-                  activeId === t.id && "bg-accent",
-                )}
-              >
-                <MessageSquare className="h-3 w-3 shrink-0 text-muted-foreground" />
-                <span className="flex-1 truncate">{t.title}</span>
-                <button
-                  onClick={(e) => remove(t.id, e)}
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition"
-                  aria-label="Ištrinti"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
+          {ThreadList}
         </aside>
 
-        {/* Mobile thread bar */}
-        <div className="md:hidden absolute top-14 left-0 right-0 z-10 border-b bg-background/95 backdrop-blur px-3 py-2 flex gap-2 overflow-x-auto">
-          <Button onClick={createNew} size="sm" variant="outline" className="gap-1 shrink-0 h-8">
-            <Plus className="h-3.5 w-3.5" /> Naujas
-          </Button>
-          {threads.slice(0, 10).map((t) => (
-            <Button
-              key={t.id}
-              size="sm"
-              variant={activeId === t.id ? "secondary" : "ghost"}
-              className="shrink-0 h-8 text-xs max-w-[140px]"
-              onClick={() => navigate({ to: "/ask/$threadId", params: { threadId: t.id } })}
-            >
-              <span className="truncate">{t.title}</span>
-            </Button>
-          ))}
-        </div>
-
-        <main className="flex-1 min-w-0 flex flex-col pt-12 md:pt-0">
+        <main className="flex-1 min-w-0 flex flex-col">
           <Outlet />
         </main>
       </div>
     </div>
   );
 }
+
