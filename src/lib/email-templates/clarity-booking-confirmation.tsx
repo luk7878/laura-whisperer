@@ -25,7 +25,8 @@ const ClarityBookingConfirmation = ({ name, sessionUrl, scheduledAt }: Props) =>
     ? new Date(scheduledAt).toLocaleString("lt-LT", {
         dateStyle: "long",
         timeStyle: "short",
-      })
+        timeZone: "Europe/Vilnius",
+      }) + " (Lietuvos laiku)"
     : null;
 
   return (

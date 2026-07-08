@@ -54,7 +54,9 @@ export const Route = createFileRoute("/api/public/clarity/book")({
           const { enqueueInternalTransactionalEmail } = await import(
             "@/lib/email/send-internal.server"
           );
-          const origin = new URL(request.url).origin;
+          const PUBLIC_ORIGIN = "https://mentor.lauraborusaite.lt";
+          const requestOrigin = new URL(request.url).origin;
+          const origin = /localhost|127\.0\.0\.1/.test(requestOrigin) ? PUBLIC_ORIGIN : requestOrigin;
           const sessionUrl = `${origin}/sesija/${data.access_token}`;
           const result = await enqueueInternalTransactionalEmail({
             templateName: "clarity-booking-confirmation",
