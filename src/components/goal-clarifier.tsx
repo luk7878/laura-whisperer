@@ -67,7 +67,7 @@ export function GoalClarifier({
   }
 
   return (
-    <aside className="border-l bg-background w-[340px] shrink-0 flex flex-col min-h-0">
+    <aside className="hidden lg:flex border-l bg-background w-[340px] shrink-0 flex-col min-h-0">
       <div className="border-b p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
