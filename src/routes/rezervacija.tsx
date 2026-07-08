@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+
 
 
 export const Route = createFileRoute("/rezervacija")({
@@ -30,12 +30,14 @@ function BookingPage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("clarity_slot_state")
-        .select("capacity, filled")
-        .eq("id", 1)
-        .maybeSingle();
-      if (data) setSlots({ remaining: Math.max(0, data.capacity - data.filled), capacity: data.capacity });
+      try {
+        const res = await fetch("/api/public/clarity/slots");
+        if (!res.ok) return;
+        const data = (await res.json()) as { capacity: number; remaining: number };
+        setSlots({ remaining: data.remaining, capacity: data.capacity });
+      } catch {
+        // ignore
+      }
     })();
   }, []);
 
