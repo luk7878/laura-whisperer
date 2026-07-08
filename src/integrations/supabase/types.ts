@@ -67,13 +67,16 @@ export type Database = {
           completed_at: string | null
           concern: string | null
           consent_accepted: boolean
+          contact_email: string | null
           created_at: string
           email: string
           emotional_end: number | null
           emotional_start: number | null
           feedback: string | null
+          helpfulness_rating: number | null
           id: string
           name: string
+          phone: string | null
           safety_reason: string | null
           safety_triggered: boolean
           scheduled_at: string | null
@@ -89,13 +92,16 @@ export type Database = {
           completed_at?: string | null
           concern?: string | null
           consent_accepted?: boolean
+          contact_email?: string | null
           created_at?: string
           email: string
           emotional_end?: number | null
           emotional_start?: number | null
           feedback?: string | null
+          helpfulness_rating?: number | null
           id?: string
           name: string
+          phone?: string | null
           safety_reason?: string | null
           safety_triggered?: boolean
           scheduled_at?: string | null
@@ -111,13 +117,16 @@ export type Database = {
           completed_at?: string | null
           concern?: string | null
           consent_accepted?: boolean
+          contact_email?: string | null
           created_at?: string
           email?: string
           emotional_end?: number | null
           emotional_start?: number | null
           feedback?: string | null
+          helpfulness_rating?: number | null
           id?: string
           name?: string
+          phone?: string | null
           safety_reason?: string | null
           safety_triggered?: boolean
           scheduled_at?: string | null
