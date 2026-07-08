@@ -43,6 +43,30 @@ export const Route = createFileRoute("/api/public/clarity/book")({
           return Response.json({ error: "Nepavyko sukurti rezervacijos" }, { status: 500 });
         }
 
+        // Send confirmation email with session link (fire-and-forget style; log failures)
+        try {
+          const { enqueueInternalTransactionalEmail } = await import(
+            "@/lib/email/send-internal.server"
+          );
+          const origin = new URL(request.url).origin;
+          const sessionUrl = `${origin}/sesija/${data.access_token}`;
+          const result = await enqueueInternalTransactionalEmail({
+            templateName: "clarity-booking-confirmation",
+            recipientEmail: parsed.data.email,
+            idempotencyKey: `clarity-book-${data.id}`,
+            templateData: {
+              name: parsed.data.name,
+              sessionUrl,
+              scheduledAt: parsed.data.scheduled_at ?? null,
+            },
+          });
+          if (!result.success) {
+            console.warn("clarity_book email not queued", result);
+          }
+        } catch (e) {
+          console.error("clarity_book email error", e);
+        }
+
         return Response.json({ id: data.id, access_token: data.access_token });
       },
     },
