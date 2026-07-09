@@ -20,17 +20,56 @@ const SESSION_MINUTES = 15;
 function SessionPage() {
   const { token } = Route.useParams();
   const navigate = useNavigate();
-  const [phase, setPhase] = useState<"intro" | "chat">("intro");
+  const [phase, setPhase] = useState<"loading" | "intro" | "chat">("loading");
   const [emotionalStart, setEmotionalStart] = useState<number>(5);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [safety, setSafety] = useState<SafetyCheck>({ level: "none", reason: null });
   const [dismissedSafety, setDismissedSafety] = useState(false);
-  const [startedAt] = useState(Date.now());
+  const [startedAt, setStartedAt] = useState<number>(Date.now());
   const [now, setNow] = useState(Date.now());
   const [sessionEnded, setSessionEnded] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  // Restore session on mount / reload
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/public/clarity/history?token=${encodeURIComponent(token)}`);
+        if (!res.ok) {
+          if (!cancelled) setPhase("intro");
+          return;
+        }
+        const data = (await res.json()) as {
+          status: string;
+          emotional_start: number | null;
+          started_at: string | null;
+          messages: ChatMsg[];
+        };
+        if (cancelled) return;
+        if (data.status === "completed") {
+          navigate({ to: "/sesija/$token/pabaiga", params: { token } });
+          return;
+        }
+        if (data.messages.length > 0) {
+          setMessages(data.messages);
+          if (data.emotional_start != null) setEmotionalStart(data.emotional_start);
+          if (data.started_at) setStartedAt(new Date(data.started_at).getTime());
+          setPhase("chat");
+        } else {
+          setPhase("intro");
+        }
+      } catch {
+        if (!cancelled) setPhase("intro");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, navigate]);
+
 
   function detectClosing(text: string): boolean {
     const t = text.toLowerCase();
