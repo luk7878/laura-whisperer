@@ -21,6 +21,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
 import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
+import { Route as ApiKnowledgeReindexRouteImport } from './routes/api/knowledge-reindex'
 import { Route as ApiKnowledgeIngestRouteImport } from './routes/api/knowledge-ingest'
 import { Route as ApiGoalBreakdownRouteImport } from './routes/api/goal-breakdown'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -114,6 +115,11 @@ const ApiPlanSuggestRoute = ApiPlanSuggestRouteImport.update({
 const ApiMentorChatRoute = ApiMentorChatRouteImport.update({
   id: '/api/mentor-chat',
   path: '/api/mentor-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiKnowledgeReindexRoute = ApiKnowledgeReindexRouteImport.update({
+  id: '/api/knowledge-reindex',
+  path: '/api/knowledge-reindex',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiKnowledgeIngestRoute = ApiKnowledgeIngestRouteImport.update({
@@ -324,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
+  '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
@@ -371,6 +378,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
+  '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
@@ -420,6 +428,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
+  '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
@@ -470,6 +479,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/goal-breakdown'
     | '/api/knowledge-ingest'
+    | '/api/knowledge-reindex'
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/goal-breakdown'
     | '/api/knowledge-ingest'
+    | '/api/knowledge-reindex'
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/goal-breakdown'
     | '/api/knowledge-ingest'
+    | '/api/knowledge-reindex'
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
@@ -603,6 +615,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiGoalBreakdownRoute: typeof ApiGoalBreakdownRoute
   ApiKnowledgeIngestRoute: typeof ApiKnowledgeIngestRoute
+  ApiKnowledgeReindexRoute: typeof ApiKnowledgeReindexRoute
   ApiMentorChatRoute: typeof ApiMentorChatRoute
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
@@ -708,6 +721,13 @@ declare module '@tanstack/react-router' {
       path: '/api/mentor-chat'
       fullPath: '/api/mentor-chat'
       preLoaderRoute: typeof ApiMentorChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/knowledge-reindex': {
+      id: '/api/knowledge-reindex'
+      path: '/api/knowledge-reindex'
+      fullPath: '/api/knowledge-reindex'
+      preLoaderRoute: typeof ApiKnowledgeReindexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/knowledge-ingest': {
@@ -1032,6 +1052,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiGoalBreakdownRoute: ApiGoalBreakdownRoute,
   ApiKnowledgeIngestRoute: ApiKnowledgeIngestRoute,
+  ApiKnowledgeReindexRoute: ApiKnowledgeReindexRoute,
   ApiMentorChatRoute: ApiMentorChatRoute,
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
