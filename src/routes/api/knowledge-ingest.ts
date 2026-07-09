@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { chunkText, embedTexts } from "@/lib/knowledge-embed.server";
+import { cleanKnowledgeText, isChunkUseful, detectLanguage } from "@/lib/knowledge-clean";
 
 type Body = {
   title?: string;
@@ -21,7 +22,9 @@ export const Route = createFileRoute("/api/knowledge-ingest")({
         const token = auth.slice(7).trim();
 
         const body = (await request.json()) as Body;
-        const text = (body.text ?? "").trim();
+        const rawText = (body.text ?? "").trim();
+        const text = cleanKnowledgeText(rawText);
+        const language = detectLanguage(text);
         const title = (body.title ?? "").trim() || "Be pavadinimo";
         if (!text) return new Response("Missing text", { status: 400 });
         if (text.length > 5_000_000) return new Response("Text too large", { status: 413 });
