@@ -149,6 +149,47 @@ function KnowledgePage() {
     load();
   }
 
+  async function reindex(doc: Doc) {
+    setReindexing(doc.id);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess.session?.access_token;
+      if (!token) throw new Error("Nesi prisijungęs");
+      const resp = await fetch("/api/knowledge-reindex", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ document_id: doc.id }),
+      });
+      if (!resp.ok) throw new Error(await resp.text().catch(() => "Nepavyko"));
+      const res = await resp.json();
+      toast.success(`Perindeksuota: ${res.chunks} gabalų`);
+      load();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Nepavyko");
+    } finally {
+      setReindexing(null);
+    }
+  }
+
+  async function saveTags(doc: Doc) {
+    const tags = tagDraft
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .slice(0, 12);
+    const { error } = await supabase
+      .from("knowledge_documents")
+      .update({ tags })
+      .eq("id", doc.id);
+    if (error) return toast.error(error.message);
+    setEditingTags(null);
+    setTagDraft("");
+    load();
+  }
+
   const totalChunks = docs.reduce((s, d) => s + (d.chunk_count ?? 0), 0);
 
   return (
