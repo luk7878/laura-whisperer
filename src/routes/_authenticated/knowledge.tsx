@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Library, Upload, FileText, Trash2, Loader2, Plus, MessageSquare } from "lucide-react";
+import { Library, Upload, FileText, Trash2, Loader2, Plus, MessageSquare, RefreshCw, Tag } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { extractText } from "@/lib/knowledge-parse";
 import { Link } from "@tanstack/react-router";
@@ -25,6 +25,8 @@ type Doc = {
   status: string;
   error: string | null;
   created_at: string;
+  language: string | null;
+  tags: string[] | null;
 };
 
 function KnowledgePage() {
@@ -34,13 +36,16 @@ function KnowledgePage() {
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteTitle, setPasteTitle] = useState("");
   const [pasteText, setPasteText] = useState("");
+  const [reindexing, setReindexing] = useState<string | null>(null);
+  const [editingTags, setEditingTags] = useState<string | null>(null);
+  const [tagDraft, setTagDraft] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
     const { data, error } = await supabase
       .from("knowledge_documents")
-      .select("id, title, source_type, chunk_count, byte_size, status, error, created_at")
+      .select("id, title, source_type, chunk_count, byte_size, status, error, created_at, language, tags")
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setDocs((data as Doc[]) ?? []);
@@ -141,6 +146,47 @@ function KnowledgePage() {
     const { error } = await supabase.from("knowledge_documents").delete().eq("id", doc.id);
     if (error) return toast.error(error.message);
     toast.success("Ištrinta");
+    load();
+  }
+
+  async function reindex(doc: Doc) {
+    setReindexing(doc.id);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess.session?.access_token;
+      if (!token) throw new Error("Nesi prisijungęs");
+      const resp = await fetch("/api/knowledge-reindex", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ document_id: doc.id }),
+      });
+      if (!resp.ok) throw new Error(await resp.text().catch(() => "Nepavyko"));
+      const res = await resp.json();
+      toast.success(`Perindeksuota: ${res.chunks} gabalų`);
+      load();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Nepavyko");
+    } finally {
+      setReindexing(null);
+    }
+  }
+
+  async function saveTags(doc: Doc) {
+    const tags = tagDraft
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .slice(0, 12);
+    const { error } = await supabase
+      .from("knowledge_documents")
+      .update({ tags })
+      .eq("id", doc.id);
+    if (error) return toast.error(error.message);
+    setEditingTags(null);
+    setTagDraft("");
     load();
   }
 
@@ -255,15 +301,75 @@ function KnowledgePage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium truncate">{d.title}</span>
                       <StatusBadge status={d.status} />
+                      {d.language && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted uppercase tracking-wide">
+                          {d.language}
+                        </span>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {d.chunk_count} gabalų
                         {d.byte_size ? ` · ${(d.byte_size / 1024).toFixed(1)} KB` : ""}
                       </span>
                     </div>
+                    <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                      {editingTags === d.id ? (
+                        <>
+                          <Input
+                            autoFocus
+                            value={tagDraft}
+                            onChange={(e) => setTagDraft(e.target.value)}
+                            placeholder="tag1, tag2, tag3"
+                            className="h-7 text-xs max-w-xs"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveTags(d);
+                              if (e.key === "Escape") {
+                                setEditingTags(null);
+                                setTagDraft("");
+                              }
+                            }}
+                          />
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => saveTags(d)}>
+                            Išsaugoti
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {(d.tags ?? []).map((t) => (
+                            <Badge key={t} variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {t}
+                            </Badge>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingTags(d.id);
+                              setTagDraft((d.tags ?? []).join(", "));
+                            }}
+                            className="text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                          >
+                            <Tag className="h-3 w-3" />
+                            {(d.tags ?? []).length === 0 ? "Pridėti žymes" : "Redaguoti"}
+                          </button>
+                        </>
+                      )}
+                    </div>
                     {d.error && (
                       <p className="text-xs text-destructive mt-1 truncate">{d.error}</p>
                     )}
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => reindex(d)}
+                    disabled={reindexing === d.id}
+                    title="Perindeksuoti su nauju valymu"
+                  >
+                    {reindexing === d.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => remove(d)} title="Ištrinti">
                     <Trash2 className="h-4 w-4" />
                   </Button>

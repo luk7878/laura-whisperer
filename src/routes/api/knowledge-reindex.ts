@@ -3,15 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { chunkText, embedTexts } from "@/lib/knowledge-embed.server";
 import { cleanKnowledgeText, isChunkUseful, detectLanguage } from "@/lib/knowledge-clean";
 
-type Body = {
-  title?: string;
-  source_type?: string;
-  file_path?: string | null;
-  byte_size?: number | null;
-  text?: string;
-};
-
-export const Route = createFileRoute("/api/knowledge-ingest")({
+export const Route = createFileRoute("/api/knowledge-reindex")({
   server: {
     handlers: {
       POST: async ({ request }) => {
@@ -21,13 +13,9 @@ export const Route = createFileRoute("/api/knowledge-ingest")({
         }
         const token = auth.slice(7).trim();
 
-        const body = (await request.json()) as Body;
-        const rawText = (body.text ?? "").trim();
-        const text = cleanKnowledgeText(rawText);
-        const language = detectLanguage(text);
-        const title = (body.title ?? "").trim() || "Be pavadinimo";
-        if (!text) return new Response("Missing text", { status: 400 });
-        if (text.length > 5_000_000) return new Response("Text too large", { status: 413 });
+        const body = (await request.json().catch(() => ({}))) as { document_id?: string };
+        const docId = body.document_id;
+        if (!docId) return new Response("Missing document_id", { status: 400 });
 
         const url = process.env.SUPABASE_URL;
         const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
@@ -42,59 +30,74 @@ export const Route = createFileRoute("/api/knowledge-ingest")({
         if (userErr || !userData.user) return new Response("Unauthorized", { status: 401 });
         const userId = userData.user.id;
 
-        // Insert document row (status = processing)
         const { data: doc, error: docErr } = await supabase
           .from("knowledge_documents")
-          .insert({
-            user_id: userId,
-            title: title.slice(0, 200),
-            source_type: body.source_type ?? "text",
-            file_path: body.file_path ?? null,
-            byte_size: body.byte_size ?? text.length,
-            status: "processing",
-            language,
-          })
-          .select("id")
-          .single();
-        if (docErr || !doc) {
-          return new Response(docErr?.message ?? "Insert failed", { status: 500 });
-        }
+          .select("id, user_id")
+          .eq("id", docId)
+          .maybeSingle();
+        if (docErr || !doc) return new Response("Document not found", { status: 404 });
+        if (doc.user_id !== userId) return new Response("Forbidden", { status: 403 });
+
+        await supabase
+          .from("knowledge_documents")
+          .update({ status: "processing", error: null })
+          .eq("id", docId);
+
+        // Reconstruct source text from existing chunks (best available; original PDF/DOCX not stored as text)
+        const { data: existing } = await supabase
+          .from("knowledge_chunks")
+          .select("chunk_index, content")
+          .eq("document_id", docId)
+          .order("chunk_index", { ascending: true });
+
+        const joined = (existing ?? []).map((c) => c.content).join("\n\n");
+        const cleaned = cleanKnowledgeText(joined);
+        const language = detectLanguage(cleaned);
 
         try {
-          const chunks = chunkText(text).filter(isChunkUseful);
+          const chunks = chunkText(cleaned).filter(isChunkUseful);
+
+          // Delete old chunks
+          const { error: delErr } = await supabase
+            .from("knowledge_chunks")
+            .delete()
+            .eq("document_id", docId);
+          if (delErr) throw delErr;
+
           if (chunks.length === 0) {
             await supabase
               .from("knowledge_documents")
-              .update({ status: "empty", chunk_count: 0 })
-              .eq("id", doc.id);
-            return Response.json({ id: doc.id, chunks: 0, status: "empty" });
+              .update({ status: "empty", chunk_count: 0, language })
+              .eq("id", docId);
+            return Response.json({ id: docId, chunks: 0, status: "empty" });
           }
+
           const vectors = await embedTexts(chunks);
           const rows = chunks.map((content, i) => ({
-            document_id: doc.id,
+            document_id: docId,
             user_id: userId,
             chunk_index: i,
             content,
-            // pgvector accepts JSON array string
             embedding: JSON.stringify(vectors[i]),
           }));
-          // insert in batches of 50 to keep payloads reasonable
           for (let i = 0; i < rows.length; i += 50) {
             const slice = rows.slice(i, i + 50);
             const { error: insErr } = await supabase.from("knowledge_chunks").insert(slice);
             if (insErr) throw insErr;
           }
+
           await supabase
             .from("knowledge_documents")
-            .update({ status: "ready", chunk_count: chunks.length })
-            .eq("id", doc.id);
-          return Response.json({ id: doc.id, chunks: chunks.length, status: "ready" });
+            .update({ status: "ready", chunk_count: chunks.length, language, error: null })
+            .eq("id", docId);
+
+          return Response.json({ id: docId, chunks: chunks.length, status: "ready", language });
         } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : "Ingest failed";
+          const msg = err instanceof Error ? err.message : "Reindex failed";
           await supabase
             .from("knowledge_documents")
             .update({ status: "error", error: msg })
-            .eq("id", doc.id);
+            .eq("id", docId);
           return new Response(msg, { status: 500 });
         }
       },
