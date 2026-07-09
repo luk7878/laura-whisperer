@@ -301,15 +301,75 @@ function KnowledgePage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium truncate">{d.title}</span>
                       <StatusBadge status={d.status} />
+                      {d.language && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted uppercase tracking-wide">
+                          {d.language}
+                        </span>
+                      )}
                       <span className="text-xs text-muted-foreground">
                         {d.chunk_count} gabalų
                         {d.byte_size ? ` · ${(d.byte_size / 1024).toFixed(1)} KB` : ""}
                       </span>
                     </div>
+                    <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                      {editingTags === d.id ? (
+                        <>
+                          <Input
+                            autoFocus
+                            value={tagDraft}
+                            onChange={(e) => setTagDraft(e.target.value)}
+                            placeholder="tag1, tag2, tag3"
+                            className="h-7 text-xs max-w-xs"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveTags(d);
+                              if (e.key === "Escape") {
+                                setEditingTags(null);
+                                setTagDraft("");
+                              }
+                            }}
+                          />
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => saveTags(d)}>
+                            Išsaugoti
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {(d.tags ?? []).map((t) => (
+                            <Badge key={t} variant="secondary" className="text-[10px] px-1.5 py-0">
+                              {t}
+                            </Badge>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingTags(d.id);
+                              setTagDraft((d.tags ?? []).join(", "));
+                            }}
+                            className="text-[10px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                          >
+                            <Tag className="h-3 w-3" />
+                            {(d.tags ?? []).length === 0 ? "Pridėti žymes" : "Redaguoti"}
+                          </button>
+                        </>
+                      )}
+                    </div>
                     {d.error && (
                       <p className="text-xs text-destructive mt-1 truncate">{d.error}</p>
                     )}
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => reindex(d)}
+                    disabled={reindexing === d.id}
+                    title="Perindeksuoti su nauju valymu"
+                  >
+                    {reindexing === d.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => remove(d)} title="Ištrinti">
                     <Trash2 className="h-4 w-4" />
                   </Button>
