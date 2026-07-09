@@ -92,7 +92,7 @@ export const Route = createFileRoute("/api/public/clarity/message")({
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            model: "google/gemini-3-flash-preview",
             stream: false,
             messages: [{ role: "system", content: CLARITY_SYSTEM_PROMPT }, ...messages],
           }),
