@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Library, Upload, FileText, Trash2, Loader2, Plus, MessageSquare } from "lucide-react";
+import { Library, Upload, FileText, Trash2, Loader2, Plus, MessageSquare, RefreshCw, Tag } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { extractText } from "@/lib/knowledge-parse";
 import { Link } from "@tanstack/react-router";
@@ -25,6 +25,8 @@ type Doc = {
   status: string;
   error: string | null;
   created_at: string;
+  language: string | null;
+  tags: string[] | null;
 };
 
 function KnowledgePage() {
@@ -34,13 +36,16 @@ function KnowledgePage() {
   const [pasteOpen, setPasteOpen] = useState(false);
   const [pasteTitle, setPasteTitle] = useState("");
   const [pasteText, setPasteText] = useState("");
+  const [reindexing, setReindexing] = useState<string | null>(null);
+  const [editingTags, setEditingTags] = useState<string | null>(null);
+  const [tagDraft, setTagDraft] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
     const { data, error } = await supabase
       .from("knowledge_documents")
-      .select("id, title, source_type, chunk_count, byte_size, status, error, created_at")
+      .select("id, title, source_type, chunk_count, byte_size, status, error, created_at, language, tags")
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setDocs((data as Doc[]) ?? []);
