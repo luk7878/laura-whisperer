@@ -197,6 +197,14 @@ export function AppSidebar() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/knowledge"} className="h-9">
+                    <Link to="/knowledge" className="flex items-center gap-2.5">
+                      <Library className={cn("h-4 w-4", pathname === "/knowledge" && "text-primary")} />
+                      <span>Žinių bazė</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
