@@ -37,7 +37,6 @@ import { NewSessionDialog, type SessionMode } from "@/components/new-session-dia
 const NAV = [
   { title: "Gyva sesija", to: "/session", icon: Radio },
   { title: "Klausk mentoriaus", to: "/ask", icon: MessageSquare },
-  { title: "Žinių bazė", to: "/knowledge", icon: Library },
   { title: "Tikslai", to: "/goals", icon: Target },
   { title: "Vizija", to: "/vision", icon: Eye },
   { title: "Prioritetai", to: "/priorities", icon: ListChecks },
