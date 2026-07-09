@@ -25,6 +25,31 @@ export const Route = createFileRoute("/api/public/clarity/book")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        // Limit: max 3 bookings per email per 30 days
+        const normalizedEmail = parsed.data.email.trim().toLowerCase();
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const { count: recentCount, error: countError } = await supabaseAdmin
+          .from("clarity_bookings")
+          .select("id", { count: "exact", head: true })
+          .ilike("email", normalizedEmail)
+          .gte("created_at", thirtyDaysAgo);
+
+        if (countError) {
+          console.error("clarity_book count error", countError);
+          return Response.json({ error: "Nepavyko patikrinti rezervacijų" }, { status: 500 });
+        }
+        if ((recentCount ?? 0) >= 3) {
+          return Response.json(
+            {
+              error:
+                "Šis el. paštas jau pasiekė maksimalų nemokamų sesijų skaičių (3) per paskutines 30 dienų. Pabandykite vėliau arba susisiekite tiesiogiai.",
+              limitReached: true,
+            },
+            { status: 429 },
+          );
+        }
+
         const { data: rpcData, error } = await supabaseAdmin.rpc("book_clarity_slot", {
           p_name: parsed.data.name,
           p_email: parsed.data.email,
