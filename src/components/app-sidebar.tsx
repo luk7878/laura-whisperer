@@ -37,7 +37,6 @@ import { NewSessionDialog, type SessionMode } from "@/components/new-session-dia
 const NAV = [
   { title: "Gyva sesija", to: "/session", icon: Radio },
   { title: "Klausk mentoriaus", to: "/ask", icon: MessageSquare },
-  { title: "Žinių bazė", to: "/knowledge", icon: Library },
   { title: "Tikslai", to: "/goals", icon: Target },
   { title: "Vizija", to: "/vision", icon: Eye },
   { title: "Prioritetai", to: "/priorities", icon: ListChecks },
@@ -195,6 +194,14 @@ export function AppSidebar() {
                     <Link to="/admin" className="flex items-center gap-2.5">
                       <ShieldCheck className={cn("h-4 w-4", pathname === "/admin" && "text-primary")} />
                       <span>15 min sesijos</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/knowledge"} className="h-9">
+                    <Link to="/knowledge" className="flex items-center gap-2.5">
+                      <Library className={cn("h-4 w-4", pathname === "/knowledge" && "text-primary")} />
+                      <span>Žinių bazė</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
