@@ -560,8 +560,10 @@ export type Database = {
           error: string | null
           file_path: string | null
           id: string
+          language: string | null
           source_type: string
           status: string
+          tags: string[]
           title: string
           updated_at: string
           user_id: string
@@ -573,8 +575,10 @@ export type Database = {
           error?: string | null
           file_path?: string | null
           id?: string
+          language?: string | null
           source_type?: string
           status?: string
+          tags?: string[]
           title: string
           updated_at?: string
           user_id: string
@@ -586,8 +590,10 @@ export type Database = {
           error?: string | null
           file_path?: string | null
           id?: string
+          language?: string | null
           source_type?: string
           status?: string
+          tags?: string[]
           title?: string
           updated_at?: string
           user_id?: string
