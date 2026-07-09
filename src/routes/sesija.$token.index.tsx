@@ -156,6 +156,14 @@ function SessionPage() {
     }, 200);
   }
 
+  if (phase === "loading") {
+    return (
+      <div className="clarity-scope min-h-screen flex items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-clarity-terra" />
+      </div>
+    );
+  }
+
   if (phase === "intro") {
     return (
       <div className="clarity-scope min-h-screen flex flex-col">
