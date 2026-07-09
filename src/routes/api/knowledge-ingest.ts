@@ -52,6 +52,7 @@ export const Route = createFileRoute("/api/knowledge-ingest")({
             file_path: body.file_path ?? null,
             byte_size: body.byte_size ?? text.length,
             status: "processing",
+            language,
           })
           .select("id")
           .single();
@@ -60,7 +61,7 @@ export const Route = createFileRoute("/api/knowledge-ingest")({
         }
 
         try {
-          const chunks = chunkText(text);
+          const chunks = chunkText(text).filter(isChunkUseful);
           if (chunks.length === 0) {
             await supabase
               .from("knowledge_documents")
