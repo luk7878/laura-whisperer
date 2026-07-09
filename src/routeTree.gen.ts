@@ -53,6 +53,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicClaritySlotsRouteImport } from './routes/api/public/clarity/slots'
 import { Route as ApiPublicClarityMessageRouteImport } from './routes/api/public/clarity/message'
 import { Route as ApiPublicClarityInterestRouteImport } from './routes/api/public/clarity/interest'
+import { Route as ApiPublicClarityHistoryRouteImport } from './routes/api/public/clarity/history'
 import { Route as ApiPublicClarityFinishRouteImport } from './routes/api/public/clarity/finish'
 import { Route as ApiPublicClarityBookRouteImport } from './routes/api/public/clarity/book'
 
@@ -283,6 +284,11 @@ const ApiPublicClarityInterestRoute =
     path: '/api/public/clarity/interest',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicClarityHistoryRoute = ApiPublicClarityHistoryRouteImport.update({
+  id: '/api/public/clarity/history',
+  path: '/api/public/clarity/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicClarityFinishRoute = ApiPublicClarityFinishRouteImport.update({
   id: '/api/public/clarity/finish',
   path: '/api/public/clarity/finish',
@@ -332,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/sesija/$token/': typeof SesijaTokenIndexRoute
   '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
+  '/api/public/clarity/history': typeof ApiPublicClarityHistoryRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
   '/api/public/clarity/slots': typeof ApiPublicClaritySlotsRoute
@@ -377,6 +384,7 @@ export interface FileRoutesByTo {
   '/sesija/$token': typeof SesijaTokenIndexRoute
   '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
+  '/api/public/clarity/history': typeof ApiPublicClarityHistoryRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
   '/api/public/clarity/slots': typeof ApiPublicClaritySlotsRoute
@@ -426,6 +434,7 @@ export interface FileRoutesById {
   '/sesija/$token/': typeof SesijaTokenIndexRoute
   '/api/public/clarity/book': typeof ApiPublicClarityBookRoute
   '/api/public/clarity/finish': typeof ApiPublicClarityFinishRoute
+  '/api/public/clarity/history': typeof ApiPublicClarityHistoryRoute
   '/api/public/clarity/interest': typeof ApiPublicClarityInterestRoute
   '/api/public/clarity/message': typeof ApiPublicClarityMessageRoute
   '/api/public/clarity/slots': typeof ApiPublicClaritySlotsRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/sesija/$token/'
     | '/api/public/clarity/book'
     | '/api/public/clarity/finish'
+    | '/api/public/clarity/history'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
     | '/api/public/clarity/slots'
@@ -520,6 +530,7 @@ export interface FileRouteTypes {
     | '/sesija/$token'
     | '/api/public/clarity/book'
     | '/api/public/clarity/finish'
+    | '/api/public/clarity/history'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
     | '/api/public/clarity/slots'
@@ -568,6 +579,7 @@ export interface FileRouteTypes {
     | '/sesija/$token/'
     | '/api/public/clarity/book'
     | '/api/public/clarity/finish'
+    | '/api/public/clarity/history'
     | '/api/public/clarity/interest'
     | '/api/public/clarity/message'
     | '/api/public/clarity/slots'
@@ -601,6 +613,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicClarityBookRoute: typeof ApiPublicClarityBookRoute
   ApiPublicClarityFinishRoute: typeof ApiPublicClarityFinishRoute
+  ApiPublicClarityHistoryRoute: typeof ApiPublicClarityHistoryRoute
   ApiPublicClarityInterestRoute: typeof ApiPublicClarityInterestRoute
   ApiPublicClarityMessageRoute: typeof ApiPublicClarityMessageRoute
   ApiPublicClaritySlotsRoute: typeof ApiPublicClaritySlotsRoute
@@ -921,6 +934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicClarityInterestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/clarity/history': {
+      id: '/api/public/clarity/history'
+      path: '/api/public/clarity/history'
+      fullPath: '/api/public/clarity/history'
+      preLoaderRoute: typeof ApiPublicClarityHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/clarity/finish': {
       id: '/api/public/clarity/finish'
       path: '/api/public/clarity/finish'
@@ -1022,6 +1042,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicClarityBookRoute: ApiPublicClarityBookRoute,
   ApiPublicClarityFinishRoute: ApiPublicClarityFinishRoute,
+  ApiPublicClarityHistoryRoute: ApiPublicClarityHistoryRoute,
   ApiPublicClarityInterestRoute: ApiPublicClarityInterestRoute,
   ApiPublicClarityMessageRoute: ApiPublicClarityMessageRoute,
   ApiPublicClaritySlotsRoute: ApiPublicClaritySlotsRoute,
