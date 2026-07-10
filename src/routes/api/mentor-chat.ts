@@ -13,8 +13,9 @@ type KnowledgeMatch = {
   similarity: number;
 };
 
-const MIN_SIMILARITY = 0.42;
+const MIN_SIMILARITY = 0.4;
 const MAX_SOURCES = 6;
+const MAX_SOURCES_PER_DOCUMENT = 2;
 
 function buildSearchQuery(messages: ChatMsg[]) {
   const recent = messages
@@ -50,16 +51,65 @@ function overlapRatio(left: string, right: string) {
 
 function selectSources(matches: KnowledgeMatch[]) {
   const selected: KnowledgeMatch[] = [];
-  for (const match of matches) {
+  const perDocument = new Map<string, number>();
+  for (const match of [...matches].sort((a, b) => b.similarity - a.similarity)) {
     if (!Number.isFinite(match.similarity) || match.similarity < MIN_SIMILARITY) continue;
+    if ((perDocument.get(match.document_id) ?? 0) >= MAX_SOURCES_PER_DOCUMENT) continue;
     const duplicate = selected.some(
       (item) =>
         item.document_id === match.document_id && overlapRatio(item.content, match.content) >= 0.72,
     );
-    if (!duplicate) selected.push(match);
+    if (!duplicate) {
+      selected.push(match);
+      perDocument.set(match.document_id, (perDocument.get(match.document_id) ?? 0) + 1);
+    }
     if (selected.length === MAX_SOURCES) break;
   }
   return selected;
+}
+
+async function buildBilingualQueries(query: string, key: string) {
+  try {
+    const response = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        stream: false,
+        temperature: 0,
+        messages: [
+          {
+            role: "system",
+            content:
+              'Convert the conversation into two concise semantic search queries for a personal-growth knowledge base. Return strict JSON only: {"lt":"Lithuanian query","en":"English query"}. Preserve names and important concepts. Do not answer the question.',
+          },
+          { role: "user", content: query },
+        ],
+      }),
+    });
+    if (!response.ok) return [query];
+    const json = (await response.json()) as { choices?: { message?: { content?: string } }[] };
+    const raw = json.choices?.[0]?.message?.content?.replace(/```json|```/g, "").trim();
+    if (!raw) return [query];
+    const parsed = JSON.parse(raw) as { lt?: string; en?: string };
+    return [
+      ...new Set([parsed.lt, parsed.en, query].filter((value): value is string => !!value?.trim())),
+    ].slice(0, 3);
+  } catch (error) {
+    console.error("bilingual query expansion failed", error);
+    return [query];
+  }
+}
+
+function mergeMatches(groups: KnowledgeMatch[][]) {
+  const merged = new Map<string, KnowledgeMatch>();
+  for (const group of groups) {
+    for (const match of group) {
+      const current = merged.get(match.chunk_id);
+      if (!current || match.similarity > current.similarity) merged.set(match.chunk_id, match);
+    }
+  }
+  return [...merged.values()];
 }
 
 const MENTOR_SYSTEM = `Tu esi įžvalgus ir praktiškas augimo mentorius. Atsakai kaip žmogus – ramiai, aiškiai ir profesionaliai. Tavo vertė nėra informacijos kiekis: padedi išgirsti tikrąjį klausimą, atrinkti svarbiausią principą ir paversti jį prasmingu kitu žingsniu.
@@ -160,7 +210,8 @@ export const Route = createFileRoute("/api/mentor-chat")({
           auth: { persistSession: false, autoRefreshToken: false },
         });
 
-        // Include recent dialogue so short follow-ups ("o kaip man?") retain their subject.
+        const key = requireLovableApiKey();
+        // Search in both Lithuanian and English so multilingual books compete fairly.
         const query = buildSearchQuery(messages);
         let sources: {
           n: number;
@@ -170,15 +221,25 @@ export const Route = createFileRoute("/api/mentor-chat")({
           similarity: number;
         }[] = [];
         try {
-          const qvec = await embedQuery(query);
-          const { data, error } = await supabase.rpc("match_knowledge", {
-            query_embedding: JSON.stringify(qvec),
-            match_count: 16,
-          });
-          if (error) {
-            console.error("match_knowledge failed", error);
-          } else if (Array.isArray(data)) {
-            sources = selectSources(data as KnowledgeMatch[]).map((r, i) => ({
+          const searchQueries = await buildBilingualQueries(query, key);
+          const vectors = await Promise.all(searchQueries.map(embedQuery));
+          const results = await Promise.all(
+            vectors.map((vector) =>
+              supabase.rpc("match_knowledge", {
+                query_embedding: JSON.stringify(vector),
+                match_count: 18,
+              }),
+            ),
+          );
+          for (const result of results)
+            if (result.error) console.error("match_knowledge failed", result.error);
+          const matches = mergeMatches(
+            results.map((result) =>
+              Array.isArray(result.data) ? (result.data as KnowledgeMatch[]) : [],
+            ),
+          );
+          if (matches.length) {
+            sources = selectSources(matches).map((r, i) => ({
               n: i + 1,
               title: r.document_title,
               content: r.content,
@@ -198,7 +259,6 @@ export const Route = createFileRoute("/api/mentor-chat")({
 
         const systemWithSources = `${MENTOR_SYSTEM}\n\n=== ŠALTINIAI ===\n${sourcesBlock}\n=== ŠALTINIŲ PABAIGA ===`;
 
-        const key = requireLovableApiKey();
         const upstream = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
           method: "POST",
           headers: {
