@@ -7,8 +7,11 @@ import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { extractActionsPayload, type ActionSuggestion } from "@/lib/parse-actions-payload";
 import {
-  MessageBubble, SaveActionDialog, streamMentorReply,
-  type Msg, type Source,
+  MessageBubble,
+  SaveActionDialog,
+  streamMentorReply,
+  type Msg,
+  type Source,
 } from "@/components/mentor-chat-parts";
 
 export const Route = createFileRoute("/_authenticated/ask/$threadId")({
@@ -47,21 +50,33 @@ function ThreadView() {
         .eq("thread_id", threadId)
         .order("created_at", { ascending: true });
       if (cancelled) return;
-      if (error) { toast.error(error.message); setLoading(false); return; }
+      if (error) {
+        toast.error(error.message);
+        setLoading(false);
+        return;
+      }
       const rows = (data ?? []) as Row[];
       const msgs: Msg[] = rows.map((r) => {
-        const srcArr = Array.isArray(r.sources) ? (r.sources as { title: string }[]) : [];
-        const sources: Source[] = srcArr.map((s, i) => ({ n: i + 1, title: s.title }));
-        const { clean, actions } = r.role === "assistant"
-          ? extractActionsPayload(r.content)
-          : { clean: r.content, actions: [] as ActionSuggestion[] };
-        return { role: r.role, content: clean, sources: sources.length ? sources : undefined, actions };
+        const srcArr = Array.isArray(r.sources) ? (r.sources as Omit<Source, "n">[]) : [];
+        const sources: Source[] = srcArr.map((s, i) => ({ n: i + 1, ...s }));
+        const { clean, actions } =
+          r.role === "assistant"
+            ? extractActionsPayload(r.content)
+            : { clean: r.content, actions: [] as ActionSuggestion[] };
+        return {
+          role: r.role,
+          content: clean,
+          sources: sources.length ? sources : undefined,
+          actions,
+        };
       });
       setMessages(msgs);
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 50);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [threadId]);
 
   // Auto-reply when last message is user with no assistant follow-up (e.g. thread just created)
@@ -106,7 +121,11 @@ function ThreadView() {
           user_id: userData.user.id,
           role: "assistant",
           content: full,
-          sources: sources.map((s) => ({ title: s.title })),
+          sources: sources.map((source) => ({
+            title: source.title,
+            excerpt: source.excerpt,
+            similarity: source.similarity,
+          })),
         });
       }
     } catch (err) {
@@ -157,26 +176,36 @@ function ThreadView() {
         </div>
       </div>
 
-      <form onSubmit={send} className="border-t bg-background/95 backdrop-blur px-3 py-3 md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
-        <div className="max-w-3xl mx-auto flex gap-2 items-end">
+      <form
+        onSubmit={send}
+        className="border-t bg-background/95 backdrop-blur px-3 py-3 md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+      >
+        <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border bg-card p-2 shadow-sm transition focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
           <Textarea
             ref={inputRef}
             autoFocus
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
             }}
             placeholder="Rašyk toliau…"
             rows={2}
-            className="resize-none rounded-2xl bg-muted/50 border-muted text-base min-h-[44px]"
+            className="min-h-[48px] resize-none border-0 bg-transparent px-3 py-2 text-base shadow-none focus-visible:ring-0"
           />
-          <Button type="submit" size="icon" disabled={busy || !input.trim()} className="rounded-full h-11 w-11 min-w-11 shrink-0">
+          <Button
+            type="submit"
+            size="icon"
+            disabled={busy || !input.trim()}
+            className="h-11 w-11 min-w-11 shrink-0 rounded-xl"
+          >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
       </form>
-
 
       <SaveActionDialog action={action} onClose={() => setAction(null)} />
     </div>

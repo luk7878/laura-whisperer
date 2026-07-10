@@ -6,17 +6,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  Loader2, Target, ListChecks, BookOpen, Sparkles, User as UserIcon,
+  ChevronDown,
+  FileText,
+  Loader2,
+  Target,
+  ListChecks,
+  BookOpen,
+  Sparkles,
+  User as UserIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import type { ActionSuggestion } from "@/lib/parse-actions-payload";
 
-export type Source = { n: number; title: string };
+export type Source = { n: number; title: string; excerpt?: string; similarity?: number };
 export type Msg = {
   role: "user" | "assistant";
   content: string;
@@ -24,7 +35,13 @@ export type Msg = {
   actions?: ActionSuggestion[];
 };
 
-export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: ActionSuggestion) => void }) {
+export function MessageBubble({
+  msg,
+  onAction,
+}: {
+  msg: Msg;
+  onAction: (a: ActionSuggestion) => void;
+}) {
   const isUser = msg.role === "user";
   return (
     <div className={cn("flex gap-2 md:gap-3", isUser && "flex-row-reverse")}>
@@ -39,16 +56,16 @@ export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: Actio
       <div className={cn("flex-1 min-w-0 space-y-2", isUser && "flex flex-col items-end")}>
         <div
           className={cn(
-            "rounded-2xl px-3.5 md:px-4 py-2.5 md:py-3 text-sm break-words",
+            "rounded-2xl px-4 md:px-5 py-3 md:py-4 text-sm break-words",
             isUser
               ? "bg-primary text-primary-foreground rounded-tr-sm max-w-[85%]"
-              : "bg-card border rounded-tl-sm shadow-sm w-full",
+              : "bg-card border border-border/70 rounded-tl-sm shadow-sm w-full",
           )}
         >
           {isUser ? (
             <div className="whitespace-pre-wrap">{msg.content}</div>
           ) : msg.content ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-serif prose-headings:mt-4 prose-headings:mb-2 prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5">
+            <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed prose-headings:font-serif prose-headings:text-foreground prose-headings:mt-5 prose-headings:mb-2 prose-p:my-2.5 prose-ul:my-2.5 prose-ol:my-2.5 prose-li:my-1 prose-strong:text-foreground">
               <ReactMarkdown>{msg.content}</ReactMarkdown>
             </div>
           ) : (
@@ -79,29 +96,54 @@ export function MessageBubble({ msg, onAction }: { msg: Msg; onAction: (a: Actio
           </div>
         )}
 
-        {!isUser && msg.sources && msg.sources.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 items-center">
-            <BookOpen className="h-3 w-3 text-muted-foreground shrink-0" />
-            {msg.sources.map((s) => (
-              <Badge
-                key={s.n}
-                variant="secondary"
-                className="text-[10px] font-normal"
-                title={s.title}
-              >
-                {s.title.length > 32 ? s.title.slice(0, 30) + "…" : s.title}
-              </Badge>
-            ))}
-          </div>
-        )}
+        {!isUser && msg.sources && msg.sources.length > 0 && <SourcesPanel sources={msg.sources} />}
       </div>
     </div>
   );
 }
 
+function SourcesPanel({ sources }: { sources: Source[] }) {
+  return (
+    <details className="group w-full rounded-xl border bg-muted/25 text-xs">
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-muted-foreground hover:text-foreground">
+        <BookOpen className="h-3.5 w-3.5 text-primary" />
+        <span className="font-medium">Kuo rėmėsi atsakymas</span>
+        <Badge variant="secondary" className="ml-1 h-5 text-[10px]">
+          {sources.length}
+        </Badge>
+        <ChevronDown className="ml-auto h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="space-y-2 border-t p-2.5">
+        {sources.map((source) => (
+          <div key={source.n} className="rounded-lg border bg-background p-3">
+            <div className="flex items-start gap-2">
+              <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="truncate font-medium">{source.title}</div>
+                  {source.similarity != null && (
+                    <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">
+                      {source.similarity}% atitikimas
+                    </span>
+                  )}
+                </div>
+                {source.excerpt && (
+                  <p className="mt-2 whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                    {source.excerpt}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
 
 export function SaveActionDialog({
-  action, onClose,
+  action,
+  onClose,
 }: {
   action: ActionSuggestion | null;
   onClose: () => void;
@@ -130,7 +172,10 @@ export function SaveActionDialog({
     if (!title.trim() || !action) return;
     setSaving(true);
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) { setSaving(false); return; }
+    if (!userData.user) {
+      setSaving(false);
+      return;
+    }
     const { error } = isGoal
       ? await supabase.from("goals").insert({
           user_id: userData.user.id,
@@ -156,7 +201,11 @@ export function SaveActionDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl flex items-center gap-2">
-            {isGoal ? <Target className="h-5 w-5 text-primary" /> : <ListChecks className="h-5 w-5 text-primary" />}
+            {isGoal ? (
+              <Target className="h-5 w-5 text-primary" />
+            ) : (
+              <ListChecks className="h-5 w-5 text-primary" />
+            )}
             {isGoal ? "Įrašyti tikslą" : "Įtraukti į prioritetus"}
           </DialogTitle>
         </DialogHeader>
@@ -168,16 +217,28 @@ export function SaveActionDialog({
           {isGoal && (
             <div>
               <Label>Aprašymas</Label>
-              <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={3} className="mt-1.5" />
+              <Textarea
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                rows={3}
+                className="mt-1.5"
+              />
             </div>
           )}
           <div>
             <Label>{isGoal ? "Terminas (data)" : "Iki kada"}</Label>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1.5 w-52" />
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-1.5 w-52"
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>Atšaukti</Button>
+          <Button variant="ghost" onClick={onClose}>
+            Atšaukti
+          </Button>
           <Button onClick={save} disabled={saving || !title.trim()}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Išsaugoti"}
           </Button>
@@ -208,9 +269,11 @@ export async function streamMentorReply({
   if (srcHeader) {
     try {
       const json = decodeURIComponent(escape(atob(srcHeader)));
-      const parsed = JSON.parse(json) as { title: string }[];
-      sources = parsed.map((s, i) => ({ n: i + 1, title: s.title }));
-    } catch { /* ignore */ }
+      const parsed = JSON.parse(json) as Omit<Source, "n">[];
+      sources = parsed.map((s, i) => ({ n: i + 1, ...s }));
+    } catch {
+      /* ignore */
+    }
   }
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();

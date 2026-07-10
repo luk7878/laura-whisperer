@@ -3,7 +3,18 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, BookOpen, CheckCircle2, Loader2, Send, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  Compass,
+  Lightbulb,
+  ListChecks,
+  Loader2,
+  Send,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -12,10 +23,26 @@ export const Route = createFileRoute("/_authenticated/ask/")({
 });
 
 const STARTERS = [
-  "Kaip teisingai suformuluoti tikslą?",
-  "Kas yra vertybės ir kaip jas atrasti?",
-  "Kaip parašyti stiprią afirmaciją?",
-  "Padėk susidėlioti planą per 7 gyvenimo sritis",
+  {
+    icon: Compass,
+    label: "Išgryninti kryptį",
+    text: "Padėk man išsigryninti, ko iš tikrųjų noriu šiuo gyvenimo etapu.",
+  },
+  {
+    icon: Brain,
+    label: "Suprasti save",
+    text: "Padėk pastebėti, koks vidinis modelis šiuo metu mane labiausiai stabdo.",
+  },
+  {
+    icon: ListChecks,
+    label: "Susidėlioti veiksmus",
+    text: "Turiu tikslą, bet nežinau nuo ko pradėti. Padėk sudaryti realų pirmųjų žingsnių planą.",
+  },
+  {
+    icon: Lightbulb,
+    label: "Pažiūrėti kitu kampu",
+    text: "Padėk kritiškai ir iš kelių pusių pažvelgti į situaciją, kurią aprašysiu.",
+  },
 ];
 
 function AskIndex() {
@@ -144,7 +171,7 @@ function AskIndex() {
               </div>
             </Card>
           )}
-          <Card className="p-8 bg-card/60 backdrop-blur border-dashed">
+          <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-card via-card to-primary/[0.04] p-6 shadow-sm md:p-8">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="h-5 w-5 text-primary" />
               <h2 className="font-serif text-xl">Kuo galiu padėti?</h2>
@@ -152,15 +179,23 @@ function AskIndex() {
             <p className="text-sm text-muted-foreground mb-4">
               Klausk savo žodžiais. Kiekvienas pokalbis išsaugomas – galėsi grįžti bet kada.
             </p>
-            <div className="grid sm:grid-cols-2 gap-2">
+            <div className="grid sm:grid-cols-2 gap-3">
               {STARTERS.map((s) => (
                 <button
-                  key={s}
+                  key={s.label}
                   disabled={busy}
-                  onClick={() => start(s)}
-                  className="text-left text-sm p-3 rounded-lg border bg-background hover:bg-accent transition-colors disabled:opacity-50"
+                  onClick={() => setInput(s.text)}
+                  className="group flex min-h-24 items-start gap-3 rounded-xl border bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm disabled:opacity-50"
                 >
-                  {s}
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <s.icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">{s.label}</div>
+                    <div className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                      {s.text}
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -169,9 +204,9 @@ function AskIndex() {
       </div>
       <form
         onSubmit={(e) => start(input, e)}
-        className="border-t bg-background/95 backdrop-blur p-4"
+        className="border-t bg-background/95 p-3 backdrop-blur md:p-4"
       >
-        <div className="max-w-2xl mx-auto flex gap-2 items-end">
+        <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border bg-card p-2 shadow-sm focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
           <Textarea
             ref={inputRef}
             autoFocus
@@ -189,13 +224,13 @@ function AskIndex() {
                 : "Užduok klausimą savo žinių bazei…"
             }
             rows={contextTitle ? 6 : 2}
-            className="resize-none rounded-2xl bg-muted/50 border-muted"
+            className="min-h-12 resize-none border-0 bg-transparent px-3 py-2 text-base shadow-none focus-visible:ring-0"
           />
           <Button
             type="submit"
             size="icon"
             disabled={busy || contextLoading || !input.trim()}
-            className="rounded-full h-11 w-11 shrink-0"
+            className="h-11 w-11 shrink-0 rounded-xl"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>

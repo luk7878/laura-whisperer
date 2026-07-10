@@ -251,7 +251,13 @@ export const Route = createFileRoute("/api/mentor-chat")({
           },
         });
 
-        const sourcesJson = JSON.stringify(sources.map((s) => ({ title: s.title })));
+        const sourcesJson = JSON.stringify(
+          sources.map((s) => ({
+            title: s.title,
+            excerpt: s.content.slice(0, 650),
+            similarity: Math.round(s.similarity * 100),
+          })),
+        );
         const sourcesB64 = Buffer.from(sourcesJson, "utf-8").toString("base64");
         return new Response(stream, {
           headers: {
