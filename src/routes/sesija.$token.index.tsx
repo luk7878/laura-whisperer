@@ -272,7 +272,7 @@ function SessionPage() {
       {/* Composer */}
       <form
         onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}
-        className="border-t border-clarity-line bg-clarity-bg p-4"
+        className="border-t border-clarity-line bg-clarity-bg px-4 py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
       >
         <div className="mx-auto max-w-2xl flex gap-2 items-end">
           <textarea
@@ -284,13 +284,14 @@ function SessionPage() {
             rows={2}
             placeholder="Rašyk savais žodžiais…"
             maxLength={2000}
-            className="flex-1 resize-none rounded-2xl border border-clarity-line bg-clarity-surface/40 px-4 py-3 text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors"
+            className="flex-1 resize-none rounded-2xl border border-clarity-line bg-clarity-surface/40 px-4 py-3 text-base text-clarity-ink placeholder:text-clarity-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-clarity-terra/30 focus:border-clarity-terra transition-colors min-h-[44px]"
             autoFocus
           />
           <button
             type="submit"
             disabled={sending || !input.trim()}
-            className="h-11 w-11 shrink-0 rounded-full bg-clarity-terra text-white flex items-center justify-center hover:bg-clarity-ink transition-colors disabled:opacity-50"
+            aria-label="Siųsti"
+            className="h-11 w-11 min-w-11 shrink-0 rounded-full bg-clarity-terra text-white flex items-center justify-center hover:bg-clarity-ink transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clarity-terra/50"
           >
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </button>
