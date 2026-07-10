@@ -60,6 +60,7 @@ export function AppSidebar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const adminArea =
     pathname === "/admin" || pathname.startsWith("/admin/") || pathname === "/knowledge";
+  const mentorArea = pathname === "/ask" || pathname.startsWith("/ask/");
 
   useEffect(() => {
     let alive = true;
@@ -170,7 +171,7 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {!adminArea && (
+        {!adminArea && !mentorArea && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-[10px] tracking-widest">
               NAUJAUSIOS SESIJOS

@@ -43,9 +43,13 @@ function AskLayout() {
     load();
     const ch = supabase
       .channel("mentor_threads_ch")
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_threads" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_threads" }, () =>
+        load(),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, []);
 
   async function createNew() {
@@ -119,7 +123,12 @@ function AskLayout() {
         {/* Mobile thread menu */}
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="sm" className="md:hidden h-9 w-9 p-0 shrink-0" title="Pokalbiai">
+            <Button
+              variant="outline"
+              size="sm"
+              className="md:hidden h-9 w-9 p-0 shrink-0"
+              title="Pokalbiai"
+            >
               <PanelLeft className="h-4 w-4" />
             </Button>
           </SheetTrigger>
@@ -149,7 +158,10 @@ function AskLayout() {
       <div className="flex-1 min-h-0 flex">
         {/* Thread list — desktop */}
         <aside className="hidden md:flex w-64 shrink-0 border-r flex-col bg-background/50">
-          <div className="p-3 border-b">
+          <div className="border-b px-3 pb-2 pt-3">
+            <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Mentoriaus pokalbiai
+            </div>
             <Button onClick={createNew} className="w-full gap-2" size="sm">
               <Plus className="h-4 w-4" /> Naujas pokalbis
             </Button>
@@ -164,4 +176,3 @@ function AskLayout() {
     </div>
   );
 }
-
