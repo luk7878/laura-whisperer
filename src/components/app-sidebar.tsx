@@ -259,17 +259,28 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-3">
         <div className="flex items-center gap-2.5 rounded-lg border bg-card p-2.5">
-          <Link
-            to="/profile"
-            className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold hover:bg-primary/20"
-            title="Profilis"
-          >
-            {initials}
-          </Link>
-          <Link to="/profile" className="flex-1 min-w-0 hover:opacity-80">
-            <div className="text-sm font-medium truncate">{email ?? "Vartotojas"}</div>
-            <div className="text-[10px] text-muted-foreground">Profilis ir nustatymai</div>
-          </Link>
+          {adminArea ? (
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium">Administratorius</div>
+              <div className="text-[10px] text-muted-foreground truncate">
+                {email ?? "Admin paskyra"}
+              </div>
+            </div>
+          ) : (
+            <>
+              <Link
+                to="/profile"
+                className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold hover:bg-primary/20"
+                title="Profilis"
+              >
+                {initials}
+              </Link>
+              <Link to="/profile" className="flex-1 min-w-0 hover:opacity-80">
+                <div className="text-sm font-medium truncate">{email ?? "Vartotojas"}</div>
+                <div className="text-[10px] text-muted-foreground">Profilis ir nustatymai</div>
+              </Link>
+            </>
+          )}
           <button
             onClick={signOut}
             title="Atsijungti"
