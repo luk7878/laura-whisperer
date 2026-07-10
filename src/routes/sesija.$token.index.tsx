@@ -158,7 +158,7 @@ function SessionPage() {
 
   if (phase === "loading") {
     return (
-      <div className="clarity-scope min-h-screen flex items-center justify-center">
+      <div className="clarity-scope min-h-[100dvh] flex items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-clarity-terra" />
       </div>
     );
@@ -166,7 +166,7 @@ function SessionPage() {
 
   if (phase === "intro") {
     return (
-      <div className="clarity-scope min-h-screen flex flex-col">
+      <div className="clarity-scope min-h-[100dvh] flex flex-col">
         <MinimalTop />
         <div className="flex-1 flex items-center justify-center px-6 py-12">
           <div className="max-w-lg w-full">
@@ -207,7 +207,7 @@ function SessionPage() {
   }
 
   return (
-    <div className="clarity-scope min-h-screen flex flex-col">
+    <div className="clarity-scope min-h-[100dvh] flex flex-col">
       {/* Timer header */}
       <header className="border-b border-clarity-line bg-clarity-bg/90 backdrop-blur sticky top-0 z-10">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">

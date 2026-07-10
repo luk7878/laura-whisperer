@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <div className="clarity-scope min-h-screen">
+    <div className="clarity-scope min-h-[100dvh]">
       <Nav />
       <Hero />
       <HowItWorks />

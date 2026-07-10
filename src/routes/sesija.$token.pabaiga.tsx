@@ -57,7 +57,7 @@ function EndPage() {
 
   if (phase === "loading") {
     return (
-      <div className="clarity-scope min-h-screen flex items-center justify-center">
+      <div className="clarity-scope min-h-[100dvh] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-clarity-terra" />
           <p className="mt-4 text-clarity-ink-soft">Ruošiu tavo santrauką…</p>
@@ -68,7 +68,7 @@ function EndPage() {
 
   if (phase === "rating") {
     return (
-      <div className="clarity-scope min-h-screen flex flex-col">
+      <div className="clarity-scope min-h-[100dvh] flex flex-col">
         <TopBar />
         <div className="flex-1 flex items-center justify-center px-6 py-12">
           <div className="max-w-lg w-full">
@@ -163,7 +163,7 @@ function EndPage() {
 
 function DoneScreen({ token, emotionalEnd, summary }: { token: string; emotionalEnd: number; summary: Summary | null }) {
   return (
-    <div className="clarity-scope min-h-screen">
+    <div className="clarity-scope min-h-[100dvh]">
       <TopBar />
       <div className="mx-auto max-w-2xl px-6 py-12 space-y-10">
         <div className="text-center">
