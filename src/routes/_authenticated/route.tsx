@@ -1,4 +1,5 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -15,8 +16,16 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthedLayout() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const focusMode = pathname === "/ask" || pathname.startsWith("/ask/");
+  const [sidebarOpen, setSidebarOpen] = useState(!focusMode);
+
+  useEffect(() => {
+    setSidebarOpen(!focusMode);
+  }, [focusMode]);
+
   return (
-    <SidebarProvider>
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
       <div className="flex min-h-[100dvh] w-full bg-background overflow-x-hidden">
         <AppSidebar />
         <div className="flex-1 min-w-0 flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
