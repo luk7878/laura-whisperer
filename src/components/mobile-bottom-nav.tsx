@@ -14,13 +14,7 @@ import {
   ShieldCheck,
   Library,
 } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +61,37 @@ export function MobileBottomNav() {
   }, []);
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + "/");
+  const adminArea = isActive("/admin") || isActive("/knowledge");
   const moreActive = MORE.some((m) => isActive(m.to)) || ADMIN_MORE.some((m) => isActive(m.to));
+
+  if (adminArea) {
+    return (
+      <nav
+        aria-label="Administratoriaus navigacija"
+        className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+      >
+        <ul className="grid grid-cols-2">
+          {ADMIN_MORE.map((item) => {
+            const active = isActive(item.to);
+            return (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  className={cn(
+                    "flex min-h-[56px] flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium",
+                    active ? "text-primary" : "text-muted-foreground",
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    );
+  }
 
   return (
     <>

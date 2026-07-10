@@ -14,11 +14,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Sparkles, ShieldAlert, Star, KeyRound, Plus, Trash2, Copy, Users, RefreshCw } from "lucide-react";
+import {
+  Loader2,
+  Sparkles,
+  ShieldAlert,
+  Star,
+  KeyRound,
+  Plus,
+  Trash2,
+  Copy,
+  Users,
+  RefreshCw,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { toast } from "sonner";
-
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -65,8 +76,10 @@ function statusBadge(b: Booking) {
   if (b.safety_triggered) {
     return <Badge variant="destructive">Saugos signalas</Badge>;
   }
-  if (b.status === "completed") return <Badge className="bg-emerald-600 hover:bg-emerald-600">Užbaigta</Badge>;
-  if (b.status === "in_progress") return <Badge className="bg-blue-600 hover:bg-blue-600">Vyksta</Badge>;
+  if (b.status === "completed")
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Užbaigta</Badge>;
+  if (b.status === "in_progress")
+    return <Badge className="bg-blue-600 hover:bg-blue-600">Vyksta</Badge>;
   return <Badge variant="secondary">{b.status ?? "nauja"}</Badge>;
 }
 
@@ -172,18 +185,41 @@ function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full p-4 md:p-6 space-y-4">
-      <div>
-        <h1 className="font-serif text-2xl mb-1">Admin — 15 min sesijos</h1>
-        <p className="text-sm text-muted-foreground">
-          Registracijos, statusai, AI santraukos ir įvertinimai.
-        </p>
+      <div className="flex items-start gap-3">
+        <SidebarTrigger className="mt-1 shrink-0" />
+        <div>
+          <h1 className="font-serif text-2xl mb-1">Admin — 15 min sesijos</h1>
+          <p className="text-sm text-muted-foreground">
+            Registracijos, statusai, AI santraukos ir įvertinimai.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        <Stat label="Viso" value={stats.total} onClick={() => setFilter("all")} active={filter === "all"} />
-        <Stat label="Laukia žmogaus" value={stats.human} onClick={() => setFilter("human")} active={filter === "human"} />
-        <Stat label="Užbaigtos" value={stats.completed} onClick={() => setFilter("completed")} active={filter === "completed"} />
-        <Stat label="Įvertintos" value={stats.rated} onClick={() => setFilter("rated")} active={filter === "rated"} />
+        <Stat
+          label="Viso"
+          value={stats.total}
+          onClick={() => setFilter("all")}
+          active={filter === "all"}
+        />
+        <Stat
+          label="Laukia žmogaus"
+          value={stats.human}
+          onClick={() => setFilter("human")}
+          active={filter === "human"}
+        />
+        <Stat
+          label="Užbaigtos"
+          value={stats.completed}
+          onClick={() => setFilter("completed")}
+          active={filter === "completed"}
+        />
+        <Stat
+          label="Įvertintos"
+          value={stats.rated}
+          onClick={() => setFilter("rated")}
+          active={filter === "rated"}
+        />
       </div>
 
       <Input
@@ -195,8 +231,6 @@ function AdminPage() {
       <SlotsPanel />
 
       <InviteCodesPanel />
-
-
 
       {loading ? (
         <div className="p-8 flex items-center gap-2 text-muted-foreground">
@@ -326,10 +360,26 @@ function BookingRow({
             </div>
             {b.summary ? (
               <div className="rounded-md bg-muted/50 p-3 space-y-1.5">
-                {b.summary.topic && <div><b>Tema:</b> {b.summary.topic}</div>}
-                {b.summary.insight && <div><b>Įžvalga:</b> {b.summary.insight}</div>}
-                {b.summary.action && <div><b>Veiksmas:</b> {b.summary.action}</div>}
-                {b.summary.next_step && <div><b>Kitas žingsnis:</b> {b.summary.next_step}</div>}
+                {b.summary.topic && (
+                  <div>
+                    <b>Tema:</b> {b.summary.topic}
+                  </div>
+                )}
+                {b.summary.insight && (
+                  <div>
+                    <b>Įžvalga:</b> {b.summary.insight}
+                  </div>
+                )}
+                {b.summary.action && (
+                  <div>
+                    <b>Veiksmas:</b> {b.summary.action}
+                  </div>
+                )}
+                {b.summary.next_step && (
+                  <div>
+                    <b>Kitas žingsnis:</b> {b.summary.next_step}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-xs text-muted-foreground">Dar nesugeneruota.</div>
@@ -515,10 +565,7 @@ function InviteCodesPanel() {
                     <span className="text-xs text-muted-foreground">
                       {c.active ? "Aktyvus" : "Išjungtas"}
                     </span>
-                    <Switch
-                      checked={c.active}
-                      onCheckedChange={(v) => toggle(c.id, v)}
-                    />
+                    <Switch checked={c.active} onCheckedChange={(v) => toggle(c.id, v)} />
                     <Button size="sm" variant="ghost" onClick={() => remove(c.id)}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
@@ -532,7 +579,6 @@ function InviteCodesPanel() {
     </Card>
   );
 }
-
 
 type WaitlistEntry = {
   id: string;
@@ -614,11 +660,15 @@ function SlotsPanel() {
   }
 
   const remaining = state ? Math.max(0, state.capacity - state.filled) : 0;
-  const pct = state && state.capacity > 0 ? Math.min(100, (state.filled / state.capacity) * 100) : 0;
+  const pct =
+    state && state.capacity > 0 ? Math.min(100, (state.filled / state.capacity) * 100) : 0;
 
   return (
     <Card className="p-4">
-      <button className="w-full flex items-center justify-between" onClick={() => setOpen((o) => !o)}>
+      <button
+        className="w-full flex items-center justify-between"
+        onClick={() => setOpen((o) => !o)}
+      >
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary" />
           <span className="font-medium">Sesijų vietos</span>
@@ -643,7 +693,9 @@ function SlotsPanel() {
               <div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
                   <span>Užimtumas</span>
-                  <span>{state.filled} / {state.capacity}</span>
+                  <span>
+                    {state.filled} / {state.capacity}
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
                   <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
@@ -683,24 +735,44 @@ function SlotsPanel() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium">{e.name}</span>
                         <span className="text-xs text-muted-foreground">{e.email}</span>
-                        <Badge variant={e.status === "waiting" ? "secondary" : "outline"}>{e.status}</Badge>
+                        <Badge variant={e.status === "waiting" ? "secondary" : "outline"}>
+                          {e.status}
+                        </Badge>
                       </div>
-                      {e.concern && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{e.concern}</p>}
-                      <div className="text-xs text-muted-foreground mt-0.5">{fmt(e.created_at)}</div>
+                      {e.concern && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                          {e.concern}
+                        </p>
+                      )}
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {fmt(e.created_at)}
+                      </div>
                     </div>
                     <div className="flex gap-1">
                       {e.status === "waiting" && (
-                        <Button size="sm" variant="outline" onClick={() => setStatus(e.id, "notified")}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setStatus(e.id, "notified")}
+                        >
                           Pranešta
                         </Button>
                       )}
                       {e.status !== "converted" && (
-                        <Button size="sm" variant="outline" onClick={() => setStatus(e.id, "converted")}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setStatus(e.id, "converted")}
+                        >
                           Užsiregistravo
                         </Button>
                       )}
                       {e.status !== "cancelled" && (
-                        <Button size="sm" variant="ghost" onClick={() => setStatus(e.id, "cancelled")}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setStatus(e.id, "cancelled")}
+                        >
                           Atmesti
                         </Button>
                       )}
