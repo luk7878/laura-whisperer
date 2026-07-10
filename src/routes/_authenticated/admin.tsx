@@ -27,7 +27,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { toast } from "sonner";
 
@@ -185,14 +184,11 @@ function AdminPage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full p-4 md:p-6 space-y-4">
-      <div className="flex items-start gap-3">
-        <SidebarTrigger className="mt-1 shrink-0" />
-        <div>
-          <h1 className="font-serif text-2xl mb-1">Admin — 15 min sesijos</h1>
-          <p className="text-sm text-muted-foreground">
-            Registracijos, statusai, AI santraukos ir įvertinimai.
-          </p>
-        </div>
+      <div>
+        <h1 className="font-serif text-2xl mb-1">Admin — 15 min sesijos</h1>
+        <p className="text-sm text-muted-foreground">
+          Registracijos, statusai, AI santraukos ir įvertinimai.
+        </p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
