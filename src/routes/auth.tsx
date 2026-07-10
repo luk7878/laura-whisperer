@@ -137,7 +137,7 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
       <Card className="w-full max-w-md border-border/50 shadow-xl">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-2 flex items-center gap-2 text-primary">

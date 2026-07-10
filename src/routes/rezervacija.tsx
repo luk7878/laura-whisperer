@@ -80,7 +80,7 @@ function BookingPage() {
 
   if (waitlisted) {
     return (
-      <div className="clarity-scope min-h-screen flex flex-col">
+      <div className="clarity-scope min-h-[100dvh] flex flex-col">
         <TopBar />
         <div className="flex-1 flex items-center justify-center px-6 py-16">
           <div className="max-w-lg text-center">
@@ -99,7 +99,7 @@ function BookingPage() {
 
   if (done) {
     return (
-      <div className="clarity-scope min-h-screen flex flex-col">
+      <div className="clarity-scope min-h-[100dvh] flex flex-col">
         <TopBar />
         <div className="flex-1 flex items-center justify-center px-6 py-16">
           <div className="max-w-lg text-center">
@@ -124,7 +124,7 @@ function BookingPage() {
   }
 
   return (
-    <div className="clarity-scope min-h-screen">
+    <div className="clarity-scope min-h-[100dvh]">
       <TopBar />
       <div className="mx-auto max-w-xl px-6 py-12">
         <h1 className="font-clarity-serif text-4xl text-clarity-ink">Rezervuoti sesiją</h1>

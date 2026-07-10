@@ -684,7 +684,7 @@ function SessionPage() {
         </div>
 
         {/* Composer */}
-        <form onSubmit={sendMessage} className="border-t bg-background p-3 md:p-4">
+        <form onSubmit={sendMessage} className="border-t bg-background px-3 py-3 md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
           <div className="max-w-3xl mx-auto">
             <Card className="p-2.5 md:p-3 flex items-start gap-2 md:gap-3">
 

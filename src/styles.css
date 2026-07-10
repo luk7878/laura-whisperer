@@ -192,5 +192,21 @@
     font-family: var(--font-clarity-serif);
     letter-spacing: -0.01em;
   }
+  /* Prevent iOS zoom on focus for text inputs */
+  @media (max-width: 767px) {
+    input, textarea, select {
+      font-size: 16px;
+    }
+  }
+  body {
+    overflow-x: hidden;
+  }
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility safe-top {
+  padding-top: env(safe-area-inset-top);
 }
 

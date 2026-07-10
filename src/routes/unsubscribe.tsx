@@ -72,7 +72,7 @@ function UnsubscribePage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background px-6 py-16">
+    <main className="min-h-[100dvh] flex items-center justify-center bg-background px-6 py-16">
       <div className="max-w-md w-full text-center space-y-6">
         <h1 className="text-2xl font-semibold">Prenumeratos atsisakymas</h1>
         {state.kind === "loading" && <p className="text-muted-foreground">Kraunama…</p>}
