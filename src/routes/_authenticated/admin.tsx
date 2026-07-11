@@ -183,12 +183,16 @@ function AdminPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto w-full p-4 md:p-6 space-y-4">
-      <div>
-        <h1 className="font-serif text-2xl mb-1">Admin — 15 min sesijos</h1>
-        <p className="text-sm text-muted-foreground">
-          Registracijos, statusai, AI santraukos ir įvertinimai.
-        </p>
+    <div className="mx-auto w-full max-w-6xl space-y-5 p-4 md:p-7">
+      <div className="relative overflow-hidden rounded-3xl border border-white/80 bg-gradient-to-br from-primary/[0.09] via-card to-map-violet/[0.06] p-5 shadow-[0_16px_50px_-30px_oklch(0.25_0.08_270)] md:p-7">
+        <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-primary/[0.07] blur-2xl" />
+        <div className="relative">
+          <p className="eyebrow">Administravimo centras</p>
+          <h1 className="mt-2 font-serif text-3xl tracking-tight md:text-4xl">15 min sesijos</h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Registracijos, statusai, AI santraukos ir įvertinimai vienoje aiškioje darbo erdvėje.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
