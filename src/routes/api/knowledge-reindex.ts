@@ -17,8 +17,9 @@ export const Route = createFileRoute("/api/knowledge-reindex")({
         const docId = body.document_id;
         if (!docId) return new Response("Missing document_id", { status: 400 });
 
-        const url = process.env.SUPABASE_URL;
-        const anon = process.env.SUPABASE_PUBLISHABLE_KEY;
+        const url = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+        const anon =
+          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
         if (!url || !anon) return new Response("Server misconfigured", { status: 500 });
 
         const supabase = createClient(url, anon, {
