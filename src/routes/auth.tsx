@@ -9,45 +9,66 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Sparkles, KeyRound } from "lucide-react";
-
+import { Sparkles, KeyRound, ArrowLeft, Mail, LockKeyhole } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
-    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//") ? s.next : undefined,
+    next:
+      typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")
+        ? s.next
+        : undefined,
+    mode: s.mode === "recovery" ? ("recovery" as const) : undefined,
   }),
   component: AuthPage,
 });
 
 const INVITE_KEY = "pending_invite_code";
 
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 function AuthPage() {
-  const { next } = Route.useSearch();
+  const { next, mode: requestedMode } = Route.useSearch();
   const target = next ?? "/session";
   const validate = useServerFn(validateInviteCode);
   const consume = useServerFn(consumeInviteCode);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot" | "recovery">(
+    requestedMode === "recovery" ? "recovery" : "signin",
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [invite, setInvite] = useState("");
   const [busy, setBusy] = useState(false);
 
-
   useEffect(() => {
+    const isRecovery =
+      requestedMode === "recovery" || window.location.hash.includes("type=recovery");
+    if (isRecovery) setMode("recovery");
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setMode("recovery");
+    });
+
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) return;
+      if (isRecovery) return;
       // Consume any pending invite code after OAuth redirect
       const pending = sessionStorage.getItem(INVITE_KEY);
       if (pending) {
         try {
           await consume({ data: { code: pending } });
-        } catch {}
+        } catch {
+          // Invite consumption can be retried after the next sign-in.
+        }
         sessionStorage.removeItem(INVITE_KEY);
       }
       window.location.href = target;
     });
-  }, [target]);
+    return () => authListener.subscription.unsubscribe();
+  }, [consume, target, requestedMode]);
 
   async function requireValidInvite(): Promise<boolean> {
     const code = invite.trim();
@@ -66,7 +87,6 @@ function AuthPage() {
       toast.error("Nepavyko patikrinti pakvietimo kodo");
       return false;
     }
-
   }
 
   async function handleEmail(e: React.FormEvent) {
@@ -96,8 +116,8 @@ function AuthPage() {
         if (error) throw error;
         window.location.href = target;
       }
-    } catch (err: any) {
-      toast.error(err.message ?? "Klaida");
+    } catch (err: unknown) {
+      toast.error(errorMessage(err, "Klaida"));
     } finally {
       setBusy(false);
     }
@@ -130,11 +150,60 @@ function AuthPage() {
         sessionStorage.removeItem(INVITE_KEY);
       }
       window.location.href = target;
-    } catch (err: any) {
-      toast.error(err.message ?? "Klaida");
+    } catch (err: unknown) {
+      toast.error(errorMessage(err, "Klaida"));
       setBusy(false);
     }
   }
+
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth?mode=recovery`,
+      });
+      if (error) throw error;
+      toast.success("Slaptažodžio atkūrimo nuoroda išsiųsta el. paštu");
+    } catch (err: unknown) {
+      toast.error(errorMessage(err, "Nepavyko išsiųsti atkūrimo laiško"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleNewPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (password.length < 8) return toast.error("Slaptažodį turi sudaryti bent 8 simboliai");
+    if (password !== passwordConfirm) return toast.error("Slaptažodžiai nesutampa");
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      toast.success("Slaptažodis sėkmingai pakeistas");
+      window.history.replaceState(null, "", "/auth");
+      window.location.href = target;
+    } catch (err: unknown) {
+      toast.error(errorMessage(err, "Nepavyko pakeisti slaptažodžio"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const heading = {
+    signin: "Prisijungimas",
+    signup: "Registracija",
+    forgot: "Atkurti slaptažodį",
+    recovery: "Naujas slaptažodis",
+  }[mode];
+
+  const description = {
+    signin: "Prisijunkite prie savo augimo kelio",
+    signup: "Reikalingas pakvietimo kodas",
+    forgot: "Įveskite el. paštą ir atsiųsime saugią atkūrimo nuorodą",
+    recovery: "Sukurkite naują, saugų paskyros slaptažodį",
+  }[mode];
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
@@ -144,91 +213,186 @@ function AuthPage() {
             <Sparkles className="h-6 w-6" />
             <span className="font-semibold">Augimo Kompasas AI</span>
           </Link>
-          <CardTitle>{mode === "signin" ? "Prisijungimas" : "Registracija"}</CardTitle>
-          <CardDescription>
-            {mode === "signin"
-              ? "Prisijunkite prie savo augimo kelio"
-              : "Reikalingas pakvietimo kodas"}
-          </CardDescription>
+          <CardTitle>{heading}</CardTitle>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {(mode === "signup") && (
-            <div className="space-y-1">
-              <Label htmlFor="invite" className="flex items-center gap-1.5">
-                <KeyRound className="h-3.5 w-3.5" /> Pakvietimo kodas
-              </Label>
-              <Input
-                id="invite"
-                value={invite}
-                onChange={(e) => setInvite(e.target.value)}
-                placeholder="Įveskite gautą kodą"
-                autoComplete="off"
-              />
-              <p className="text-xs text-muted-foreground">
-                Registracija šiuo metu ribota. Pakvietimo kodo klauskite administratoriaus.
-              </p>
-            </div>
-          )}
-
-          {mode === "signup" && (
-            <>
+          {mode === "forgot" && (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Mail className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="recovery-email">El. paštas</Label>
+                <Input
+                  id="recovery-email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="vardas@pastas.lt"
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={busy}>
+                Siųsti atkūrimo nuorodą
+              </Button>
               <Button
                 type="button"
-                variant="outline"
-                className="w-full"
-                onClick={handleGoogle}
-                disabled={busy}
+                variant="ghost"
+                className="w-full gap-2"
+                onClick={() => setMode("signin")}
               >
-                Tęsti su Google
+                <ArrowLeft className="h-4 w-4" /> Grįžti į prisijungimą
               </Button>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">arba el. paštu</span>
-                </div>
+            </form>
+          )}
+
+          {mode === "recovery" && (
+            <form onSubmit={handleNewPassword} className="space-y-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <LockKeyhole className="h-5 w-5" />
               </div>
+              <div className="space-y-1">
+                <Label htmlFor="new-password">Naujas slaptažodis</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="new-password-confirm">Pakartokite slaptažodį</Label>
+                <Input
+                  id="new-password-confirm"
+                  type="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Naudokite bent 8 simbolius ir nesirinkite anksčiau naudoto slaptažodžio.
+              </p>
+              <Button type="submit" className="w-full" disabled={busy}>
+                Išsaugoti naują slaptažodį
+              </Button>
+            </form>
+          )}
+
+          {(mode === "signin" || mode === "signup") && (
+            <>
+              {mode === "signup" && (
+                <div className="space-y-1">
+                  <Label htmlFor="invite" className="flex items-center gap-1.5">
+                    <KeyRound className="h-3.5 w-3.5" /> Pakvietimo kodas
+                  </Label>
+                  <Input
+                    id="invite"
+                    value={invite}
+                    onChange={(e) => setInvite(e.target.value)}
+                    placeholder="Įveskite gautą kodą"
+                    autoComplete="off"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Registracija šiuo metu ribota. Pakvietimo kodo klauskite administratoriaus.
+                  </p>
+                </div>
+              )}
+
+              {mode === "signup" && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleGoogle}
+                    disabled={busy}
+                  >
+                    Tęsti su Google
+                  </Button>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">arba el. paštu</span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <form onSubmit={handleEmail} className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="email">El. paštas</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <Label htmlFor="password">Slaptažodis</Label>
+                    {mode === "signin" && (
+                      <button
+                        type="button"
+                        className="text-xs font-medium text-primary hover:underline"
+                        onClick={() => setMode("forgot")}
+                      >
+                        Pamiršote slaptažodį?
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={busy}>
+                  {mode === "signin" ? "Prisijungti" : "Registruotis"}
+                </Button>
+              </form>
+
+              {mode === "signin" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={async () => {
+                    // Google sign-in for existing users — also requires invite for now.
+                    setMode("signup");
+                    toast.info("Google prisijungimui reikalingas pakvietimo kodas");
+                  }}
+                  disabled={busy}
+                >
+                  Tęsti su Google
+                </Button>
+              )}
+
+              <button
+                type="button"
+                className="w-full text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              >
+                {mode === "signin"
+                  ? "Neturite paskyros? Registruokitės"
+                  : "Jau turite paskyrą? Prisijunkite"}
+              </button>
             </>
           )}
-
-          <form onSubmit={handleEmail} className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="email">El. paštas</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="password">Slaptažodis</Label>
-              <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <Button type="submit" className="w-full" disabled={busy}>
-              {mode === "signin" ? "Prisijungti" : "Registruotis"}
-            </Button>
-          </form>
-
-          {mode === "signin" && (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={async () => {
-                // Google sign-in for existing users — also requires invite for now.
-                setMode("signup");
-                toast.info("Google prisijungimui reikalingas pakvietimo kodas");
-              }}
-              disabled={busy}
-            >
-              Tęsti su Google
-            </Button>
-          )}
-
-          <button
-            type="button"
-            className="w-full text-sm text-muted-foreground hover:text-foreground"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          >
-            {mode === "signin" ? "Neturite paskyros? Registruokitės" : "Jau turite paskyrą? Prisijunkite"}
-          </button>
         </CardContent>
       </Card>
     </div>
