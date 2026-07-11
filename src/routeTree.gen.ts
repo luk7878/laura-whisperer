@@ -26,6 +26,7 @@ import { Route as ApiKnowledgeIngestRouteImport } from './routes/api/knowledge-i
 import { Route as ApiGoalBreakdownRouteImport } from './routes/api/goal-breakdown'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisionRouteImport } from './routes/_authenticated/vision'
+import { Route as AuthenticatedValuesRouteImport } from './routes/_authenticated/values'
 import { Route as AuthenticatedSessionRouteImport } from './routes/_authenticated/session'
 import { Route as AuthenticatedResourcesRouteImport } from './routes/_authenticated/resources'
 import { Route as AuthenticatedProgressRouteImport } from './routes/_authenticated/progress'
@@ -140,6 +141,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const AuthenticatedVisionRoute = AuthenticatedVisionRouteImport.update({
   id: '/vision',
   path: '/vision',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedValuesRoute = AuthenticatedValuesRouteImport.update({
+  id: '/values',
+  path: '/values',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSessionRoute = AuthenticatedSessionRouteImport.update({
@@ -326,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/progress': typeof AuthenticatedProgressRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/session': typeof AuthenticatedSessionRoute
+  '/values': typeof AuthenticatedValuesRoute
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/progress': typeof AuthenticatedProgressRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/session': typeof AuthenticatedSessionRoute
+  '/values': typeof AuthenticatedValuesRoute
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
@@ -424,6 +432,7 @@ export interface FileRoutesById {
   '/_authenticated/progress': typeof AuthenticatedProgressRoute
   '/_authenticated/resources': typeof AuthenticatedResourcesRoute
   '/_authenticated/session': typeof AuthenticatedSessionRoute
+  '/_authenticated/values': typeof AuthenticatedValuesRoute
   '/_authenticated/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/resources'
     | '/session'
+    | '/values'
     | '/vision'
     | '/api/chat'
     | '/api/goal-breakdown'
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/progress'
     | '/resources'
     | '/session'
+    | '/values'
     | '/vision'
     | '/api/chat'
     | '/api/goal-breakdown'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/_authenticated/progress'
     | '/_authenticated/resources'
     | '/_authenticated/session'
+    | '/_authenticated/values'
     | '/_authenticated/vision'
     | '/api/chat'
     | '/api/goal-breakdown'
@@ -756,6 +768,13 @@ declare module '@tanstack/react-router' {
       path: '/vision'
       fullPath: '/vision'
       preLoaderRoute: typeof AuthenticatedVisionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/values': {
+      id: '/_authenticated/values'
+      path: '/values'
+      fullPath: '/values'
+      preLoaderRoute: typeof AuthenticatedValuesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/session': {
@@ -1003,6 +1022,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProgressRoute: typeof AuthenticatedProgressRoute
   AuthenticatedResourcesRoute: typeof AuthenticatedResourcesRoute
   AuthenticatedSessionRoute: typeof AuthenticatedSessionRoute
+  AuthenticatedValuesRoute: typeof AuthenticatedValuesRoute
   AuthenticatedVisionRoute: typeof AuthenticatedVisionRoute
 }
 
@@ -1018,6 +1038,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProgressRoute: AuthenticatedProgressRoute,
   AuthenticatedResourcesRoute: AuthenticatedResourcesRoute,
   AuthenticatedSessionRoute: AuthenticatedSessionRoute,
+  AuthenticatedValuesRoute: AuthenticatedValuesRoute,
   AuthenticatedVisionRoute: AuthenticatedVisionRoute,
 }
 

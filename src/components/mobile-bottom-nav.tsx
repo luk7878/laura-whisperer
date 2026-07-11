@@ -13,6 +13,7 @@ import {
   User,
   ShieldCheck,
   Library,
+  Gem,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ const PRIMARY = [
 ] as const;
 
 const MORE = [
+  { title: "Mano vertybės", to: "/values", icon: Gem },
   { title: "Vizija", to: "/vision", icon: Eye },
   { title: "Prioritetai", to: "/priorities", icon: ListChecks },
   { title: "Įžvalgos", to: "/insights", icon: Lightbulb },
