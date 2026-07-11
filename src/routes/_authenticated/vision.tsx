@@ -1,193 +1,329 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Save, Loader2, Sparkles, Check } from "lucide-react";
+import { Check, Compass, Eye, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/vision")({
-  component: VisionPage,
-});
+export const Route = createFileRoute("/_authenticated/vision")({ component: VisionPage });
 
-type VisionRow = {
+type Category = "be" | "do" | "have";
+type Horizon = "now" | "1_year" | "5_years" | "long_term";
+type Item = {
   id: string;
-  horizon_years: number;
-  content: string | null;
+  category: Category;
+  horizon: Horizon;
+  content: string;
+  why: string;
+  evidence: string;
+  linked_value_id: string | null;
   updated_at: string;
 };
+type Value = { id: string; name: string; rank: number };
 
-const HORIZONS = [
+const CATEGORIES: {
+  key: Category;
+  title: string;
+  subtitle: string;
+  prompt: string;
+  accent: string;
+}[] = [
   {
-    years: 5,
-    title: "5 metai",
-    subtitle: "Artimiausia kryptis",
-    prompt:
-      "Kur nori būti po 5 metų? Kokie tikslai, aplinka, santykiai, kasdienybė?",
+    key: "be",
+    title: "Būti",
+    subtitle: "Tapatybė ir savybės",
+    prompt: "Kokiu žmogumi renkiesi būti? Kokias savybes, gebėjimus ir vertybes įkūniji?",
     accent: "bg-map-teal/10 text-map-teal border-map-teal/30",
   },
   {
-    years: 10,
-    title: "10 metų",
-    subtitle: "Vidutinė perspektyva",
-    prompt: "Koks tavo gyvenimas po 10 metų? Kokią įtaką kuri, ką jau pasiekei?",
+    key: "do",
+    title: "Daryti",
+    subtitle: "Misija ir veikla",
+    prompt: "Kokią prasmingą veiklą kuri? Kam ir kokią vertę suteiki savo veiksmais?",
     accent: "bg-primary/10 text-primary border-primary/30",
   },
   {
-    years: 20,
-    title: "20 metų",
-    subtitle: "Ilgalaikė vizija",
-    prompt:
-      "Koks tavo palikimas po 20 metų? Kas svarbiausia tavo gyvenimo istorijai?",
+    key: "have",
+    title: "Turėti",
+    subtitle: "Rezultatai ir aplinka",
+    prompt: "Kokius apčiuopiamus rezultatus, santykius, aplinką ir gyvenimo būdą kuri?",
     accent: "bg-map-orange/10 text-map-orange border-map-orange/30",
   },
-] as const;
+];
+const HORIZONS: { key: Horizon; label: string }[] = [
+  { key: "now", label: "Dabar" },
+  { key: "1_year", label: "Po 1 metų" },
+  { key: "5_years", label: "Po 5 metų" },
+  { key: "long_term", label: "Ilgalaikė kryptis" },
+];
 
 function VisionPage() {
-  const [rows, setRows] = useState<Record<number, VisionRow | null>>({
-    5: null,
-    10: null,
-    20: null,
+  const [items, setItems] = useState<Item[]>([]);
+  const [values, setValues] = useState<Value[]>([]);
+  const [horizon, setHorizon] = useState<Horizon>("long_term");
+  const [drafts, setDrafts] = useState<
+    Record<Category, Omit<Item, "id" | "category" | "horizon" | "updated_at">>
+  >({
+    be: { content: "", why: "", evidence: "", linked_value_id: null },
+    do: { content: "", why: "", evidence: "", linked_value_id: null },
+    have: { content: "", why: "", evidence: "", linked_value_id: null },
   });
-  const [drafts, setDrafts] = useState<Record<number, string>>({ 5: "", 10: "", 20: "" });
-  const [saving, setSaving] = useState<number | null>(null);
+  const [saving, setSaving] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("vision")
-        .select("id, horizon_years, content, updated_at")
-        .order("horizon_years");
-      const next: Record<number, VisionRow | null> = { 5: null, 10: null, 20: null };
-      const nextDraft: Record<number, string> = { 5: "", 10: "", 20: "" };
-      for (const r of (data as VisionRow[]) ?? []) {
-        next[r.horizon_years] = r;
-        nextDraft[r.horizon_years] = r.content ?? "";
-      }
-      setRows(next);
-      setDrafts(nextDraft);
+      const [{ data: vision }, { data: valueRows }] = await Promise.all([
+        supabase
+          .from("vision_items")
+          .select("id,category,horizon,content,why,evidence,linked_value_id,updated_at"),
+        supabase.from("values").select("id,name,rank").order("rank"),
+      ]);
+      setItems((vision as Item[]) ?? []);
+      setValues((valueRows as Value[]) ?? []);
       setLoading(false);
     })();
   }, []);
 
-  async function save(years: number) {
-    setSaving(years);
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return setSaving(null);
-    const existing = rows[years];
-    const content = drafts[years].trim();
-    let error;
-    if (existing) {
-      ({ error } = await supabase
-        .from("vision")
-        .update({ content, updated_at: new Date().toISOString() })
-        .eq("id", existing.id));
-    } else {
-      const { error: insErr, data: ins } = await supabase
-        .from("vision")
-        .insert({ user_id: userData.user.id, horizon_years: years, content })
-        .select("id, horizon_years, content, updated_at")
-        .single();
-      error = insErr;
-      if (ins) setRows((r) => ({ ...r, [years]: ins as VisionRow }));
+  useEffect(() => {
+    const next = { ...drafts };
+    for (const category of CATEGORIES) {
+      const item = items.find((row) => row.category === category.key && row.horizon === horizon);
+      next[category.key] = {
+        content: item?.content ?? "",
+        why: item?.why ?? "",
+        evidence: item?.evidence ?? "",
+        linked_value_id: item?.linked_value_id ?? null,
+      };
     }
+    setDrafts(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [horizon, items]);
+
+  const completion = useMemo(
+    () => CATEGORIES.filter((category) => drafts[category.key].content.trim()).length,
+    [drafts],
+  );
+
+  async function save(category: Category) {
+    setSaving(category);
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return setSaving(null);
+    const draft = drafts[category];
+    const { data, error } = await supabase
+      .from("vision_items")
+      .upsert(
+        {
+          user_id: auth.user.id,
+          category,
+          horizon,
+          ...draft,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,category,horizon" },
+      )
+      .select("id,category,horizon,content,why,evidence,linked_value_id,updated_at")
+      .single();
     setSaving(null);
     if (error) return toast.error(error.message);
-    toast.success("Išsaugota");
-    if (existing)
-      setRows((r) => ({
-        ...r,
-        [years]: { ...existing, content, updated_at: new Date().toISOString() },
-      }));
+    setItems((current) => [
+      ...current.filter((item) => !(item.category === category && item.horizon === horizon)),
+      data as Item,
+    ]);
+    toast.success("Vizijos dalis išsaugota");
   }
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 md:gap-3">
-        <SidebarTrigger className="shrink-0" />
-        <div className="flex-1 min-w-0">
-          <h1 className="font-serif text-xl md:text-2xl leading-tight">Vizija</h1>
-          <p className="text-xs md:text-sm text-muted-foreground hidden sm:block truncate">
-            Trys horizontai — trys tavo augimo kryptys.
+      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-3">
+        <SidebarTrigger />
+        <div>
+          <h1 className="font-serif text-xl md:text-2xl">Vizija</h1>
+          <p className="hidden text-sm text-muted-foreground sm:block">
+            Būti, daryti ir turėti — pagal tai, kas tau iš tikrųjų svarbu.
           </p>
         </div>
       </header>
+      <div className="flex-1 overflow-y-auto bg-muted/20 p-3 md:p-6">
+        <div className="mx-auto max-w-6xl space-y-5">
+          <Card className="overflow-hidden border-primary/15 bg-gradient-to-br from-primary/[0.08] via-card to-map-teal/[0.06] p-5 md:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  <Compass className="h-4 w-4" /> Tavo pasirinkta ateitis
+                </div>
+                <h2 className="mt-2 font-serif text-2xl md:text-3xl">
+                  Ne ką turėtum — ką renkiesi kurti?
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                  Aiški vizija sujungia tapatybę, prasmingą veiklą ir apčiuopiamus rezultatus su
+                  tavo aukščiausiomis vertybėmis.
+                </p>
+              </div>
+              <div className="rounded-xl border bg-background/70 px-4 py-3 text-center">
+                <div className="font-serif text-2xl">{completion}/3</div>
+                <div className="text-[10px] text-muted-foreground">užpildyta šiame horizonte</div>
+              </div>
+            </div>
+          </Card>
 
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-muted/20">
-        <div className="max-w-5xl mx-auto space-y-4">
-          {loading && <div className="text-sm text-muted-foreground">Kraunama…</div>}
-          {!loading && (
-            <div className="grid gap-4 md:grid-cols-3">
-              {HORIZONS.map((h) => {
-                const row = rows[h.years];
-                const draft = drafts[h.years];
-                const dirty = (row?.content ?? "") !== draft;
+          <div className="flex flex-wrap gap-2">
+            {HORIZONS.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => setHorizon(item.key)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-xs transition",
+                  horizon === item.key
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "bg-card hover:bg-accent",
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {loading ? (
+            <div className="text-sm text-muted-foreground">Kraunama…</div>
+          ) : (
+            <div className="grid gap-4 lg:grid-cols-3">
+              {CATEGORIES.map((category) => {
+                const draft = drafts[category.key];
                 return (
-                  <Card key={h.years} className="p-4 md:p-5 flex flex-col">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className={`h-10 w-10 rounded-xl border flex items-center justify-center shrink-0 ${h.accent}`}>
-                        <Eye className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h2 className="font-serif text-xl">{h.title}</h2>
-                          {row?.content && (
-                            <Badge variant="outline" className="text-[10px] gap-1">
-                              <Check className="h-3 w-3" /> Užpildyta
-                            </Badge>
+                  <Card key={category.key} className="flex flex-col overflow-hidden">
+                    <div className="border-b bg-muted/20 p-4">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-xl border",
+                            category.accent,
                           )}
+                        >
+                          <Eye className="h-5 w-5" />
                         </div>
-                        <p className="text-xs text-muted-foreground">{h.subtitle}</p>
+                        <div>
+                          <h2 className="font-serif text-xl">{category.title}</h2>
+                          <p className="text-xs text-muted-foreground">{category.subtitle}</p>
+                        </div>
+                        {draft.content && <Check className="ml-auto h-4 w-4 text-map-green" />}
                       </div>
+                      <p className="mt-3 text-xs italic leading-relaxed text-muted-foreground">
+                        {category.prompt}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground italic mb-2">{h.prompt}</p>
-                    <Textarea
-                      value={draft}
-                      onChange={(e) =>
-                        setDrafts((d) => ({ ...d, [h.years]: e.target.value }))
-                      }
-                      rows={8}
-                      placeholder="Rašyk laisvai — vėliau AI padės sustruktūrinti…"
-                      className="flex-1 resize-none min-h-[160px]"
-                    />
-                    <div className="flex items-center gap-2 mt-3">
+                    <div className="flex flex-1 flex-col gap-4 p-4">
+                      <Field label="Mano vizija">
+                        <Textarea
+                          value={draft.content}
+                          onChange={(event) =>
+                            setDrafts((current) => ({
+                              ...current,
+                              [category.key]: { ...draft, content: event.target.value },
+                            }))
+                          }
+                          rows={5}
+                          placeholder="Rašyk konkrečiai ir savais žodžiais…"
+                        />
+                      </Field>
+                      <Field label="Kodėl tai mano?">
+                        <Textarea
+                          value={draft.why}
+                          onChange={(event) =>
+                            setDrafts((current) => ({
+                              ...current,
+                              [category.key]: { ...draft, why: event.target.value },
+                            }))
+                          }
+                          rows={2}
+                          placeholder="Kaip tai susiję su tuo, kas tau svarbiausia?"
+                        />
+                      </Field>
+                      <Field label="Kaip žinosiu, kad realizuoju?">
+                        <Textarea
+                          value={draft.evidence}
+                          onChange={(event) =>
+                            setDrafts((current) => ({
+                              ...current,
+                              [category.key]: { ...draft, evidence: event.target.value },
+                            }))
+                          }
+                          rows={2}
+                          placeholder="Kokie konkretūs įrodymai bus matomi?"
+                        />
+                      </Field>
+                      {values.length > 0 && (
+                        <Field label="Susieta vertybė">
+                          <select
+                            value={draft.linked_value_id ?? ""}
+                            onChange={(event) =>
+                              setDrafts((current) => ({
+                                ...current,
+                                [category.key]: {
+                                  ...draft,
+                                  linked_value_id: event.target.value || null,
+                                },
+                              }))
+                            }
+                            className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                          >
+                            <option value="">Pasirinkti nebūtina</option>
+                            {values.map((value) => (
+                              <option key={value.id} value={value.id}>
+                                {value.rank}. {value.name}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                      )}
                       <Button
-                        size="sm"
-                        onClick={() => save(h.years)}
-                        disabled={!dirty || saving === h.years}
-                        className="gap-1.5"
+                        onClick={() => save(category.key)}
+                        disabled={saving === category.key || !draft.content.trim()}
+                        className="mt-auto gap-2"
                       >
-                        {saving === h.years ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        {saving === category.key ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
-                          <Save className="h-3.5 w-3.5" />
-                        )}
+                          <Save className="h-4 w-4" />
+                        )}{" "}
                         Išsaugoti
                       </Button>
-                      <Button asChild size="sm" variant="outline" className="gap-1.5">
-                        <Link to="/ask">
-                          <Sparkles className="h-3.5 w-3.5" />
-                          Aptarti su AI
-                        </Link>
-                      </Button>
                     </div>
-                    {row?.updated_at && (
-                      <div className="text-[10px] text-muted-foreground mt-2">
-                        Atnaujinta {new Date(row.updated_at).toLocaleDateString("lt-LT")}
-                      </div>
-                    )}
                   </Card>
                 );
               })}
             </div>
           )}
+
+          <Card className="flex items-start gap-3 border-dashed p-4">
+            <Sparkles className="mt-0.5 h-4 w-4 text-primary" />
+            <div>
+              <div className="text-sm font-medium">Kitas etapas</div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Iš užpildytos vizijos vėliau galėsime automatiškai pasiūlyti suderintus tikslus ir
+                pirmuosius prioritetus.
+              </p>
+            </div>
+            <Badge variant="secondary" className="ml-auto">
+              Ruošiama
+            </Badge>
+          </Card>
         </div>
       </div>
     </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-medium">{label}</span>
+      {children}
+    </label>
   );
 }
