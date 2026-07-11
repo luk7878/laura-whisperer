@@ -1008,6 +1008,56 @@ export type Database = {
         }
         Relationships: []
       }
+      vision_items: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          evidence: string
+          horizon: string
+          id: string
+          linked_value_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          why: string
+        }
+        Insert: {
+          category: string
+          content?: string
+          created_at?: string
+          evidence?: string
+          horizon?: string
+          id?: string
+          linked_value_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          why?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          evidence?: string
+          horizon?: string
+          id?: string
+          linked_value_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          why?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vision_items_linked_value_id_fkey"
+            columns: ["linked_value_id"]
+            isOneToOne: false
+            referencedRelation: "values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
