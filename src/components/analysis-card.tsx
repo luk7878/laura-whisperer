@@ -12,14 +12,13 @@ type Parsed = {
 };
 
 function parseAnalysis(text: string): Parsed {
-  const grab = (label: string) => {
-    const re = new RegExp(`\\*\\*${label}:\\*\\*\\s*([^\\n]*(?:\\n(?!\\*\\*|\\*[^*])[^\\n]*)*)`, "i");
-    const m = text.match(re);
-    return m?.[1]?.trim();
-  };
-  const etapas = grab("Etapas");
-  const fokusas = grab("Fokusas");
-  const klausimas = grab("Klausimas");
+  const grabLine = (label: string) =>
+    text.match(new RegExp(`\\*\\*${label}:\\*\\*\\s*([^\\n]+)`, "i"))?.[1]?.trim();
+  const etapas = grabLine("Etapas");
+  const fokusas = grabLine("Fokusas");
+  const klausimas = text
+    .match(/\*\*Klausimas:\*\*\s*([\s\S]*?)(?=\n\s*\*[^*]|\n\s*\*\*|$)/i)?.[1]
+    ?.trim();
 
   // intensity: "**Pradinis emocinis intensyvumas: 8/10**" or "**Emocinis intensyvumas: 8/10**"
   const im = text.match(/\*\*(?:Pradinis\s+)?[Ee]mocinis intensyvumas:\s*(\d+\/\d+)\*\*/);
@@ -29,9 +28,12 @@ function parseAnalysis(text: string): Parsed {
   const hintMatch = text.match(/\*([^*\n]{6,240})\*(?!\*)/g);
   const hint = hintMatch?.[hintMatch.length - 1]?.replace(/^\*|\*$/g, "").trim();
 
-  // intro = everything before **Etapas:**
-  const idx = text.search(/\*\*Etapas:\*\*/i);
-  const intro = (idx >= 0 ? text.slice(0, idx) : text).trim();
+  // Reflection can be before the metadata or between Fokusas and Klausimas.
+  const beforeEtapas = text.split(/\*\*Etapas:\*\*/i)[0]?.trim();
+  const betweenFocusAndQuestion = text
+    .match(/\*\*Fokusas:\*\*[^\n]*\n+([\s\S]*?)(?=\*\*Klausimas:\*\*)/i)?.[1]
+    ?.trim();
+  const intro = beforeEtapas || betweenFocusAndQuestion || "";
 
   return { intro, etapas, fokusas, klausimas, hint, intensity };
 }
@@ -75,48 +77,91 @@ export function AnalysisCard({ content, time }: { content: string; time?: string
   const hasStructure = p.etapas || p.fokusas || p.klausimas;
 
   return (
-    <Card className="border-primary/20 shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3 border-b bg-primary/5">
-        <div className="flex items-center gap-2 text-primary font-medium text-sm">
-          <Sparkles className="h-4 w-4" /> AI analizė
+    <Card className="overflow-hidden rounded-2xl border-primary/10 bg-card shadow-sm">
+      <div className="flex items-center justify-between px-5 py-4 md:px-6">
+        <div className="flex items-center gap-2.5 font-semibold text-foreground">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          AI analizė
         </div>
         {time && <span className="text-xs text-muted-foreground">{time}</span>}
       </div>
 
-      <div className="p-5 space-y-4">
-        {p.intro && (
-          <div className="flex gap-4">
-            <div className="prose prose-sm dark:prose-invert max-w-none flex-1 leading-relaxed">
-              <ReactMarkdown>{p.intro}</ReactMarkdown>
+      <div className="grid gap-4 px-4 pb-4 md:px-6 md:pb-6 lg:grid-cols-[1.75fr_0.85fr]">
+        <div className="rounded-2xl border bg-background p-4 shadow-sm md:p-5">
+          {hasStructure && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field
+                icon={<Flag className="h-4 w-4" />}
+                label="Etapas"
+                value={p.etapas}
+                tone="primary"
+              />
+              <Field
+                icon={<Target className="h-4 w-4" />}
+                label="Fokusas"
+                value={p.fokusas}
+                tone="violet"
+              />
             </div>
-            {p.intensity && (
-              <div className="flex flex-col items-center justify-center rounded-lg bg-primary/10 border border-primary/20 px-4 py-3 min-w-[130px]">
-                <Activity className="h-5 w-5 text-primary mb-1" />
-                <div className="text-xs text-muted-foreground">Emocinis intensyvumas</div>
-                <div className="text-2xl font-semibold text-primary leading-tight">{p.intensity}</div>
+          )}
+
+          {p.intro && (
+            <div className="mt-5">
+              <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed prose-headings:font-serif prose-headings:text-foreground prose-headings:leading-tight prose-headings:mb-3 prose-p:my-2.5 prose-strong:text-foreground md:prose-lg">
+                <ReactMarkdown>{p.intro}</ReactMarkdown>
               </div>
-            )}
-          </div>
-        )}
+              <div className="mt-4 h-0.5 w-24 bg-gradient-to-r from-primary via-map-violet to-transparent" />
+            </div>
+          )}
 
-        {hasStructure && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 rounded-lg border bg-muted/30 p-4">
-            <Field icon={<Flag className="h-4 w-4" />} label="Etapas" value={p.etapas} tone="primary" />
-            <Field icon={<Target className="h-4 w-4" />} label="Fokusas" value={p.fokusas} tone="violet" />
-            <Field icon={<HelpCircle className="h-4 w-4" />} label="Klausimas" value={p.klausimas} tone="teal" />
-          </div>
-        )}
+          {p.intensity && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs">
+              <Activity className="h-3.5 w-3.5 text-primary" />
+              <span className="text-muted-foreground">Emocinis intensyvumas</span>
+              <span className="font-semibold text-primary">{p.intensity}</span>
+            </div>
+          )}
 
-        {p.hint && (
-          <div className="flex items-start gap-2 text-sm text-muted-foreground bg-muted/40 rounded-md px-3 py-2">
-            <Lightbulb className="h-4 w-4 mt-0.5 shrink-0 text-amber-500" />
-            <span className="italic">{p.hint}</span>
-          </div>
-        )}
+          {p.hint && (
+            <div className="mt-5 flex items-start gap-3 rounded-xl border border-map-violet/15 bg-gradient-to-r from-map-violet/10 to-primary/5 px-4 py-3 text-sm">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-map-violet/15 text-map-violet">
+                <Lightbulb className="h-4 w-4" />
+              </div>
+              <div className="leading-relaxed text-map-violet">
+                <span className="font-semibold">Esmė: </span>
+                {p.hint}
+              </div>
+            </div>
+          )}
 
-        {!hasStructure && !p.intro && (
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown>{content || "…"}</ReactMarkdown>
+          {!hasStructure && !p.intro && (
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown>{content || "…"}</ReactMarkdown>
+            </div>
+          )}
+        </div>
+
+        {p.klausimas && (
+          <div className="relative min-h-[260px] overflow-hidden rounded-2xl border border-map-green/20 bg-gradient-to-br from-map-green/[0.06] via-background to-map-teal/[0.10] p-5 shadow-sm md:p-6">
+            <div className="absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-map-green/[0.07]" />
+            <div className="absolute -right-8 top-8 h-20 w-20 rounded-full bg-map-teal/[0.05]" />
+            <div className="relative flex items-center gap-2.5 text-map-green">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-map-green/15">
+                <HelpCircle className="h-5 w-5" />
+              </div>
+              <span className="font-semibold">Klausimas</span>
+            </div>
+            <div className="relative mt-7 text-5xl font-serif leading-none text-map-green/30">
+              “
+            </div>
+            <p className="relative -mt-2 whitespace-pre-wrap text-base font-medium leading-8 text-foreground md:text-lg">
+              {p.klausimas}
+            </p>
+            <div className="relative mt-3 text-right text-5xl font-serif leading-none text-map-green/30">
+              ”
+            </div>
           </div>
         )}
       </div>
@@ -141,8 +186,10 @@ function Field({
     teal: "text-teal-600 bg-teal-500/10",
   };
   return (
-    <div className="flex gap-2">
-      <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${toneMap[tone]}`}>
+    <div className="flex min-h-[92px] gap-3 rounded-xl border bg-card/80 p-3.5">
+      <div
+        className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${toneMap[tone]}`}
+      >
         {icon}
       </div>
       <div className="min-w-0">
@@ -164,7 +211,9 @@ export function UserCard({ content, time }: { content: string; time?: string }) 
         </div>
         {time && <span className="text-xs text-muted-foreground">{time}</span>}
       </div>
-      <div className="px-5 py-4 text-sm whitespace-pre-wrap text-right text-foreground">{content}</div>
+      <div className="px-5 py-4 text-sm whitespace-pre-wrap text-right text-foreground">
+        {content}
+      </div>
     </Card>
   );
 }
