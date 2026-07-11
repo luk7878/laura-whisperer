@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Sparkles, KeyRound, ArrowLeft, Mail, LockKeyhole } from "lucide-react";
+import { KeyRound, ArrowLeft, Mail, LockKeyhole, Compass, ShieldCheck, BrainCircuit } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -206,12 +206,35 @@ function AuthPage() {
   }[mode];
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
-      <Card className="w-full max-w-md border-border/50 shadow-xl">
+    <div className="relative min-h-[100dvh] overflow-hidden bg-background p-4 md:p-8">
+      <div className="pointer-events-none absolute -left-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-48 -right-36 h-[32rem] w-[32rem] rounded-full bg-map-violet/10 blur-3xl" />
+      <div className="relative mx-auto grid min-h-[calc(100dvh-2rem)] w-full max-w-5xl items-stretch overflow-hidden rounded-[2rem] border border-white/80 bg-card/70 shadow-[0_35px_100px_-42px_oklch(0.2_0.1_270_/_0.65)] backdrop-blur-xl md:min-h-[calc(100dvh-4rem)] md:grid-cols-[1.05fr_0.95fr]">
+        <aside className="relative hidden overflow-hidden bg-gradient-to-br from-primary via-primary to-map-violet p-10 text-primary-foreground md:flex md:flex-col md:justify-between lg:p-14">
+          <div className="absolute -right-32 -top-28 h-96 w-96 rounded-full border border-white/15 bg-white/[0.06]" />
+          <div className="absolute -bottom-28 -left-20 h-80 w-80 rounded-full border border-white/10 bg-white/[0.05]" />
+          <Link to="/" className="relative flex items-center gap-3 text-white">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 backdrop-blur">
+              <Compass className="h-5 w-5" />
+            </span>
+            <span className="font-serif text-2xl">Augimo Kompasas</span>
+          </Link>
+          <div className="relative max-w-md">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/65">Tavo asmeninė augimo erdvė</p>
+            <h1 className="mt-4 font-serif text-5xl leading-[1.03] tracking-tight lg:text-6xl">Aiškumas prasideda nuo vieno tikro klausimo.</h1>
+            <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/72">Sugrįžk prie savo sesijų, įžvalgų ir tikslų. Visa tavo augimo istorija — saugioje, ramioje erdvėje.</p>
+          </div>
+          <div className="relative grid gap-3 text-sm text-white/80">
+            <div className="flex items-center gap-3"><BrainCircuit className="h-4 w-4" /> AI mentorius su tavo kontekstu</div>
+            <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4" /> Privati ir saugi refleksijos erdvė</div>
+          </div>
+        </aside>
+        <div className="flex items-center justify-center p-4 sm:p-8 lg:p-12">
+      <Card className="w-full max-w-md border-0 bg-transparent shadow-none backdrop-blur-none">
         <CardHeader className="text-center">
-          <Link to="/" className="mx-auto mb-2 flex items-center gap-2 text-primary">
-            <Sparkles className="h-6 w-6" />
-            <span className="font-semibold">Augimo Kompasas AI</span>
+          <Link to="/" className="mx-auto mb-3 flex items-center gap-2 text-primary md:hidden">
+            <Compass className="h-6 w-6" />
+            <span className="font-serif text-xl">Augimo Kompasas</span>
           </Link>
           <CardTitle>{heading}</CardTitle>
           <CardDescription>{description}</CardDescription>
@@ -395,6 +418,8 @@ function AuthPage() {
           )}
         </CardContent>
       </Card>
+        </div>
+      </div>
     </div>
   );
 }
