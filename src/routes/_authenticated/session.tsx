@@ -441,7 +441,7 @@ function SessionPage() {
       {/* Center column */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="z-20 shrink-0 border-b bg-background/90 backdrop-blur px-3 md:px-5 py-3">
+        <header className="z-20 shrink-0 border-b border-border/70 bg-background/80 px-3 py-3 backdrop-blur-xl md:px-6 md:py-4">
           <div className="flex items-start gap-2 md:gap-3">
             <SidebarTrigger className="mt-1 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -521,17 +521,17 @@ function SessionPage() {
         </header>
 
         {/* Tabs */}
-        <div className="z-10 shrink-0 border-b bg-background px-3 md:px-5 overflow-x-auto">
-          <div className="flex gap-4 md:gap-6 min-w-max">
+        <div className="z-10 shrink-0 border-b border-border/60 bg-background/70 px-3 backdrop-blur-xl md:px-6 overflow-x-auto">
+          <div className="flex min-w-max gap-1 py-2">
             {TABS.map((t) => (
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
-                  "flex items-center gap-1.5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap",
+                  "flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all whitespace-nowrap",
                   tab === t.key
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground",
+                    ? "bg-primary/[0.09] text-primary shadow-[inset_0_0_0_1px_oklch(0.535_0.205_274_/_0.08)]"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                 )}
               >
                 <t.icon className="h-4 w-4" />
@@ -542,12 +542,12 @@ function SessionPage() {
         </div>
 
         {/* Body */}
-        <div className="flex-1 min-h-0 overflow-hidden bg-muted/20">
+        <div className="flex-1 min-h-0 overflow-hidden bg-transparent">
           {tab === "session" && (
             <div ref={scrollRef} className="h-full overflow-y-auto">
-              <div className="max-w-3xl mx-auto px-3 md:px-5 py-4 space-y-4">
+              <div className="max-w-4xl mx-auto px-3 md:px-6 py-5 md:py-7 space-y-5">
                 {/* Sesijos pulsas */}
-                <div className="flex items-center gap-2 overflow-x-auto rounded-xl border bg-background/70 px-3 py-2.5 shadow-sm">
+                <div className="flex items-center gap-2 overflow-x-auto rounded-2xl border border-white/80 bg-card/85 px-3 py-2.5 shadow-[0_10px_30px_-24px_oklch(0.25_0.08_270)] backdrop-blur">
                   <Activity className="h-4 w-4 shrink-0 text-map-green" />
                   <div className="flex min-w-max items-center gap-2">
                     <PulseBadge icon={<Ear className="h-3 w-3" />} tone="map-green">
@@ -602,7 +602,7 @@ function SessionPage() {
 
                 {/* Gyvas fokusas – tik demartini režime */}
                 {mode === "demartini" && messages.length > 0 && (
-                  <Card className="p-4 md:p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                  <Card className="overflow-hidden border-primary/15 bg-gradient-to-br from-primary/[0.09] via-card to-map-violet/[0.06] p-5 md:p-7">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium">Gyvas fokusas</span>

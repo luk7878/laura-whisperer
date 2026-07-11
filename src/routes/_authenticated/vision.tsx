@@ -140,7 +140,7 @@ function VisionPage() {
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-3">
+      <header className="app-page-header">
         <SidebarTrigger />
         <div>
           <h1 className="font-serif text-xl md:text-2xl">Vizija</h1>
@@ -149,7 +149,7 @@ function VisionPage() {
           </p>
         </div>
       </header>
-      <div className="flex-1 overflow-y-auto bg-muted/20 p-3 md:p-6">
+      <div className="app-page-body">
         <div className="mx-auto max-w-6xl space-y-5">
           <Card className="overflow-hidden border-primary/15 bg-gradient-to-br from-primary/[0.08] via-card to-map-teal/[0.06] p-5 md:p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

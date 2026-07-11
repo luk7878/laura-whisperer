@@ -205,7 +205,7 @@ function KnowledgePage() {
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto">
-      <header className="border-b bg-background/80 backdrop-blur px-6 py-4 flex items-start gap-3">
+      <header className="app-page-header items-start">
         <SidebarTrigger className="mt-1" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">

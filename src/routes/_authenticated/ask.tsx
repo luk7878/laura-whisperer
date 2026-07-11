@@ -105,10 +105,10 @@ function AskLayout() {
   );
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col bg-gradient-to-b from-background to-muted/30">
-      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-2.5 md:py-3 flex items-center gap-2">
+    <div className="flex-1 min-h-0 flex flex-col bg-transparent">
+      <header className="app-page-header py-2.5 md:py-3">
         <SidebarTrigger className="shrink-0" />
-        <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-map-violet text-white shadow-md flex items-center justify-center shrink-0">
           <MessageSquare className="h-4 w-4" />
         </div>
         <div className="flex-1 min-w-0">
@@ -157,7 +157,7 @@ function AskLayout() {
 
       <div className="flex-1 min-h-0 flex">
         {/* Thread list — desktop */}
-        <aside className="hidden md:flex w-64 shrink-0 border-r flex-col bg-background/50">
+        <aside className="hidden md:flex w-72 shrink-0 border-r border-border/60 flex-col bg-card/35 backdrop-blur">
           <div className="border-b px-3 pb-2 pt-3">
             <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Mentoriaus pokalbiai

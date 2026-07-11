@@ -132,7 +132,7 @@ function ProfilePage() {
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 md:gap-3">
+      <header className="app-page-header">
         <SidebarTrigger className="shrink-0" />
         <div className="flex-1 min-w-0">
           <h1 className="font-serif text-xl md:text-2xl leading-tight truncate">

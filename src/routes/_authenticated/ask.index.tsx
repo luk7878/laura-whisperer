@@ -143,7 +143,7 @@ function AskIndex() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col">
-      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-8">
+      <div className="flex-1 overflow-y-auto px-4 py-8 md:px-8 md:py-12">
         <div className="max-w-2xl mx-auto">
           {contextLoading && (
             <Card className="mb-4 flex items-center gap-3 p-4 text-sm text-muted-foreground">
@@ -174,7 +174,7 @@ function AskIndex() {
               </div>
             </Card>
           )}
-          <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-card via-card to-primary/[0.04] p-6 shadow-sm md:p-8">
+          <Card className="relative overflow-hidden border-primary/15 bg-gradient-to-br from-card via-card to-primary/[0.07] p-6 md:p-8">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="h-5 w-5 text-primary" />
               <h2 className="font-serif text-xl">Kuo galiu padėti?</h2>
@@ -188,7 +188,7 @@ function AskIndex() {
                   key={s.label}
                   disabled={busy}
                   onClick={() => setInput(s.text)}
-                  className="group flex min-h-24 items-start gap-3 rounded-xl border bg-background p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm disabled:opacity-50"
+                  className="group flex min-h-24 items-start gap-3 rounded-2xl border border-white/80 bg-background/70 p-4 text-left shadow-[0_8px_24px_-22px_oklch(0.25_0.08_270)] transition-all hover:-translate-y-1 hover:border-primary/25 hover:bg-card hover:shadow-[0_16px_34px_-24px_oklch(0.25_0.08_270)] disabled:opacity-50"
                 >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <s.icon className="h-4 w-4" />
@@ -207,9 +207,9 @@ function AskIndex() {
       </div>
       <form
         onSubmit={(e) => start(input, e)}
-        className="border-t bg-background/95 p-3 backdrop-blur md:p-4"
+        className="border-t border-border/60 bg-background/80 p-3 backdrop-blur-xl md:p-4"
       >
-        <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border bg-card p-2 shadow-sm focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
+        <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-white/80 bg-card/95 p-2 shadow-[0_16px_45px_-24px_oklch(0.25_0.08_270_/_0.55)] transition-all focus-within:border-primary/35 focus-within:ring-4 focus-within:ring-primary/8">
           <Textarea
             ref={inputRef}
             autoFocus

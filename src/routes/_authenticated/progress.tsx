@@ -131,7 +131,7 @@ function ProgressPage() {
 
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <header className="border-b bg-background/80 backdrop-blur px-3 md:px-6 py-3 md:py-4 flex items-center gap-2 md:gap-3">
+      <header className="app-page-header">
         <SidebarTrigger className="shrink-0" />
         <div className="flex-1 min-w-0">
           <h1 className="font-serif text-xl md:text-2xl leading-tight">Pažanga</h1>
@@ -141,7 +141,7 @@ function ProgressPage() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-muted/20">
+      <div className="app-page-body">
         <div className="max-w-6xl mx-auto space-y-5">
           {loading && <div className="text-sm text-muted-foreground">Kraunama…</div>}
 

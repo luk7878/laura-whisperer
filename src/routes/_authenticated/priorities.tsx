@@ -105,7 +105,7 @@ function PrioritiesPage() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <header className="flex items-center gap-2 border-b bg-background/90 px-3 py-3 backdrop-blur md:gap-3 md:px-6 md:py-4">
+      <header className="app-page-header">
         <SidebarTrigger className="shrink-0" />
         <div className="min-w-0 flex-1">
           <h1 className="font-serif text-xl leading-tight md:text-2xl">Prioritetai</h1>
@@ -130,7 +130,7 @@ function PrioritiesPage() {
         </Dialog>
       </header>
 
-      <div className="flex-1 overflow-y-auto bg-muted/20 p-3 md:p-6">
+      <div className="app-page-body">
         <div className="mx-auto max-w-5xl space-y-5">
           <section className="relative overflow-hidden rounded-3xl border bg-gradient-to-br from-primary/[0.08] via-background to-map-violet/[0.08] p-5 shadow-sm md:p-7">
             <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-primary/[0.06]" />

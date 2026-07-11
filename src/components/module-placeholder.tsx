@@ -18,7 +18,7 @@ export function ModulePlaceholder({
 }) {
   return (
     <div className="flex-1 flex flex-col min-w-0">
-      <header className="border-b bg-background/80 backdrop-blur px-6 py-4 flex items-center gap-3">
+      <header className="app-page-header">
         <SidebarTrigger />
         <div>
           <h1 className="font-serif text-2xl leading-tight">{title}</h1>
@@ -26,7 +26,7 @@ export function ModulePlaceholder({
         </div>
       </header>
 
-      <div className="flex-1 flex items-center justify-center p-8 bg-muted/20">
+      <div className="app-page-body flex items-center justify-center p-8">
         <Card className="max-w-lg p-10 text-center">
           <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary mx-auto flex items-center justify-center mb-5">
             <Icon className="h-8 w-8" />
