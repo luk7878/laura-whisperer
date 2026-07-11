@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthedLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const focusMode = pathname === "/ask" || pathname.startsWith("/ask/");
+  const focusMode = pathname === "/ask" || pathname.startsWith("/ask/") || pathname === "/session";
   const [sidebarOpen, setSidebarOpen] = useState(!focusMode);
 
   useEffect(() => {

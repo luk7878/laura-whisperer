@@ -44,7 +44,7 @@ export function GrowthMap({
   data: SessionMapData;
   progress?: { day: string; value: number }[];
 }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   if (collapsed) {
     return (
@@ -218,7 +218,6 @@ export function GrowthMapBody({
   );
 }
 
-
 function MapCard({
   icon,
   label,
@@ -236,7 +235,9 @@ function MapCard({
 }) {
   return (
     <Card className="p-4">
-      <div className={cn("flex items-center gap-2 text-xs uppercase tracking-wider", `text-${tint}`)}>
+      <div
+        className={cn("flex items-center gap-2 text-xs uppercase tracking-wider", `text-${tint}`)}
+      >
         {icon}
         <span>{label}</span>
       </div>

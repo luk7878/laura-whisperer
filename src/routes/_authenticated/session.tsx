@@ -30,7 +30,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GrowthMap, GrowthMapBody, type SessionMapData } from "@/components/growth-map";
-import { GoalClarifier, GoalClarifierBody, type GoalClarifierData } from "@/components/goal-clarifier";
+import {
+  GoalClarifier,
+  GoalClarifierBody,
+  type GoalClarifierData,
+} from "@/components/goal-clarifier";
 import { NewSessionDialog, type SessionMode } from "@/components/new-session-dialog";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
 import { extractGoalPayload } from "@/lib/parse-goal-payload";
@@ -40,7 +44,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
 import { SessionIntegration } from "@/components/session-integration";
 import { CheckCircle2, Compass, BookOpen } from "lucide-react";
-
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -73,7 +76,6 @@ const TABS = [
   { key: "integration", label: "Integracija", icon: Puzzle },
 ] as const;
 
-
 function SessionPage() {
   const navigate = useNavigate();
   const { s: sidFromUrl } = Route.useSearch();
@@ -91,7 +93,6 @@ function SessionPage() {
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
   const [mapSheetOpen, setMapSheetOpen] = useState(false);
-
 
   const mode: SessionMode = (session?.mode as SessionMode) ?? "demartini";
 
@@ -136,7 +137,6 @@ function SessionPage() {
     navigate({ to: "/session", search: { s: created.id } });
   }
 
-
   async function loadSession(id: string) {
     const [{ data: srow }, { data: mrows }] = await Promise.all([
       supabase.from("sessions").select("*").eq("id", id).single(),
@@ -163,7 +163,6 @@ function SessionPage() {
     grid: (session?.grid as Record<string, string> | null) ?? {},
   };
 
-
   const grid = (session?.grid as Record<string, string> | null) ?? {};
   const goalData: GoalClarifierData = {
     stage: session?.active_column ?? null,
@@ -180,7 +179,8 @@ function SessionPage() {
 
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
   const lastUser = [...messages].reverse().find((m) => m.role === "user");
-  const focusQuote = lastUser?.content?.split(/[.!?]/)[0]?.trim() || "Kokia mintis dabar giliausiai kalba?";
+  const focusQuote =
+    lastUser?.content?.split(/[.!?]/)[0]?.trim() || "Kokia mintis dabar giliausiai kalba?";
 
   async function sendMessage(e?: FormEvent) {
     e?.preventDefault();
@@ -194,7 +194,6 @@ function SessionPage() {
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setStreaming(true);
-
 
     await supabase.from("messages").insert({
       session_id: session.id,
@@ -299,7 +298,6 @@ function SessionPage() {
           .single();
         if (updated) setSession(updated as SessionRow);
       }
-
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "AI klaida";
       toast.error(msg);
@@ -429,20 +427,22 @@ function SessionPage() {
     }
   }
 
-  const currentTime = new Date().toLocaleTimeString("lt-LT", { hour: "2-digit", minute: "2-digit" });
-
+  const currentTime = new Date().toLocaleTimeString("lt-LT", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <div className="flex flex-1 min-h-0">
       {/* Center column */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Header */}
-        <header className="border-b bg-background/80 backdrop-blur px-4 md:px-6 py-3 md:py-4">
+        <header className="border-b bg-background/90 backdrop-blur px-3 md:px-5 py-3">
           <div className="flex items-start gap-2 md:gap-3">
             <SidebarTrigger className="mt-1 shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-serif text-xl md:text-3xl leading-tight text-foreground truncate max-w-full">
+                <h1 className="font-serif text-xl md:text-2xl leading-tight text-foreground truncate max-w-full">
                   {session?.title ?? "Gyva augimo sesija"}
                 </h1>
                 <ModeBadge mode={mode} />
@@ -454,7 +454,7 @@ function SessionPage() {
                 </span>
                 <span>· {currentTime}</span>
               </div>
-              <p className="hidden md:block text-sm text-muted-foreground mt-1">
+              <p className="hidden xl:block text-xs text-muted-foreground mt-1">
                 {mode === "goal_clarify"
                   ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
                   : mode === "mentor"
@@ -516,9 +516,8 @@ function SessionPage() {
           </div>
         </header>
 
-
         {/* Tabs */}
-        <div className="border-b bg-background px-4 md:px-6 overflow-x-auto">
+        <div className="border-b bg-background px-3 md:px-5 overflow-x-auto">
           <div className="flex gap-4 md:gap-6 min-w-max">
             {TABS.map((t) => (
               <button
@@ -538,26 +537,25 @@ function SessionPage() {
           </div>
         </div>
 
-
         {/* Body */}
         <div className="flex-1 min-h-0 overflow-hidden bg-muted/20">
           {tab === "session" && (
             <div ref={scrollRef} className="h-full overflow-y-auto">
-              <div className="max-w-3xl mx-auto px-4 md:px-6 py-4 md:py-6 space-y-4">
+              <div className="max-w-3xl mx-auto px-3 md:px-5 py-4 space-y-4">
                 {/* Sesijos pulsas */}
-                <Card className="p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium mb-3">
-                    <Activity className="h-4 w-4 text-map-green" />
-                    Sesijos pulsas
-                  </div>
-                  <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-2 overflow-x-auto rounded-xl border bg-background/70 px-3 py-2.5 shadow-sm">
+                  <Activity className="h-4 w-4 shrink-0 text-map-green" />
+                  <div className="flex min-w-max items-center gap-2">
                     <PulseBadge icon={<Ear className="h-3 w-3" />} tone="map-green">
                       {streaming ? "AI analizuoja…" : "Klausausi"}
                     </PulseBadge>
                     {mode === "demartini" && (
                       <>
                         {mapData.topic && (
-                          <PulseBadge icon={<Circle className="h-3 w-3 fill-current" />} tone="map-blue">
+                          <PulseBadge
+                            icon={<Circle className="h-3 w-3 fill-current" />}
+                            tone="map-blue"
+                          >
                             Aktyvi tema: {mapData.topic}
                           </PulseBadge>
                         )}
@@ -581,7 +579,10 @@ function SessionPage() {
                           </PulseBadge>
                         )}
                         {goalData.goal_draft && (
-                          <PulseBadge icon={<Circle className="h-3 w-3 fill-current" />} tone="map-blue">
+                          <PulseBadge
+                            icon={<Circle className="h-3 w-3 fill-current" />}
+                            tone="map-blue"
+                          >
                             Tikslas: {goalData.goal_draft.slice(0, 60)}
                           </PulseBadge>
                         )}
@@ -593,7 +594,7 @@ function SessionPage() {
                       </>
                     )}
                   </div>
-                </Card>
+                </div>
 
                 {/* Gyvas fokusas – tik demartini režime */}
                 {mode === "demartini" && messages.length > 0 && (
@@ -601,7 +602,9 @@ function SessionPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium">Gyvas fokusas</span>
-                      <span className="text-xs text-muted-foreground hidden sm:inline">· Sustokime čia</span>
+                      <span className="text-xs text-muted-foreground hidden sm:inline">
+                        · Sustokime čia
+                      </span>
                     </div>
                     <div className="text-center py-2 md:py-3">
                       <Quote className="h-5 w-5 md:h-6 md:w-6 text-primary/40 mx-auto mb-2" />
@@ -620,7 +623,7 @@ function SessionPage() {
                         <HelpCircle className="h-3.5 w-3.5" /> Paprasčiau
                       </Button>
                       <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-                        Toliau <ChevronRight className="h-3.5 w-3.5" />
+                        Kitas klausimas <ChevronRight className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </Card>
@@ -628,14 +631,22 @@ function SessionPage() {
 
                 {messages.length === 0 && (
                   <Card className="p-6 md:p-10 text-center border-dashed">
-                    <div className={cn(
-                      "h-12 w-12 md:h-14 md:w-14 rounded-2xl mx-auto mb-4 flex items-center justify-center",
-                      "bg-primary/10 text-primary",
-                    )}>
-                      {mode === "goal_clarify" ? <Compass className="h-6 w-6 md:h-7 md:w-7" /> : <Sparkles className="h-6 w-6 md:h-7 md:w-7" />}
+                    <div
+                      className={cn(
+                        "h-12 w-12 md:h-14 md:w-14 rounded-2xl mx-auto mb-4 flex items-center justify-center",
+                        "bg-primary/10 text-primary",
+                      )}
+                    >
+                      {mode === "goal_clarify" ? (
+                        <Compass className="h-6 w-6 md:h-7 md:w-7" />
+                      ) : (
+                        <Sparkles className="h-6 w-6 md:h-7 md:w-7" />
+                      )}
                     </div>
                     <h2 className="font-serif text-xl md:text-2xl">
-                      {mode === "goal_clarify" ? "Pradėk tikslo išgryninimą" : "Pradėk savirefleksijos sesiją"}
+                      {mode === "goal_clarify"
+                        ? "Pradėk tikslo išgryninimą"
+                        : "Pradėk savirefleksijos sesiją"}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
                       {mode === "goal_clarify"
@@ -644,8 +655,6 @@ function SessionPage() {
                     </p>
                   </Card>
                 )}
-
-
 
                 {/* Messages */}
                 {messages.map((m) => (
@@ -684,16 +693,18 @@ function SessionPage() {
         </div>
 
         {/* Composer */}
-        <form onSubmit={sendMessage} className="border-t bg-background px-3 py-3 md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+        <form
+          onSubmit={sendMessage}
+          className="border-t bg-background/95 px-3 py-3 backdrop-blur md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+        >
           <div className="max-w-3xl mx-auto">
-            <Card className="p-2.5 md:p-3 flex items-start gap-2 md:gap-3">
-
+            <Card className="p-2 flex items-end gap-2 border-primary/20 shadow-sm focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
               <button
                 type="button"
                 onClick={recording ? stopRecording : startRecording}
                 disabled={streaming || transcribing}
                 className={cn(
-                  "h-10 w-10 md:h-11 md:w-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                  "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
                   recording
                     ? "bg-destructive text-destructive-foreground border-destructive"
                     : "bg-muted hover:bg-accent",
@@ -709,11 +720,15 @@ function SessionPage() {
                 )}
               </button>
 
-
               <div className="flex-1 min-w-0">
-                <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                <div className="hidden md:flex items-center gap-2 px-2 text-[10px] text-muted-foreground mb-1">
                   <span className="flex items-center gap-1">
-                    <span className={cn("h-1.5 w-1.5 rounded-full", recording ? "bg-destructive animate-pulse" : "bg-map-green")} />
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        recording ? "bg-destructive animate-pulse" : "bg-map-green",
+                      )}
+                    />
                     {recording ? "Įrašoma…" : "Balso režimas aktyvus"}
                   </span>
                   <span>·</span>
@@ -725,7 +740,7 @@ function SessionPage() {
                   placeholder="Pasakyk, kas dabar kyla mintyse…"
                   rows={2}
                   disabled={streaming || transcribing}
-                  className="resize-none border-0 shadow-none focus-visible:ring-0 p-0 text-base min-h-[44px]"
+                  className="resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 px-2 py-1 text-base min-h-[44px]"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -733,7 +748,7 @@ function SessionPage() {
                     }
                   }}
                 />
-                <div className="hidden md:flex items-center gap-2 mt-2 text-muted-foreground">
+                <div className="hidden xl:flex items-center gap-2 px-2 mt-1 text-muted-foreground">
                   <button type="button" className="p-1 hover:text-foreground" title="Priedas">
                     <Paperclip className="h-4 w-4" />
                   </button>
@@ -746,14 +761,16 @@ function SessionPage() {
                 </div>
               </div>
 
-
               <Button
                 type="submit"
                 disabled={streaming || !input.trim()}
-                className="h-11 gap-1.5 shrink-0 px-3 md:px-4"
+                className="h-11 w-11 rounded-xl shrink-0 p-0"
               >
-                {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                <span className="hidden md:inline">Siųsti</span>
+                {streaming ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </Card>
           </div>
@@ -786,7 +803,6 @@ function SessionPage() {
           </SheetContent>
         </Sheet>
       )}
-
 
       {session && mode === "demartini" && (
         <SessionCompletionDialog
@@ -853,7 +869,11 @@ function PulseBadge({
     <Badge
       variant="outline"
       className="gap-1.5 py-1.5 px-2.5 font-normal rounded-full border"
-      style={{ color: `var(--color-${tone})`, borderColor: `color-mix(in oklab, var(--color-${tone}) 30%, transparent)`, backgroundColor: `color-mix(in oklab, var(--color-${tone}) 8%, transparent)` }}
+      style={{
+        color: `var(--color-${tone})`,
+        borderColor: `color-mix(in oklab, var(--color-${tone}) 30%, transparent)`,
+        backgroundColor: `color-mix(in oklab, var(--color-${tone}) 8%, transparent)`,
+      }}
     >
       {icon}
       {children}
@@ -863,7 +883,10 @@ function PulseBadge({
 
 function MessageBubble({ message }: { message: Message }) {
   const time = message.created_at
-    ? new Date(message.created_at).toLocaleTimeString("lt-LT", { hour: "2-digit", minute: "2-digit" })
+    ? new Date(message.created_at).toLocaleTimeString("lt-LT", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : "dabar";
 
   if (message.role === "user") {
@@ -871,7 +894,6 @@ function MessageBubble({ message }: { message: Message }) {
   }
   return <AnalysisCard content={message.content} time={time} />;
 }
-
 
 function cleanMessage(m: Message): Message {
   const { clean: c1 } = extractMapPayload(m.content);
@@ -931,4 +953,3 @@ function PlaceholderView({
     </div>
   );
 }
-
