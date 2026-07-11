@@ -151,7 +151,13 @@ function SessionPage() {
   }
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const frame = requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: streaming ? "smooth" : "auto",
+      });
+    });
+    return () => cancelAnimationFrame(frame);
   }, [messages, streaming]);
 
   const mapData: SessionMapData = {
@@ -433,11 +439,11 @@ function SessionPage() {
   });
 
   return (
-    <div className="flex flex-1 min-h-0">
+    <div className="flex h-[calc(100dvh-64px)] min-h-0 flex-1 overflow-hidden md:h-[100dvh]">
       {/* Center column */}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="border-b bg-background/90 backdrop-blur px-3 md:px-5 py-3">
+        <header className="z-20 shrink-0 border-b bg-background/90 backdrop-blur px-3 md:px-5 py-3">
           <div className="flex items-start gap-2 md:gap-3">
             <SidebarTrigger className="mt-1 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -517,7 +523,7 @@ function SessionPage() {
         </header>
 
         {/* Tabs */}
-        <div className="border-b bg-background px-3 md:px-5 overflow-x-auto">
+        <div className="z-10 shrink-0 border-b bg-background px-3 md:px-5 overflow-x-auto">
           <div className="flex gap-4 md:gap-6 min-w-max">
             {TABS.map((t) => (
               <button
@@ -695,7 +701,7 @@ function SessionPage() {
         {/* Composer */}
         <form
           onSubmit={sendMessage}
-          className="border-t bg-background/95 px-3 py-3 backdrop-blur md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+          className="z-20 shrink-0 border-t bg-background/95 px-3 py-3 backdrop-blur md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
         >
           <div className="max-w-3xl mx-auto">
             <Card className="p-2 flex items-end gap-2 border-primary/20 shadow-sm focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
