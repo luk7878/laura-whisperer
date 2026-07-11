@@ -25,8 +25,6 @@ import {
   Puzzle,
   Ear,
   HelpCircle,
-  Paperclip,
-  Smile,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GrowthMap, GrowthMapBody, type SessionMapData } from "@/components/growth-map";
@@ -701,19 +699,30 @@ function SessionPage() {
         {/* Composer */}
         <form
           onSubmit={sendMessage}
-          className="z-20 shrink-0 border-t bg-background/95 px-3 py-3 backdrop-blur md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+          className="z-20 shrink-0 border-t bg-background/95 px-3 py-3 backdrop-blur md:px-5 md:py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
         >
           <div className="max-w-3xl mx-auto">
-            <Card className="p-2 flex items-end gap-2 border-primary/20 shadow-sm focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
+            <div className="mb-2 flex items-center gap-2 px-1 text-[11px] text-muted-foreground">
+              <span
+                className={cn(
+                  "h-2 w-2 rounded-full",
+                  recording ? "animate-pulse bg-destructive" : "bg-map-green",
+                )}
+              />
+              <span>{recording ? "Įrašoma…" : "Balso režimas aktyvus"}</span>
+              <span>·</span>
+              <span>{streaming ? "AI analizuoja" : "AI klausosi"}</span>
+            </div>
+            <div className="flex items-end gap-2.5">
               <button
                 type="button"
                 onClick={recording ? stopRecording : startRecording}
                 disabled={streaming || transcribing}
                 className={cn(
-                  "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors",
+                  "h-12 w-12 rounded-full flex items-center justify-center shrink-0 border shadow-sm transition-all",
                   recording
                     ? "bg-destructive text-destructive-foreground border-destructive"
-                    : "bg-muted hover:bg-accent",
+                    : "border-primary/15 bg-primary/10 text-primary hover:scale-105 hover:bg-primary/15",
                 )}
                 title={recording ? "Sustabdyti įrašymą" : "Įrašyti balsu"}
               >
@@ -726,27 +735,14 @@ function SessionPage() {
                 )}
               </button>
 
-              <div className="flex-1 min-w-0">
-                <div className="hidden md:flex items-center gap-2 px-2 text-[10px] text-muted-foreground mb-1">
-                  <span className="flex items-center gap-1">
-                    <span
-                      className={cn(
-                        "h-1.5 w-1.5 rounded-full",
-                        recording ? "bg-destructive animate-pulse" : "bg-map-green",
-                      )}
-                    />
-                    {recording ? "Įrašoma…" : "Balso režimas aktyvus"}
-                  </span>
-                  <span>·</span>
-                  <span>AI klausosi</span>
-                </div>
+              <div className="flex min-w-0 flex-1 items-end rounded-[1.5rem] border bg-card py-1.5 pl-3 pr-1.5 shadow-sm transition-all focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Pasakyk, kas dabar kyla mintyse…"
-                  rows={2}
+                  rows={1}
                   disabled={streaming || transcribing}
-                  className="resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 px-2 py-1 text-base min-h-[44px]"
+                  className="max-h-32 min-h-[42px] flex-1 resize-none border-0 bg-transparent px-2 py-2 text-base shadow-none focus-visible:ring-0"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -754,31 +750,20 @@ function SessionPage() {
                     }
                   }}
                 />
-                <div className="hidden xl:flex items-center gap-2 px-2 mt-1 text-muted-foreground">
-                  <button type="button" className="p-1 hover:text-foreground" title="Priedas">
-                    <Paperclip className="h-4 w-4" />
-                  </button>
-                  <button type="button" className="p-1 hover:text-foreground" title="Emoji">
-                    <Smile className="h-4 w-4" />
-                  </button>
-                  <span className="ml-auto text-[11px]">
-                    Enter — siųsti, Shift + Enter — nauja eilutė
-                  </span>
-                </div>
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={streaming || !input.trim()}
+                  className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-primary to-map-violet p-0 shadow-md hover:opacity-90"
+                >
+                  {streaming ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
-
-              <Button
-                type="submit"
-                disabled={streaming || !input.trim()}
-                className="h-11 w-11 rounded-xl shrink-0 p-0"
-              >
-                {streaming ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-              </Button>
-            </Card>
+            </div>
           </div>
         </form>
       </div>
