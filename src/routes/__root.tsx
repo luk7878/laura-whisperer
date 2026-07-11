@@ -87,13 +87,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "Laura Borusaitė" },
       { property: "og:title", content: "Aiškumo sesija — nemokamas 15 min pokalbis" },
-      { property: "og:description", content: "Nemokama 15 minučių aiškumo sesija su virtualiu mentoriumi. Vienas aiškumas, vienas žingsnis." },
+      {
+        property: "og:description",
+        content:
+          "Nemokama 15 minučių aiškumo sesija su virtualiu mentoriumi. Vienas aiškumas, vienas žingsnis.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Aiškumo sesija" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Aiškumo sesija — nemokamas 15 min pokalbis" },
-      { name: "twitter:description", content: "Nemokama 15 minučių aiškumo sesija su virtualiu mentoriumi. Vienas aiškumas, vienas žingsnis." },
-
+      {
+        name: "twitter:description",
+        content:
+          "Nemokama 15 minučių aiškumo sesija su virtualiu mentoriumi. Vienas aiškumas, vienas žingsnis.",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -123,6 +130,16 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+
+  useEffect(() => {
+    if (window.location.pathname === "/auth") return;
+    const recoveryParams = new URLSearchParams(window.location.hash.slice(1));
+    if (recoveryParams.get("type") !== "recovery" || !recoveryParams.get("access_token")) return;
+
+    // Supabase dashboard-generated recovery emails return to Site URL.
+    // Forward the untouched fragment so the auth client can establish the recovery session.
+    window.location.replace(`/auth?mode=recovery${window.location.hash}`);
+  }, []);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
