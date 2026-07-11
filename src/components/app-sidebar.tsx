@@ -117,19 +117,21 @@ export function AppSidebar() {
   const initials = email ? email.slice(0, 2).toUpperCase() : "AK";
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r">
-      <SidebarHeader className="gap-3 p-4">
-        <Link to={adminArea ? "/admin" : "/session"} className="flex items-center gap-2.5">
-          <img src={logo} alt="Augimo Kompasas" className="h-9 w-9" />
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border/70 bg-sidebar/90 backdrop-blur-xl">
+      <SidebarHeader className="gap-4 px-4 pb-3 pt-5">
+        <Link to={adminArea ? "/admin" : "/session"} className="group flex items-center gap-3 rounded-xl px-1 py-1">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-map-violet/10 ring-1 ring-primary/10 transition-transform group-hover:scale-105">
+            <img src={logo} alt="Augimo Kompasas" className="h-7 w-7" />
+          </div>
           <div className="leading-tight">
-            <div className="font-serif text-lg text-foreground">Augimo Kompasas</div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+            <div className="font-serif text-xl tracking-[-0.01em] text-foreground">Augimo Kompasas</div>
+            <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               AI palydovas
             </div>
           </div>
         </Link>
         {adminArea ? (
-          <div className="rounded-lg border bg-primary/5 px-3 py-2.5">
+          <div className="rounded-xl border border-primary/15 bg-primary/[0.06] px-3 py-3">
             <div className="flex items-center gap-2 text-sm font-medium text-primary">
               <ShieldCheck className="h-4 w-4" /> Administravimas
             </div>
@@ -137,7 +139,7 @@ export function AppSidebar() {
           </div>
         ) : (
           <>
-            <Button onClick={() => setNewOpen(true)} className="w-full gap-2 shadow-sm" size="sm">
+            <Button onClick={() => setNewOpen(true)} className="h-11 w-full gap-2" size="sm">
               <Plus className="h-4 w-4" /> Nauja sesija
             </Button>
             <NewSessionDialog open={newOpen} onOpenChange={setNewOpen} onPick={createSession} />
@@ -147,8 +149,8 @@ export function AppSidebar() {
 
       <SidebarContent>
         {!adminArea && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] tracking-widest">
+          <SidebarGroup className="px-3 py-2">
+            <SidebarGroupLabel className="px-2 text-[10px] font-semibold tracking-[0.2em] text-muted-foreground/80">
               MANO AUGIMAS
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -157,9 +159,11 @@ export function AppSidebar() {
                   const active = pathname === n.to || pathname.startsWith(n.to + "/");
                   return (
                     <SidebarMenuItem key={n.to}>
-                      <SidebarMenuButton asChild isActive={active} className="h-9">
-                        <Link to={n.to} className="flex items-center gap-2.5">
-                          <n.icon className={cn("h-4 w-4", active && "text-primary")} />
+                      <SidebarMenuButton asChild isActive={active} className="h-10 rounded-xl px-3 text-[13px] font-medium transition-all data-[active=true]:bg-sidebar-accent data-[active=true]:shadow-[inset_0_0_0_1px_oklch(0.535_0.205_274_/_0.08)]">
+                        <Link to={n.to} className="flex items-center gap-3">
+                          <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg transition-colors", active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground")}>
+                            <n.icon className="h-4 w-4" />
+                          </span>
                           <span>{n.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -172,8 +176,8 @@ export function AppSidebar() {
         )}
 
         {!adminArea && !mentorArea && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] tracking-widest">
+          <SidebarGroup className="px-3 py-2">
+            <SidebarGroupLabel className="px-2 text-[10px] font-semibold tracking-[0.2em] text-muted-foreground/80">
               NAUJAUSIOS SESIJOS
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -185,7 +189,7 @@ export function AppSidebar() {
                   const dot = emotionDot(s.emotional_current);
                   return (
                     <SidebarMenuItem key={s.id}>
-                      <SidebarMenuButton asChild className="h-9">
+                      <SidebarMenuButton asChild className="h-10 rounded-xl px-3">
                         <Link
                           to="/session"
                           search={{ s: s.id }}
@@ -216,8 +220,8 @@ export function AppSidebar() {
         )}
 
         {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] tracking-widest">
+          <SidebarGroup className="px-3 py-2">
+            <SidebarGroupLabel className="px-2 text-[10px] font-semibold tracking-[0.2em] text-muted-foreground/80">
               {adminArea ? "ADMINISTRAVIMAS" : "ADMIN"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -259,7 +263,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-3">
-        <div className="flex items-center gap-2.5 rounded-lg border bg-card p-2.5">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-white/80 bg-card/85 p-2.5 shadow-[0_10px_30px_-24px_oklch(0.25_0.08_270)] backdrop-blur">
           {adminArea ? (
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium">Administratorius</div>
@@ -271,7 +275,7 @@ export function AppSidebar() {
             <>
               <Link
                 to="/profile"
-                className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold hover:bg-primary/20"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-map-violet text-xs font-semibold text-white shadow-md transition-transform hover:scale-105"
                 title="Profilis"
               >
                 {initials}
@@ -285,7 +289,7 @@ export function AppSidebar() {
           <button
             onClick={signOut}
             title="Atsijungti"
-            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
           </button>

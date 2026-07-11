@@ -68,7 +68,7 @@ export function MobileBottomNav() {
     return (
       <nav
         aria-label="Administratoriaus navigacija"
-        className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+        className="md:hidden fixed inset-x-2 bottom-2 z-40 overflow-hidden rounded-2xl border border-white/80 bg-card/90 shadow-[0_12px_36px_-16px_oklch(0.25_0.08_270_/_0.5)] backdrop-blur-xl pb-[env(safe-area-inset-bottom)]"
       >
         <ul className="grid grid-cols-2">
           {ADMIN_MORE.map((item) => {
@@ -98,8 +98,8 @@ export function MobileBottomNav() {
       <nav
         aria-label="Mobili navigacija"
         className={cn(
-          "md:hidden fixed inset-x-0 bottom-0 z-40",
-          "bg-background/95 backdrop-blur border-t",
+          "md:hidden fixed inset-x-2 bottom-2 z-40 overflow-hidden rounded-2xl",
+          "border border-white/80 bg-card/90 shadow-[0_12px_36px_-16px_oklch(0.25_0.08_270_/_0.5)] backdrop-blur-xl",
           "pb-[env(safe-area-inset-bottom)]",
         )}
       >
@@ -113,7 +113,7 @@ export function MobileBottomNav() {
                   className={cn(
                     "flex flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium",
                     "transition-colors focus-visible:outline-none focus-visible:bg-accent",
-                    active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                    active ? "bg-primary/[0.08] text-primary" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <n.icon className={cn("h-5 w-5", active && "text-primary")} />
@@ -129,7 +129,7 @@ export function MobileBottomNav() {
               className={cn(
                 "w-full flex flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium",
                 "transition-colors focus-visible:outline-none focus-visible:bg-accent",
-                moreActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                moreActive ? "bg-primary/[0.08] text-primary" : "text-muted-foreground hover:text-foreground",
               )}
               aria-label="Daugiau"
             >
@@ -143,7 +143,7 @@ export function MobileBottomNav() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="bottom"
-          className="rounded-t-2xl p-0 max-h-[85dvh] pb-[env(safe-area-inset-bottom)]"
+          className="rounded-t-3xl border-white/80 bg-card/95 p-0 max-h-[85dvh] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
         >
           <SheetHeader className="p-4 border-b">
             <SheetTitle className="text-left font-serif text-lg">Daugiau</SheetTitle>

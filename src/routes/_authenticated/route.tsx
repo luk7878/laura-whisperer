@@ -26,7 +26,7 @@ function AuthedLayout() {
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-      <div className="flex min-h-[100dvh] w-full bg-background overflow-x-hidden">
+      <div className="flex min-h-[100dvh] w-full bg-transparent overflow-x-hidden">
         <AppSidebar />
         <div className="flex-1 min-w-0 flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
           <Outlet />
