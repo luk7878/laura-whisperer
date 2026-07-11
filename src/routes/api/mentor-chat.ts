@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { AI_GATEWAY_URL, requireLovableApiKey } from "@/lib/ai-gateway.server";
 import { embedQuery } from "@/lib/knowledge-embed.server";
+import { buildUserValueContext } from "@/lib/value-context.server";
+import type { Database } from "@/integrations/supabase/types";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -206,7 +208,7 @@ export const Route = createFileRoute("/api/mentor-chat")({
           import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
         if (!url || !anon) return new Response("Server misconfigured", { status: 500 });
 
-        const supabase = createClient(url, anon, {
+        const supabase = createClient<Database>(url, anon, {
           global: { headers: { Authorization: `Bearer ${token}` } },
           auth: { persistSession: false, autoRefreshToken: false },
         });
@@ -252,13 +254,14 @@ export const Route = createFileRoute("/api/mentor-chat")({
           console.error("embed/search failed", e);
         }
 
+        const valueContext = await buildUserValueContext(supabase);
         const sourcesBlock = sources.length
           ? sources
               .map((s) => `[${s.n}] ${s.title}\n"""\n${s.content.slice(0, 1400)}\n"""`)
               .join("\n\n")
           : "(šiai užklausai pakankamai aktualių šaltinių nerasta)";
 
-        const systemWithSources = `${MENTOR_SYSTEM}\n\n=== ŠALTINIAI ===\n${sourcesBlock}\n=== ŠALTINIŲ PABAIGA ===`;
+        const systemWithSources = `${MENTOR_SYSTEM}${valueContext.prompt}\n\n=== ŠALTINIAI ===\n${sourcesBlock}\n=== ŠALTINIŲ PABAIGA ===`;
 
         const upstream = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
           method: "POST",

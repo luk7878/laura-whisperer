@@ -25,6 +25,7 @@ import {
   Puzzle,
   Ear,
   HelpCircle,
+  Gem,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GrowthMap, GrowthMapBody, type SessionMapData } from "@/components/growth-map";
@@ -91,10 +92,19 @@ function SessionPage() {
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
   const [mapSheetOpen, setMapSheetOpen] = useState(false);
+  const [valuesCount, setValuesCount] = useState(0);
 
   const mode: SessionMode = (session?.mode as SessionMode) ?? "demartini";
 
   // Load or bootstrap active session
+  useEffect(() => {
+    supabase
+      .from("values")
+      .select("id", { count: "exact", head: true })
+      .lt("rank", 100)
+      .then(({ count }) => setValuesCount(count ?? 0));
+  }, []);
+
   useEffect(() => {
     (async () => {
       if (sidFromUrl) {
@@ -231,9 +241,15 @@ function SessionPage() {
           body: JSON.stringify({ messages: history }),
         });
       } else {
+        const { data: sess } = await supabase.auth.getSession();
+        const token = sess.session?.access_token;
+        if (!token) throw new Error("Nesi prisijungęs");
         resp = await fetch("/api/chat", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ messages: history, mode }),
         });
       }
@@ -553,6 +569,11 @@ function SessionPage() {
                     <PulseBadge icon={<Ear className="h-3 w-3" />} tone="map-green">
                       {streaming ? "AI analizuoja…" : "Klausausi"}
                     </PulseBadge>
+                    {valuesCount > 0 && (
+                      <PulseBadge icon={<Gem className="h-3 w-3" />} tone="map-violet">
+                        Žino tavo TOP {Math.min(valuesCount, 5)} vertybes
+                      </PulseBadge>
+                    )}
                     {mode === "demartini" && (
                       <>
                         {mapData.topic && (

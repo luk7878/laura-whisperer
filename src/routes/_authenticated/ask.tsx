@@ -11,7 +11,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { MessageSquare, Library, Plus, Loader2, Trash2, PanelLeft } from "lucide-react";
+import { MessageSquare, Library, Plus, Loader2, Trash2, PanelLeft, Gem } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,7 @@ function AskLayout() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [valuesCount, setValuesCount] = useState(0);
 
   async function load() {
     const { data, error } = await supabase
@@ -38,6 +39,14 @@ function AskLayout() {
     setThreads(data ?? []);
     setLoading(false);
   }
+
+  useEffect(() => {
+    supabase
+      .from("values")
+      .select("id", { count: "exact", head: true })
+      .lt("rank", 100)
+      .then(({ count }) => setValuesCount(count ?? 0));
+  }, []);
 
   useEffect(() => {
     load();
@@ -116,9 +125,19 @@ function AskLayout() {
             Klausk mentoriaus
           </h1>
           <p className="text-[10px] md:text-[11px] text-muted-foreground truncate">
-            Atsakymai iš tavo įkeltos medžiagos
+            {valuesCount > 0
+              ? `Žinių bazė + tavo TOP ${Math.min(valuesCount, 5)} vertybės`
+              : "Atsakymai iš tavo įkeltos medžiagos"}
           </p>
         </div>
+
+        {valuesCount > 0 && (
+          <Button asChild variant="ghost" size="sm" className="hidden gap-1.5 lg:inline-flex">
+            <Link to="/values">
+              <Gem className="h-3.5 w-3.5" /> Vertybių kontekstas
+            </Link>
+          </Button>
+        )}
 
         {/* Mobile thread menu */}
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>

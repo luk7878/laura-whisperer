@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createClient } from "@supabase/supabase-js";
 import { AI_GATEWAY_URL, requireLovableApiKey } from "@/lib/ai-gateway.server";
 import { DEMARTINI_SYSTEM_PROMPT } from "@/lib/demartini-prompt";
 import { GOAL_CLARIFY_SYSTEM_PROMPT } from "@/lib/goal-clarify-prompt";
+import { buildUserValueContext } from "@/lib/value-context.server";
+import type { Database } from "@/integrations/supabase/types";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 type Mode = "demartini" | "goal_clarify";
@@ -10,11 +13,26 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const auth = request.headers.get("authorization") ?? request.headers.get("Authorization");
+        if (!auth || !auth.toLowerCase().startsWith("bearer ")) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        const token = auth.slice(7).trim();
         const body = (await request.json()) as { messages?: ChatMsg[]; mode?: Mode };
         const messages = Array.isArray(body.messages) ? body.messages : [];
         const mode: Mode = body.mode === "goal_clarify" ? "goal_clarify" : "demartini";
-        const systemPrompt =
+        const basePrompt =
           mode === "goal_clarify" ? GOAL_CLARIFY_SYSTEM_PROMPT : DEMARTINI_SYSTEM_PROMPT;
+        const url = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+        const anon =
+          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+        if (!url || !anon) return new Response("Server misconfigured", { status: 500 });
+        const supabase = createClient<Database>(url, anon, {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const valueContext = await buildUserValueContext(supabase);
+        const systemPrompt = `${basePrompt}${valueContext.prompt}`;
         const key = requireLovableApiKey();
 
         const upstream = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
@@ -26,10 +44,7 @@ export const Route = createFileRoute("/api/chat")({
           body: JSON.stringify({
             model: "google/gemini-3-flash-preview",
             stream: true,
-            messages: [
-              { role: "system", content: systemPrompt },
-              ...messages,
-            ],
+            messages: [{ role: "system", content: systemPrompt }, ...messages],
           }),
         });
 
