@@ -191,11 +191,17 @@
   .clarity-scope {
     font-family: var(--font-clarity-sans);
     color: var(--clarity-ink);
-    background-color: var(--clarity-bg);
+    background:
+      radial-gradient(circle at 85% 3%, color-mix(in oklab, var(--clarity-terra-soft) 22%, transparent), transparent 28rem),
+      radial-gradient(circle at 8% 42%, color-mix(in oklab, var(--clarity-forest) 8%, transparent), transparent 30rem),
+      var(--clarity-bg);
   }
   .clarity-scope h1, .clarity-scope h2, .clarity-scope h3 {
     font-family: var(--font-clarity-serif);
     letter-spacing: -0.01em;
+  }
+  .clarity-scope ::selection {
+    background: color-mix(in oklab, var(--clarity-terra) 24%, transparent);
   }
   /* Prevent iOS zoom on focus for text inputs */
   @media (max-width: 767px) {

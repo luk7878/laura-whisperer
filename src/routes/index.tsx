@@ -39,7 +39,7 @@ function Landing() {
 
 function Nav() {
   return (
-    <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
+    <nav className="sticky top-0 z-30 mx-auto flex max-w-6xl items-center justify-between border-b border-clarity-line/70 bg-clarity-bg/78 px-6 py-4 backdrop-blur-xl md:top-4 md:mt-4 md:rounded-full md:border md:px-7">
       <div className="flex items-center gap-2">
         <span className="font-clarity-serif text-xl">Aiškumo sesija</span>
       </div>
@@ -63,7 +63,7 @@ function Nav() {
 
 function Hero() {
   return (
-    <section className="mx-auto max-w-4xl px-6 pt-16 pb-24 text-center">
+    <section className="relative mx-auto max-w-5xl overflow-hidden px-6 pb-28 pt-20 text-center md:pt-28">
       <div className="inline-flex items-center gap-2 rounded-full border border-clarity-line bg-clarity-surface/60 px-4 py-1.5 text-xs text-clarity-ink-soft">
         <Sparkles className="h-3.5 w-3.5" />
         Nemokama · 15 minučių · Be paskyros
@@ -80,7 +80,7 @@ function Hero() {
       <div className="mt-10 flex flex-col items-center gap-3">
         <Link
           to="/rezervacija"
-          className="group inline-flex items-center gap-2 rounded-full bg-clarity-terra px-8 py-4 text-lg text-white shadow-lg shadow-clarity-terra/20 hover:bg-clarity-ink transition-all hover:shadow-xl"
+        className="group inline-flex items-center gap-2 rounded-full bg-clarity-terra px-8 py-4 text-lg font-medium text-white shadow-[0_16px_40px_-16px_color-mix(in_oklab,var(--clarity-terra)_70%,transparent)] transition-all hover:-translate-y-1 hover:bg-clarity-ink hover:shadow-xl"
         >
           Rezervuoti nemokamą sesiją
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -120,7 +120,7 @@ function HowItWorks() {
         </p>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {steps.map((s) => (
-            <div key={s.n} className="rounded-2xl bg-clarity-bg p-8 shadow-sm border border-clarity-line">
+            <div key={s.n} className="rounded-3xl border border-clarity-line/80 bg-clarity-bg/85 p-8 shadow-[0_18px_48px_-38px_var(--clarity-ink)] backdrop-blur transition-transform hover:-translate-y-1">
               <div className="font-clarity-serif text-2xl text-clarity-terra">{s.n}</div>
               <h3 className="mt-3 font-clarity-serif text-2xl text-clarity-ink">{s.title}</h3>
               <p className="mt-3 text-clarity-ink-soft leading-relaxed">{s.body}</p>
@@ -148,7 +148,7 @@ function ForWhom() {
         </p>
         <div className="mt-14 grid gap-6 sm:grid-cols-2">
           {cases.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-2xl border border-clarity-line bg-clarity-bg p-8">
+            <div key={title} className="rounded-3xl border border-clarity-line/80 bg-clarity-bg/75 p-8 shadow-[0_16px_44px_-38px_var(--clarity-ink)] backdrop-blur transition-all hover:-translate-y-1 hover:bg-clarity-surface/45">
               <Icon className="h-6 w-6 text-clarity-terra" />
               <h3 className="mt-4 font-clarity-serif text-2xl text-clarity-ink">{title}</h3>
               <p className="mt-2 text-clarity-ink-soft leading-relaxed">{body}</p>
@@ -175,7 +175,7 @@ function Faq() {
         <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">Dažni klausimai</h2>
         <div className="mt-12 space-y-6">
           {items.map((it) => (
-            <details key={it.q} className="group rounded-2xl border border-clarity-line bg-clarity-bg p-6 open:bg-clarity-surface/40 transition-colors">
+            <details key={it.q} className="group rounded-3xl border border-clarity-line/80 bg-clarity-bg/75 p-6 shadow-[0_12px_36px_-34px_var(--clarity-ink)] backdrop-blur transition-all open:bg-clarity-surface/55 open:shadow-sm">
               <summary className="cursor-pointer list-none font-clarity-serif text-lg text-clarity-ink flex items-center justify-between">
                 {it.q}
                 <span className="ml-4 text-clarity-terra transition-transform group-open:rotate-45">+</span>
