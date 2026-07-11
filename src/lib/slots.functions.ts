@@ -17,8 +17,8 @@ export const getSlotState = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    
+    const { data, error } = await context.supabase
       .from("clarity_slot_state")
       .select("capacity, filled, updated_at")
       .eq("id", 1)
@@ -34,8 +34,8 @@ export const updateSlotCapacity = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    
+    const { error } = await context.supabase
       .from("clarity_slot_state")
       .update({ capacity: data.capacity, updated_at: new Date().toISOString() })
       .eq("id", 1);
@@ -47,8 +47,8 @@ export const resetSlotFilled = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    
+    const { error } = await context.supabase
       .from("clarity_slot_state")
       .update({ filled: 0, updated_at: new Date().toISOString() })
       .eq("id", 1);
@@ -60,8 +60,8 @@ export const listWaitlist = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    
+    const { data, error } = await context.supabase
       .from("clarity_waitlist")
       .select("id, name, email, concern, status, notified_at, created_at")
       .order("created_at", { ascending: true });
@@ -79,10 +79,10 @@ export const updateWaitlistStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    
     const patch: { status: string; notified_at?: string } = { status: data.status };
     if (data.status === "notified") patch.notified_at = new Date().toISOString();
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("clarity_waitlist")
       .update(patch)
       .eq("id", data.id);
