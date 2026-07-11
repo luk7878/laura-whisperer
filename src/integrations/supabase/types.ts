@@ -957,6 +957,42 @@ export type Database = {
         }
         Relationships: []
       }
+      value_assessments: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          id: string
+          result: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          result?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          result?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       values: {
         Row: {
           created_at: string
