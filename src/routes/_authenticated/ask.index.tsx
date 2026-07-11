@@ -55,7 +55,8 @@ function AskIndex() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!search.session) return;
+    const sessionId = search.session;
+    if (!sessionId) return;
     let cancelled = false;
     setContextLoading(true);
     (async () => {
@@ -63,12 +64,12 @@ function AskIndex() {
         supabase
           .from("sessions")
           .select("id,title,active_topic,patterns,emotional_start,emotional_end,updated_at")
-          .eq("id", search.session)
+          .eq("id", sessionId)
           .maybeSingle(),
         supabase
           .from("journal_entries")
           .select("summary,patterns")
-          .eq("session_id", search.session)
+          .eq("session_id", sessionId)
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
@@ -79,7 +80,9 @@ function AskIndex() {
         setContextLoading(false);
         return;
       }
-      const patterns = [...new Set([...(session.patterns ?? []), ...(entry?.patterns ?? [])])];
+      const sessionPatterns = Array.isArray(session.patterns) ? (session.patterns as string[]) : [];
+      const entryPatterns = Array.isArray(entry?.patterns) ? (entry?.patterns as string[]) : [];
+      const patterns = [...new Set([...sessionPatterns, ...entryPatterns])];
       const delta =
         session.emotional_start != null && session.emotional_end != null
           ? session.emotional_end - session.emotional_start
