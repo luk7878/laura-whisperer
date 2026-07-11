@@ -80,7 +80,7 @@ function Hero() {
       <div className="mt-10 flex flex-col items-center gap-3">
         <Link
           to="/rezervacija"
-        className="group inline-flex items-center gap-2 rounded-full bg-clarity-terra px-8 py-4 text-lg font-medium text-white shadow-[0_16px_40px_-16px_color-mix(in_oklab,var(--clarity-terra)_70%,transparent)] transition-all hover:-translate-y-1 hover:bg-clarity-ink hover:shadow-xl"
+          className="group inline-flex items-center gap-2 rounded-full bg-clarity-terra px-8 py-4 text-lg font-medium text-white shadow-[0_16px_40px_-16px_color-mix(in_oklab,var(--clarity-terra)_70%,transparent)] transition-all hover:-translate-y-1 hover:bg-clarity-ink hover:shadow-xl"
         >
           Rezervuoti nemokamą sesiją
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -114,13 +114,18 @@ function HowItWorks() {
   return (
     <section className="border-y border-clarity-line bg-clarity-surface/40 py-24">
       <div className="mx-auto max-w-5xl px-6">
-        <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">Kaip tai vyksta</h2>
+        <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">
+          Kaip tai vyksta
+        </h2>
         <p className="mx-auto mt-4 max-w-xl text-center text-clarity-ink-soft">
           Trys žingsniai. Iš viso apie 15 minučių tavo laiko.
         </p>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {steps.map((s) => (
-            <div key={s.n} className="rounded-3xl border border-clarity-line/80 bg-clarity-bg/85 p-8 shadow-[0_18px_48px_-38px_var(--clarity-ink)] backdrop-blur transition-transform hover:-translate-y-1">
+            <div
+              key={s.n}
+              className="rounded-3xl border border-clarity-line/80 bg-clarity-bg/85 p-8 shadow-[0_18px_48px_-38px_var(--clarity-ink)] backdrop-blur transition-transform hover:-translate-y-1"
+            >
               <div className="font-clarity-serif text-2xl text-clarity-terra">{s.n}</div>
               <h3 className="mt-3 font-clarity-serif text-2xl text-clarity-ink">{s.title}</h3>
               <p className="mt-3 text-clarity-ink-soft leading-relaxed">{s.body}</p>
@@ -134,10 +139,26 @@ function HowItWorks() {
 
 function ForWhom() {
   const cases = [
-    { icon: HeartHandshake, title: "Santykių sunkumai", body: "Užstrigo pokalbis su artimu žmogumi. Nesupranti, ko iš tikrųjų nori pati/-s." },
-    { icon: Compass, title: "Karjeros kryžkelė", body: "Reikia priimti sprendimą, bet visos pusės atrodo blogai. Neaišku, kas iš tikrųjų svarbu." },
-    { icon: Leaf, title: "Per didelis krūvis", body: "Diena baigėsi, o galvoje viskas kunkuliuoja. Nori bent minutę tylos ir aiškumo." },
-    { icon: Sparkles, title: "Savivertė", body: "Vidinis balsas per griežtas. Nori pamatyti save švelniau, be sacharino." },
+    {
+      icon: HeartHandshake,
+      title: "Santykių sunkumai",
+      body: "Užstrigo pokalbis su artimu žmogumi. Nesupranti, ko iš tikrųjų nori pati/-s.",
+    },
+    {
+      icon: Compass,
+      title: "Karjeros kryžkelė",
+      body: "Reikia priimti sprendimą, bet visos pusės atrodo blogai. Neaišku, kas iš tikrųjų svarbu.",
+    },
+    {
+      icon: Leaf,
+      title: "Per didelis krūvis",
+      body: "Diena baigėsi, o galvoje viskas kunkuliuoja. Nori bent minutę tylos ir aiškumo.",
+    },
+    {
+      icon: Sparkles,
+      title: "Savivertė",
+      body: "Vidinis balsas per griežtas. Nori pamatyti save švelniau, be sacharino.",
+    },
   ];
   return (
     <section className="py-24">
@@ -148,7 +169,10 @@ function ForWhom() {
         </p>
         <div className="mt-14 grid gap-6 sm:grid-cols-2">
           {cases.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-3xl border border-clarity-line/80 bg-clarity-bg/75 p-8 shadow-[0_16px_44px_-38px_var(--clarity-ink)] backdrop-blur transition-all hover:-translate-y-1 hover:bg-clarity-surface/45">
+            <div
+              key={title}
+              className="rounded-3xl border border-clarity-line/80 bg-clarity-bg/75 p-8 shadow-[0_16px_44px_-38px_var(--clarity-ink)] backdrop-blur transition-all hover:-translate-y-1 hover:bg-clarity-surface/45"
+            >
               <Icon className="h-6 w-6 text-clarity-terra" />
               <h3 className="mt-4 font-clarity-serif text-2xl text-clarity-ink">{title}</h3>
               <p className="mt-2 text-clarity-ink-soft leading-relaxed">{body}</p>
@@ -160,25 +184,46 @@ function ForWhom() {
   );
 }
 
-
 function Faq() {
   const items = [
-    { q: "Ar tikrai nemokama?", a: "Taip. Pirma sesija — 15 minučių — nemokama, be įsipareigojimų. Nereikia įvesti kortelės." },
-    { q: "Ar galiu būti anonimiškai?", a: "Vardas nebūtinai turi būti tikras. Reikia el. pašto, kad galėtume atsiųsti sesijos nuorodą." },
-    { q: "Kas tas virtualus mentorius?", a: "Dirbtinio intelekto asistentas, sukurtas remiantis giluminės savirefleksijos ir sąmoningumo principais. Ne terapeutas ir ne draugas — struktūruotas klausimų tinklas." },
-    { q: "Kas nutinka su tuo, ką parašau?", a: "Tavo pokalbis saugomas šifruotai ir naudojamas tik tam, kad mentorius atsimintų kontekstą sesijos metu. Duomenys nedalinami tretiesiems asmenims." },
-    { q: "O jei bus per sunku?", a: "Jei mentorius atpažįsta, kad tema per sunki AI pokalbiui, jis pasiūlys tęsti su tikru žmogumi." },
+    {
+      q: "Ar tikrai nemokama?",
+      a: "Taip. Pirma sesija — 15 minučių — nemokama, be įsipareigojimų. Nereikia įvesti kortelės.",
+    },
+    {
+      q: "Ar galiu būti anonimiškai?",
+      a: "Vardas nebūtinai turi būti tikras. Reikia el. pašto, kad galėtume atsiųsti sesijos nuorodą.",
+    },
+    {
+      q: "Kas tas virtualus mentorius?",
+      a: "Dirbtinio intelekto asistentas, sukurtas remiantis giluminės savirefleksijos ir sąmoningumo principais. Ne terapeutas ir ne draugas — struktūruotas klausimų tinklas.",
+    },
+    {
+      q: "Kas nutinka su tuo, ką parašau?",
+      a: "Tavo pokalbis saugomas šifruotai ir naudojamas tik tam, kad mentorius atsimintų kontekstą sesijos metu. Duomenys nedalinami tretiesiems asmenims.",
+    },
+    {
+      q: "O jei bus per sunku?",
+      a: "Jei mentorius atpažįsta, kad tema per sunki AI pokalbiui, jis pasiūlys tęsti su tikru žmogumi.",
+    },
   ];
   return (
     <section className="py-24">
       <div className="mx-auto max-w-2xl px-6">
-        <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">Dažni klausimai</h2>
+        <h2 className="text-center font-clarity-serif text-4xl text-clarity-ink">
+          Dažni klausimai
+        </h2>
         <div className="mt-12 space-y-6">
           {items.map((it) => (
-            <details key={it.q} className="group rounded-3xl border border-clarity-line/80 bg-clarity-bg/75 p-6 shadow-[0_12px_36px_-34px_var(--clarity-ink)] backdrop-blur transition-all open:bg-clarity-surface/55 open:shadow-sm">
+            <details
+              key={it.q}
+              className="group rounded-3xl border border-clarity-line/80 bg-clarity-bg/75 p-6 shadow-[0_12px_36px_-34px_var(--clarity-ink)] backdrop-blur transition-all open:bg-clarity-surface/55 open:shadow-sm"
+            >
               <summary className="cursor-pointer list-none font-clarity-serif text-lg text-clarity-ink flex items-center justify-between">
                 {it.q}
-                <span className="ml-4 text-clarity-terra transition-transform group-open:rotate-45">+</span>
+                <span className="ml-4 text-clarity-terra transition-transform group-open:rotate-45">
+                  +
+                </span>
               </summary>
               <p className="mt-3 text-clarity-ink-soft leading-relaxed">{it.a}</p>
             </details>

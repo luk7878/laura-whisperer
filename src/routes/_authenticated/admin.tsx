@@ -78,7 +78,7 @@ function statusBadge(b: Booking) {
   if (b.status === "completed")
     return <Badge className="bg-emerald-600 hover:bg-emerald-600">Užbaigta</Badge>;
   if (b.status === "in_progress")
-    return <Badge className="bg-blue-600 hover:bg-blue-600">Vyksta</Badge>;
+    return <Badge className="bg-primary hover:bg-primary">Vyksta</Badge>;
   return <Badge variant="secondary">{b.status ?? "nauja"}</Badge>;
 }
 
@@ -195,7 +195,7 @@ function AdminPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat
           label="Viso"
           value={stats.total}

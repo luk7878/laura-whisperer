@@ -9,7 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { KeyRound, ArrowLeft, Mail, LockKeyhole, Compass, ShieldCheck, BrainCircuit } from "lucide-react";
+import {
+  KeyRound,
+  ArrowLeft,
+  Mail,
+  LockKeyhole,
+  Compass,
+  ShieldCheck,
+  BrainCircuit,
+} from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -220,204 +228,215 @@ function AuthPage() {
             <span className="font-serif text-2xl">Augimo Kompasas</span>
           </Link>
           <div className="relative max-w-md">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/65">Tavo asmeninė augimo erdvė</p>
-            <h1 className="mt-4 font-serif text-5xl leading-[1.03] tracking-tight lg:text-6xl">Aiškumas prasideda nuo vieno tikro klausimo.</h1>
-            <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/72">Sugrįžk prie savo sesijų, įžvalgų ir tikslų. Visa tavo augimo istorija — saugioje, ramioje erdvėje.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
+              Tavo asmeninė augimo erdvė
+            </p>
+            <h1 className="mt-4 font-serif text-5xl leading-[1.03] tracking-tight lg:text-6xl">
+              Aiškumas prasideda nuo vieno tikro klausimo.
+            </h1>
+            <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/72">
+              Sugrįžk prie savo sesijų, įžvalgų ir tikslų. Visa tavo augimo istorija — saugioje,
+              ramioje erdvėje.
+            </p>
           </div>
           <div className="relative grid gap-3 text-sm text-white/80">
-            <div className="flex items-center gap-3"><BrainCircuit className="h-4 w-4" /> AI mentorius su tavo kontekstu</div>
-            <div className="flex items-center gap-3"><ShieldCheck className="h-4 w-4" /> Privati ir saugi refleksijos erdvė</div>
+            <div className="flex items-center gap-3">
+              <BrainCircuit className="h-4 w-4" /> AI mentorius su tavo kontekstu
+            </div>
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-4 w-4" /> Privati ir saugi refleksijos erdvė
+            </div>
           </div>
         </aside>
         <div className="flex items-center justify-center p-4 sm:p-8 lg:p-12">
-      <Card className="w-full max-w-md border-0 bg-transparent shadow-none backdrop-blur-none">
-        <CardHeader className="text-center">
-          <Link to="/" className="mx-auto mb-3 flex items-center gap-2 text-primary md:hidden">
-            <Compass className="h-6 w-6" />
-            <span className="font-serif text-xl">Augimo Kompasas</span>
-          </Link>
-          <CardTitle>{heading}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {mode === "forgot" && (
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <Mail className="h-5 w-5" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="recovery-email">El. paštas</Label>
-                <Input
-                  id="recovery-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="vardas@pastas.lt"
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>
-                Siųsti atkūrimo nuorodą
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full gap-2"
-                onClick={() => setMode("signin")}
-              >
-                <ArrowLeft className="h-4 w-4" /> Grįžti į prisijungimą
-              </Button>
-            </form>
-          )}
-
-          {mode === "recovery" && (
-            <form onSubmit={handleNewPassword} className="space-y-4">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <LockKeyhole className="h-5 w-5" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new-password">Naujas slaptažodis</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="new-password-confirm">Pakartokite slaptažodį</Label>
-                <Input
-                  id="new-password-confirm"
-                  type="password"
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Naudokite bent 8 simbolius ir nesirinkite anksčiau naudoto slaptažodžio.
-              </p>
-              <Button type="submit" className="w-full" disabled={busy}>
-                Išsaugoti naują slaptažodį
-              </Button>
-            </form>
-          )}
-
-          {(mode === "signin" || mode === "signup") && (
-            <>
-              {mode === "signup" && (
-                <div className="space-y-1">
-                  <Label htmlFor="invite" className="flex items-center gap-1.5">
-                    <KeyRound className="h-3.5 w-3.5" /> Pakvietimo kodas
-                  </Label>
-                  <Input
-                    id="invite"
-                    value={invite}
-                    onChange={(e) => setInvite(e.target.value)}
-                    placeholder="Įveskite gautą kodą"
-                    autoComplete="off"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Registracija šiuo metu ribota. Pakvietimo kodo klauskite administratoriaus.
-                  </p>
-                </div>
-              )}
-
-              {mode === "signup" && (
-                <>
+          <Card className="w-full max-w-md border-0 bg-transparent shadow-none backdrop-blur-none">
+            <CardHeader className="text-center">
+              <Link to="/" className="mx-auto mb-3 flex items-center gap-2 text-primary md:hidden">
+                <Compass className="h-6 w-6" />
+                <span className="font-serif text-xl">Augimo Kompasas</span>
+              </Link>
+              <CardTitle>{heading}</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {mode === "forgot" && (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="recovery-email">El. paštas</Label>
+                    <Input
+                      id="recovery-email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="vardas@pastas.lt"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    Siųsti atkūrimo nuorodą
+                  </Button>
                   <Button
                     type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleGoogle}
-                    disabled={busy}
+                    variant="ghost"
+                    className="w-full gap-2"
+                    onClick={() => setMode("signin")}
                   >
-                    Tęsti su Google
+                    <ArrowLeft className="h-4 w-4" /> Grįžti į prisijungimą
                   </Button>
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">arba el. paštu</span>
-                    </div>
+                </form>
+              )}
+
+              {mode === "recovery" && (
+                <form onSubmit={handleNewPassword} className="space-y-4">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <LockKeyhole className="h-5 w-5" />
                   </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="new-password">Naujas slaptažodis</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="new-password-confirm">Pakartokite slaptažodį</Label>
+                    <Input
+                      id="new-password-confirm"
+                      type="password"
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                      value={passwordConfirm}
+                      onChange={(e) => setPasswordConfirm(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Naudokite bent 8 simbolius ir nesirinkite anksčiau naudoto slaptažodžio.
+                  </p>
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    Išsaugoti naują slaptažodį
+                  </Button>
+                </form>
+              )}
+
+              {(mode === "signin" || mode === "signup") && (
+                <>
+                  {mode === "signup" && (
+                    <div className="space-y-1">
+                      <Label htmlFor="invite" className="flex items-center gap-1.5">
+                        <KeyRound className="h-3.5 w-3.5" /> Pakvietimo kodas
+                      </Label>
+                      <Input
+                        id="invite"
+                        value={invite}
+                        onChange={(e) => setInvite(e.target.value)}
+                        placeholder="Įveskite gautą kodą"
+                        autoComplete="off"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Registracija šiuo metu ribota. Pakvietimo kodo klauskite administratoriaus.
+                      </p>
+                    </div>
+                  )}
+
+                  {mode === "signup" && (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleGoogle}
+                        disabled={busy}
+                      >
+                        Tęsti su Google
+                      </Button>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-card px-2 text-muted-foreground">arba el. paštu</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  <form onSubmit={handleEmail} className="space-y-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="email">El. paštas</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label htmlFor="password">Slaptažodis</Label>
+                        {mode === "signin" && (
+                          <button
+                            type="button"
+                            className="text-xs font-medium text-primary hover:underline"
+                            onClick={() => setMode("forgot")}
+                          >
+                            Pamiršote slaptažodį?
+                          </button>
+                        )}
+                      </div>
+                      <Input
+                        id="password"
+                        type="password"
+                        required
+                        minLength={6}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={busy}>
+                      {mode === "signin" ? "Prisijungti" : "Registruotis"}
+                    </Button>
+                  </form>
+
+                  {mode === "signin" && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={async () => {
+                        // Google sign-in for existing users — also requires invite for now.
+                        setMode("signup");
+                        toast.info("Google prisijungimui reikalingas pakvietimo kodas");
+                      }}
+                      disabled={busy}
+                    >
+                      Tęsti su Google
+                    </Button>
+                  )}
+
+                  <button
+                    type="button"
+                    className="w-full text-sm text-muted-foreground hover:text-foreground"
+                    onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                  >
+                    {mode === "signin"
+                      ? "Neturite paskyros? Registruokitės"
+                      : "Jau turite paskyrą? Prisijunkite"}
+                  </button>
                 </>
               )}
-
-              <form onSubmit={handleEmail} className="space-y-3">
-                <div className="space-y-1">
-                  <Label htmlFor="email">El. paštas</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="password">Slaptažodis</Label>
-                    {mode === "signin" && (
-                      <button
-                        type="button"
-                        className="text-xs font-medium text-primary hover:underline"
-                        onClick={() => setMode("forgot")}
-                      >
-                        Pamiršote slaptažodį?
-                      </button>
-                    )}
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={busy}>
-                  {mode === "signin" ? "Prisijungti" : "Registruotis"}
-                </Button>
-              </form>
-
-              {mode === "signin" && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={async () => {
-                    // Google sign-in for existing users — also requires invite for now.
-                    setMode("signup");
-                    toast.info("Google prisijungimui reikalingas pakvietimo kodas");
-                  }}
-                  disabled={busy}
-                >
-                  Tęsti su Google
-                </Button>
-              )}
-
-              <button
-                type="button"
-                className="w-full text-sm text-muted-foreground hover:text-foreground"
-                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-              >
-                {mode === "signin"
-                  ? "Neturite paskyros? Registruokitės"
-                  : "Jau turite paskyrą? Prisijunkite"}
-              </button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

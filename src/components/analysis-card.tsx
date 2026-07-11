@@ -182,7 +182,7 @@ function Field({
 }) {
   const toneMap = {
     primary: "text-primary bg-primary/10",
-    violet: "text-violet-600 bg-violet-500/10",
+    violet: "text-map-violet bg-map-violet/10",
     teal: "text-teal-600 bg-teal-500/10",
   };
   return (

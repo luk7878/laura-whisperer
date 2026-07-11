@@ -7,7 +7,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Library, Upload, FileText, Trash2, Loader2, Plus, MessageSquare, RefreshCw, Tag } from "lucide-react";
+import {
+  Library,
+  Upload,
+  FileText,
+  Trash2,
+  Loader2,
+  Plus,
+  MessageSquare,
+  RefreshCw,
+  Tag,
+} from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { extractText } from "@/lib/knowledge-parse";
 import { Link } from "@tanstack/react-router";
@@ -56,7 +66,9 @@ function KnowledgePage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("knowledge_documents")
-      .select("id, title, source_type, chunk_count, byte_size, status, error, created_at, language, tags")
+      .select(
+        "id, title, source_type, chunk_count, byte_size, status, error, created_at, language, tags",
+      )
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setDocs((data as Doc[]) ?? []);
@@ -191,10 +203,7 @@ function KnowledgePage() {
       .map((t) => t.trim())
       .filter(Boolean)
       .slice(0, 12);
-    const { error } = await supabase
-      .from("knowledge_documents")
-      .update({ tags })
-      .eq("id", doc.id);
+    const { error } = await supabase.from("knowledge_documents").update({ tags }).eq("id", doc.id);
     if (error) return toast.error(error.message);
     setEditingTags(null);
     setTagDraft("");
@@ -258,18 +267,14 @@ function KnowledgePage() {
                   )}
                   Pasirinkti failus
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setPasteOpen((v) => !v)}
-                  className="gap-2"
-                >
+                <Button variant="outline" onClick={() => setPasteOpen((v) => !v)} className="gap-2">
                   <Plus className="h-4 w-4" /> Įklijuoti tekstą
                 </Button>
               </div>
               {pasteOpen && (
                 <div className="mt-4 space-y-3 rounded-lg border p-4 bg-muted/30">
                   <Input
-                    placeholder='Pavadinimas (pvz. „Demartini – vertybės“)'
+                    placeholder="Pavadinimas (pvz. „Demartini – vertybės“)"
                     value={pasteTitle}
                     onChange={(e) => setPasteTitle(e.target.value)}
                   />
@@ -339,7 +344,12 @@ function KnowledgePage() {
                               }
                             }}
                           />
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => saveTags(d)}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => saveTags(d)}
+                          >
                             Išsaugoti
                           </Button>
                         </>
@@ -364,9 +374,7 @@ function KnowledgePage() {
                         </>
                       )}
                     </div>
-                    {d.error && (
-                      <p className="text-xs text-destructive mt-1 truncate">{d.error}</p>
-                    )}
+                    {d.error && <p className="text-xs text-destructive mt-1 truncate">{d.error}</p>}
                   </div>
                   <Button
                     variant="ghost"

@@ -113,7 +113,9 @@ export function MobileBottomNav() {
                   className={cn(
                     "flex flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium",
                     "transition-colors focus-visible:outline-none focus-visible:bg-accent",
-                    active ? "bg-primary/[0.08] text-primary" : "text-muted-foreground hover:text-foreground",
+                    active
+                      ? "bg-primary/[0.08] text-primary"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <n.icon className={cn("h-5 w-5", active && "text-primary")} />
@@ -129,7 +131,9 @@ export function MobileBottomNav() {
               className={cn(
                 "w-full flex flex-col items-center justify-center gap-0.5 py-2 min-h-[56px] text-[10px] font-medium",
                 "transition-colors focus-visible:outline-none focus-visible:bg-accent",
-                moreActive ? "bg-primary/[0.08] text-primary" : "text-muted-foreground hover:text-foreground",
+                moreActive
+                  ? "bg-primary/[0.08] text-primary"
+                  : "text-muted-foreground hover:text-foreground",
               )}
               aria-label="Daugiau"
             >

@@ -75,14 +75,9 @@ function InsightsPage() {
   }, [sessions]);
 
   const avgDelta = useMemo(() => {
-    const closed = sessions.filter(
-      (s) => s.emotional_start != null && s.emotional_end != null,
-    );
+    const closed = sessions.filter((s) => s.emotional_start != null && s.emotional_end != null);
     if (closed.length === 0) return null;
-    const sum = closed.reduce(
-      (acc, s) => acc + (s.emotional_end! - s.emotional_start!),
-      0,
-    );
+    const sum = closed.reduce((acc, s) => acc + (s.emotional_end! - s.emotional_start!), 0);
     return sum / closed.length;
   }, [sessions]);
 
@@ -158,11 +153,7 @@ function InsightsPage() {
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {patternCounts.map(([name, count]) => (
-                      <Badge
-                        key={name}
-                        variant="secondary"
-                        className="text-xs gap-1.5 py-1 px-2"
-                      >
+                      <Badge key={name} variant="secondary" className="text-xs gap-1.5 py-1 px-2">
                         {name}
                         <span className="text-[10px] text-muted-foreground">×{count}</span>
                       </Badge>

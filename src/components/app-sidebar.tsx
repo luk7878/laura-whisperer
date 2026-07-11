@@ -117,14 +117,22 @@ export function AppSidebar() {
   const initials = email ? email.slice(0, 2).toUpperCase() : "AK";
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border/70 bg-sidebar/90 backdrop-blur-xl">
+    <Sidebar
+      collapsible="offcanvas"
+      className="border-r border-sidebar-border/70 bg-sidebar/90 backdrop-blur-xl"
+    >
       <SidebarHeader className="gap-4 px-4 pb-3 pt-5">
-        <Link to={adminArea ? "/admin" : "/session"} className="group flex items-center gap-3 rounded-xl px-1 py-1">
+        <Link
+          to={adminArea ? "/admin" : "/session"}
+          className="group flex items-center gap-3 rounded-xl px-1 py-1"
+        >
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-map-violet/10 ring-1 ring-primary/10 transition-transform group-hover:scale-105">
             <img src={logo} alt="Augimo Kompasas" className="h-7 w-7" />
           </div>
           <div className="leading-tight">
-            <div className="font-serif text-xl tracking-[-0.01em] text-foreground">Augimo Kompasas</div>
+            <div className="font-serif text-xl tracking-[-0.01em] text-foreground">
+              Augimo Kompasas
+            </div>
             <div className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               AI palydovas
             </div>
@@ -159,9 +167,20 @@ export function AppSidebar() {
                   const active = pathname === n.to || pathname.startsWith(n.to + "/");
                   return (
                     <SidebarMenuItem key={n.to}>
-                      <SidebarMenuButton asChild isActive={active} className="h-10 rounded-xl px-3 text-[13px] font-medium transition-all data-[active=true]:bg-sidebar-accent data-[active=true]:shadow-[inset_0_0_0_1px_oklch(0.535_0.205_274_/_0.08)]">
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        className="h-10 rounded-xl px-3 text-[13px] font-medium transition-all data-[active=true]:bg-sidebar-accent data-[active=true]:shadow-[inset_0_0_0_1px_oklch(0.535_0.205_274_/_0.08)]"
+                      >
                         <Link to={n.to} className="flex items-center gap-3">
-                          <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg transition-colors", active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground")}>
+                          <span
+                            className={cn(
+                              "flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
+                              active
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground",
+                            )}
+                          >
                             <n.icon className="h-4 w-4" />
                           </span>
                           <span>{n.title}</span>
