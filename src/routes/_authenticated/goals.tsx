@@ -44,6 +44,8 @@ import {
   TrendingUp,
   Gem,
   ShieldQuestion,
+  Pencil,
+  Scale,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -76,6 +78,9 @@ type AlignmentData = {
   ownership?: Ownership;
   supporting_value_ids?: string[];
   supporting_value_names?: string[];
+  benefits?: string;
+  costs?: string;
+  next_review_date?: string;
 };
 
 type Task = {
@@ -100,6 +105,7 @@ function GoalsPage() {
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const [values, setValues] = useState<Value[]>([]);
   const [alignmentGoal, setAlignmentGoal] = useState<Goal | null>(null);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
 
   async function load() {
     const [{ data: g }, { data: t }, { data: v }] = await Promise.all([
@@ -435,6 +441,12 @@ function GoalsPage() {
                           {new Date(g.target_date).toLocaleDateString("lt-LT")}
                         </span>
                       )}
+                      {g.value_alignment?.next_review_date && (
+                        <span className="flex items-center gap-1 text-xs text-primary">
+                          <Compass className="h-3 w-3" /> Peržiūra{" "}
+                          {new Date(g.value_alignment.next_review_date).toLocaleDateString("lt-LT")}
+                        </span>
+                      )}
                     </div>
                     {!hasTasks && (
                       <Button
@@ -463,6 +475,14 @@ function GoalsPage() {
                       {g.value_alignment_score == null
                         ? "Patikrinti vertybinį ryšį"
                         : "Peržiūrėti vertybinį ryšį"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setEditingGoal(g)}
+                      className="mt-2 h-8 gap-1.5 text-xs"
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Koreguoti tikslą
                     </Button>
                   </div>
                 </div>
@@ -496,7 +516,223 @@ function GoalsPage() {
           />
         )}
       </Dialog>
+      <Dialog open={!!editingGoal} onOpenChange={(next) => !next && setEditingGoal(null)}>
+        {editingGoal && (
+          <EditGoalDialog
+            goal={editingGoal}
+            values={values}
+            onSaved={() => {
+              setEditingGoal(null);
+              load();
+            }}
+          />
+        )}
+      </Dialog>
     </div>
+  );
+}
+
+function EditGoalDialog({
+  goal,
+  values,
+  onSaved,
+}: {
+  goal: Goal;
+  values: Value[];
+  onSaved: () => void;
+}) {
+  const [title, setTitle] = useState(goal.title);
+  const [description, setDescription] = useState(goal.description ?? "");
+  const [targetDate, setTargetDate] = useState(goal.target_date ?? "");
+  const [status, setStatus] = useState(goal.status);
+  const [progress, setProgress] = useState(goal.progress);
+  const [primaryValueId, setPrimaryValueId] = useState(goal.linked_value_id ?? "");
+  const [benefits, setBenefits] = useState(goal.value_alignment?.benefits ?? "");
+  const [costs, setCosts] = useState(goal.value_alignment?.costs ?? "");
+  const [nextReviewDate, setNextReviewDate] = useState(
+    goal.value_alignment?.next_review_date ?? "",
+  );
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    if (!title.trim()) return toast.error("Įrašyk tikslo pavadinimą");
+    setSaving(true);
+    const nextAlignment: AlignmentData = {
+      ...(goal.value_alignment ?? {}),
+      benefits: benefits.trim(),
+      costs: costs.trim(),
+      next_review_date: nextReviewDate || undefined,
+    };
+    const score = calculateAlignmentScore({
+      ...nextAlignment,
+      primaryValueId,
+      description,
+      targetDate,
+    });
+    const { error } = await supabase
+      .from("goals")
+      .update({
+        title: title.trim(),
+        description: description.trim() || null,
+        target_date: targetDate || null,
+        status,
+        progress: Math.max(0, Math.min(100, progress)),
+        linked_value_id: primaryValueId || null,
+        value_alignment: nextAlignment as unknown as Json,
+        value_alignment_score: score,
+        alignment_updated_at: new Date().toISOString(),
+      })
+      .eq("id", goal.id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Tikslas atnaujintas");
+    onSaved();
+  }
+
+  return (
+    <DialogContent className="max-h-[92dvh] max-w-2xl overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2 font-serif text-2xl">
+          <Pencil className="h-5 w-5 text-primary" /> Koreguoti tikslą
+        </DialogTitle>
+        <p className="text-sm text-muted-foreground">
+          Tikslas gali keistis. Svarbu, kad jis liktų konkretus ir realizuotų tai, kas tau iš tiesų
+          svarbu.
+        </p>
+      </DialogHeader>
+      <div className="space-y-5">
+        <div>
+          <Label>Pavadinimas</Label>
+          <Input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            className="mt-1.5"
+          />
+        </div>
+        <div>
+          <Label>Kaip atrodys pasiektas rezultatas?</Label>
+          <Textarea
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={3}
+            className="mt-1.5"
+            placeholder="Aprašyk matomą ir pamatuojamą rezultatą…"
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label>Pasiekimo data</Label>
+            <Input
+              type="date"
+              value={targetDate}
+              onChange={(event) => setTargetDate(event.target.value)}
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label>Kita tikslo peržiūra</Label>
+            <Input
+              type="date"
+              value={nextReviewDate}
+              onChange={(event) => setNextReviewDate(event.target.value)}
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label>Būsena</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Aktyvus</SelectItem>
+                <SelectItem value="paused">Pristabdytas</SelectItem>
+                <SelectItem value="completed">Pasiektas</SelectItem>
+                <SelectItem value="archived">Nebėra aktualus</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Progresas: {progress}%</Label>
+            <Input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={progress}
+              onChange={(event) => setProgress(Number(event.target.value))}
+              className="mt-3"
+            />
+          </div>
+        </div>
+        <Card className="space-y-4 border-primary/20 bg-primary/[0.04] p-4">
+          <div className="flex items-start gap-3">
+            <div className="rounded-xl bg-primary/10 p-2 text-primary">
+              <Scale className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold">Vertybinis balansas</div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Įvertink ne tik naudą, bet ir kainą. Aiškus tikslas nėra vien idealizuojamas
+                rezultatas.
+              </p>
+            </div>
+          </div>
+          <div>
+            <Label>Kokią pagrindinę vertybę realizuoja?</Label>
+            <Select value={primaryValueId} onValueChange={setPrimaryValueId}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="Pasirink vertybę" />
+              </SelectTrigger>
+              <SelectContent>
+                {values.map((value) => (
+                  <SelectItem key={value.id} value={value.id}>
+                    #{value.rank} · {value.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label>Ką šis tikslas duos?</Label>
+              <Textarea
+                value={benefits}
+                onChange={(event) => setBenefits(event.target.value)}
+                rows={3}
+                className="mt-1.5"
+                placeholder="Konkrečios naudos…"
+              />
+            </div>
+            <div>
+              <Label>Ką kainuos jo siekimas?</Label>
+              <Textarea
+                value={costs}
+                onChange={(event) => setCosts(event.target.value)}
+                rows={3}
+                className="mt-1.5"
+                placeholder="Laikas, energija, atsisakymai, rizikos…"
+              />
+            </div>
+          </div>
+        </Card>
+      </div>
+      <DialogFooter className="gap-2 sm:justify-between">
+        <Button asChild variant="outline">
+          <Link to="/ask" search={{ goal: goal.id } as never}>
+            <Sparkles /> Aptarti korekciją su mentoriumi
+          </Link>
+        </Button>
+        <Button onClick={save} disabled={saving || !title.trim()}>
+          {saving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}{" "}
+          Išsaugoti pakeitimus
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   );
 }
 
@@ -1020,5 +1256,7 @@ function calculateAlignmentScore(
   score += Math.min(data.supporting_value_ids?.length ?? 0, 2) * 5;
   if (data.description.trim().length >= 20) score += 3;
   if (data.targetDate) score += 2;
+  if ((data.benefits?.trim().length ?? 0) >= 15) score += 4;
+  if ((data.costs?.trim().length ?? 0) >= 15) score += 4;
   return Math.min(score, 100);
 }
