@@ -37,6 +37,12 @@ type Answer = {
 };
 
 type RankedValue = { name: string; count: number; rank: number; evidence: string[] };
+type SimilaritySuggestion = {
+  source: string;
+  target: string;
+  confidence: number;
+  reason: string;
+};
 type AssessmentRow = {
   id: string;
   status: string;
@@ -686,7 +692,59 @@ function Results({
   onBack: () => void;
 }) {
   const [mergeSource, setMergeSource] = useState<number | null>(null);
+  const [checkingSimilarities, setCheckingSimilarities] = useState(false);
+  const [suggestions, setSuggestions] = useState<SimilaritySuggestion[]>([]);
   const max = Math.max(...ranked.map((item) => item.count), 1);
+
+  async function detectSimilarities() {
+    setCheckingSimilarities(true);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Nesi prisijungęs");
+      const response = await fetch("/api/value-similarities", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          values: ranked.map((value) => ({
+            name: value.name,
+            count: value.count,
+            evidence: value.evidence,
+          })),
+        }),
+      });
+      if (!response.ok) throw new Error(await response.text().catch(() => "AI klaida"));
+      const result = (await response.json()) as { suggestions?: SimilaritySuggestion[] };
+      const next = Array.isArray(result.suggestions) ? result.suggestions : [];
+      setSuggestions(next);
+      if (!next.length) toast.success("AI nerado aiškių pasikartojančių vertybių");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nepavyko palyginti vertybių");
+    } finally {
+      setCheckingSimilarities(false);
+    }
+  }
+
+  function acceptSuggestion(suggestion: SimilaritySuggestion) {
+    const sourceIndex = ranked.findIndex((value) => value.name === suggestion.source);
+    const targetIndex = ranked.findIndex((value) => value.name === suggestion.target);
+    if (sourceIndex < 0 || targetIndex < 0) {
+      setSuggestions((current) => current.filter((item) => item !== suggestion));
+      return toast.error("Viena iš vertybių jau buvo pakeista");
+    }
+    onMerge(sourceIndex, targetIndex);
+    setSuggestions((current) =>
+      current.filter(
+        (item) =>
+          item !== suggestion &&
+          item.source !== suggestion.source &&
+          item.target !== suggestion.source,
+      ),
+    );
+  }
   return (
     <div className="mx-auto max-w-5xl space-y-5">
       <section className="rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/[0.1] via-card to-map-green/[0.07] p-6 md:p-8">
@@ -698,7 +756,66 @@ function Results({
           Daugiausia pasikartojimų turinčios temos yra aukščiau. Patikslink pavadinimus taip, kad
           jie būtų konkretūs tau — ne tik „šeima“, o, pavyzdžiui, „vaikų potencialo atskleidimas“.
         </p>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-5 gap-2 bg-card/75"
+          onClick={detectSimilarities}
+          disabled={checkingSimilarities || ranked.length < 2}
+        >
+          {checkingSimilarities ? <Loader2 className="animate-spin" /> : <Sparkles />}
+          {checkingSimilarities ? "AI lygina įrodymus…" : "AI rasti panašias vertybes"}
+        </Button>
       </section>
+      {suggestions.length > 0 && (
+        <section className="space-y-3 rounded-3xl border border-map-violet/20 bg-map-violet/[0.045] p-4 md:p-6">
+          <div>
+            <div className="eyebrow text-map-violet">AI pasiūlymai</div>
+            <h3 className="mt-1 font-serif text-2xl">Galimai tos pačios vertybės</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              AI gali klysti. Patvirtink tik tas poras, kurios tau iš tikrųjų reiškia tą pačią
+              gilesnę kryptį.
+            </p>
+          </div>
+          {suggestions.map((suggestion) => (
+            <Card
+              key={`${suggestion.source}-${suggestion.target}`}
+              className="border-map-violet/15 p-4"
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+                    <span className="rounded-lg bg-muted px-2.5 py-1">{suggestion.source}</span>
+                    <Combine className="h-4 w-4 text-map-violet" />
+                    <span className="rounded-lg bg-muted px-2.5 py-1">{suggestion.target}</span>
+                    <Badge variant="secondary">
+                      {Math.round(suggestion.confidence * 100)}% panašumas
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    {suggestion.reason} Sujungus liks pavadinimas „{suggestion.target}“.
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      setSuggestions((current) => current.filter((item) => item !== suggestion))
+                    }
+                  >
+                    Ne, palikti
+                  </Button>
+                  <Button type="button" size="sm" onClick={() => acceptSuggestion(suggestion)}>
+                    <CheckCircle2 /> Taip, sujungti
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </section>
+      )}
       <div className="space-y-3">
         {ranked.map((value, index) => (
           <Card

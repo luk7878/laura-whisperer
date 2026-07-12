@@ -18,6 +18,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SesijaTokenRouteImport } from './routes/sesija.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ApiValueSimilaritiesRouteImport } from './routes/api/value-similarities'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
 import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
@@ -101,6 +102,11 @@ const SesijaTokenRoute = SesijaTokenRouteImport.update({
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiValueSimilaritiesRoute = ApiValueSimilaritiesRouteImport.update({
+  id: '/api/value-similarities',
+  path: '/api/value-similarities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
@@ -341,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/value-similarities': typeof ApiValueSimilaritiesRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -390,6 +397,7 @@ export interface FileRoutesByTo {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/value-similarities': typeof ApiValueSimilaritiesRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -441,6 +449,7 @@ export interface FileRoutesById {
   '/api/mentor-chat': typeof ApiMentorChatRoute
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/value-similarities': typeof ApiValueSimilaritiesRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -493,6 +502,7 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/api/value-similarities'
     | '/email/unsubscribe'
     | '/sesija/$token'
     | '/.lovable/oauth/consent'
@@ -542,6 +552,7 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/api/value-similarities'
     | '/email/unsubscribe'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -592,6 +603,7 @@ export interface FileRouteTypes {
     | '/api/mentor-chat'
     | '/api/plan-suggest'
     | '/api/transcribe'
+    | '/api/value-similarities'
     | '/email/unsubscribe'
     | '/sesija/$token'
     | '/.lovable/oauth/consent'
@@ -631,6 +643,7 @@ export interface RootRouteChildren {
   ApiMentorChatRoute: typeof ApiMentorChatRoute
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
+  ApiValueSimilaritiesRoute: typeof ApiValueSimilaritiesRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   SesijaTokenRoute: typeof SesijaTokenRouteWithChildren
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -712,6 +725,13 @@ declare module '@tanstack/react-router' {
       path: '/email/unsubscribe'
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/value-similarities': {
+      id: '/api/value-similarities'
+      path: '/api/value-similarities'
+      fullPath: '/api/value-similarities'
+      preLoaderRoute: typeof ApiValueSimilaritiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/transcribe': {
@@ -1077,6 +1097,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMentorChatRoute: ApiMentorChatRoute,
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
+  ApiValueSimilaritiesRoute: ApiValueSimilaritiesRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   SesijaTokenRoute: SesijaTokenRouteWithChildren,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
