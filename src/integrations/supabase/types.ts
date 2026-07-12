@@ -1053,6 +1053,51 @@ export type Database = {
         }
         Relationships: []
       }
+      vision_item_values: {
+        Row: {
+          created_at: string
+          id: string
+          rationale: string
+          updated_at: string
+          user_id: string
+          value_id: string
+          vision_item_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rationale?: string
+          updated_at?: string
+          user_id: string
+          value_id: string
+          vision_item_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rationale?: string
+          updated_at?: string
+          user_id?: string
+          value_id?: string
+          vision_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vision_item_values_value_id_fkey"
+            columns: ["value_id"]
+            isOneToOne: false
+            referencedRelation: "values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vision_item_values_vision_item_id_fkey"
+            columns: ["vision_item_id"]
+            isOneToOne: false
+            referencedRelation: "vision_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vision_items: {
         Row: {
           category: string
