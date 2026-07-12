@@ -392,6 +392,7 @@ export type Database = {
       }
       goals: {
         Row: {
+          alignment_updated_at: string | null
           created_at: string
           description: string | null
           id: string
@@ -403,8 +404,11 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          value_alignment: Json
+          value_alignment_score: number | null
         }
         Insert: {
+          alignment_updated_at?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -416,8 +420,11 @@ export type Database = {
           title: string
           updated_at?: string
           user_id: string
+          value_alignment?: Json
+          value_alignment_score?: number | null
         }
         Update: {
+          alignment_updated_at?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -429,6 +436,8 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          value_alignment?: Json
+          value_alignment_score?: number | null
         }
         Relationships: [
           {
