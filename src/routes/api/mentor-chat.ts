@@ -255,7 +255,7 @@ export const Route = createFileRoute("/api/mentor-chat")({
           console.error("embed/search failed", e);
         }
 
-        const valueContext = await buildUserValueContext(supabase);
+        const valueContext = await buildUserValueContext(supabase, lastUser.content);
         const sourcesBlock = sources.length
           ? sources
               .map((s) => `[${s.n}] ${s.title}\n"""\n${s.content.slice(0, 1400)}\n"""`)
