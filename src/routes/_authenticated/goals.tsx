@@ -19,6 +19,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Target,
   Plus,
   Calendar,
@@ -35,9 +42,12 @@ import {
   Compass,
   Flame,
   TrendingUp,
+  Gem,
+  ShieldQuestion,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { Json } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/goals")({
   component: GoalsPage,
@@ -51,7 +61,21 @@ type Goal = {
   status: string;
   progress: number;
   linked_plan_id: string | null;
+  linked_value_id: string | null;
+  value_alignment_score: number | null;
+  value_alignment: AlignmentData | null;
+  alignment_updated_at: string | null;
   created_at: string;
+};
+
+type Value = { id: string; name: string; rank: number };
+type Ownership = "own" | "mixed" | "external" | "";
+type AlignmentData = {
+  value_link?: string;
+  personal_why?: string;
+  ownership?: Ownership;
+  supporting_value_ids?: string[];
+  supporting_value_names?: string[];
 };
 
 type Task = {
@@ -74,20 +98,21 @@ function GoalsPage() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
+  const [values, setValues] = useState<Value[]>([]);
+  const [alignmentGoal, setAlignmentGoal] = useState<Goal | null>(null);
 
   async function load() {
-    const [{ data: g }, { data: t }] = await Promise.all([
-      supabase
-        .from("goals")
-        .select("id, title, description, target_date, status, progress, linked_plan_id, created_at")
-        .order("created_at", { ascending: false }),
+    const [{ data: g }, { data: t }, { data: v }] = await Promise.all([
+      supabase.from("goals").select("*").order("created_at", { ascending: false }),
       supabase
         .from("goal_tasks")
         .select("id, goal_id, parent_id, title, why, estimate, due_date, depth, sort_order, done")
         .order("sort_order", { ascending: true }),
+      supabase.from("values").select("id,name,rank").lt("rank", 100).order("rank"),
     ]);
     setGoals((g as Goal[]) ?? []);
     setTasks((t as Task[]) ?? []);
+    setValues((v as Value[]) ?? []);
     setLoading(false);
   }
   useEffect(() => {
@@ -165,6 +190,14 @@ function GoalsPage() {
           goal_title: goal.title,
           goal_description: goal.description,
           target_date: goal.target_date,
+          value: values.find((value) => value.id === goal.linked_value_id)?.name ?? null,
+          why: goal.value_alignment?.personal_why ?? null,
+          benefits: [
+            goal.value_alignment?.value_link,
+            ...(goal.value_alignment?.supporting_value_names ?? []),
+          ]
+            .filter(Boolean)
+            .join("; "),
         }),
       });
       if (!resp.ok) throw new Error(await resp.text().catch(() => "AI klaida"));
@@ -203,6 +236,7 @@ function GoalsPage() {
             </Button>
           </DialogTrigger>
           <NewGoalDialog
+            values={values}
             onCreated={() => {
               setOpen(false);
               load();
@@ -385,6 +419,7 @@ function GoalsPage() {
                           {goalTasks.filter((t) => t.done).length}/{goalTasks.length}
                         </Badge>
                       )}
+                      <AlignmentBadge score={g.value_alignment_score} />
                     </div>
                     {g.description && (
                       <p className="text-xs md:text-sm text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-3">
@@ -418,6 +453,17 @@ function GoalsPage() {
                         Skaidyti su AI
                       </Button>
                     )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setAlignmentGoal(g)}
+                      className="mt-2 h-8 gap-1.5 text-xs text-primary"
+                    >
+                      <Gem className="h-3.5 w-3.5" />
+                      {g.value_alignment_score == null
+                        ? "Patikrinti vertybinį ryšį"
+                        : "Peržiūrėti vertybinį ryšį"}
+                    </Button>
                   </div>
                 </div>
 
@@ -438,6 +484,18 @@ function GoalsPage() {
           })}
         </div>
       </div>
+      <Dialog open={!!alignmentGoal} onOpenChange={(next) => !next && setAlignmentGoal(null)}>
+        {alignmentGoal && (
+          <GoalAlignmentDialog
+            goal={alignmentGoal}
+            values={values}
+            onSaved={() => {
+              setAlignmentGoal(null);
+              load();
+            }}
+          />
+        )}
+      </Dialog>
     </div>
   );
 }
@@ -548,10 +606,17 @@ function TaskTree({
   );
 }
 
-function NewGoalDialog({ onCreated }: { onCreated: () => void }) {
+function NewGoalDialog({ values, onCreated }: { values: Value[]; onCreated: () => void }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [date, setDate] = useState("");
+  const [primaryValueId, setPrimaryValueId] = useState("");
+  const [alignment, setAlignment] = useState<AlignmentData>({
+    value_link: "",
+    personal_why: "",
+    ownership: "",
+    supporting_value_ids: [],
+  });
   const [saving, setSaving] = useState(false);
 
   async function save() {
@@ -559,23 +624,52 @@ function NewGoalDialog({ onCreated }: { onCreated: () => void }) {
     setSaving(true);
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
-    const { error } = await supabase.from("goals").insert({
+    const score = calculateAlignmentScore({
+      ...alignment,
+      primaryValueId,
+      description: desc,
+      targetDate: date,
+    });
+    const selectedNames = values
+      .filter((value) => alignment.supporting_value_ids?.includes(value.id))
+      .map((value) => value.name);
+    const fullPayload = {
       user_id: userData.user.id,
       title: title.trim(),
       description: desc.trim() || null,
       target_date: date || null,
-    });
+      linked_value_id: primaryValueId || null,
+      value_alignment_score: score,
+      value_alignment: {
+        ...alignment,
+        supporting_value_names: selectedNames,
+      } as unknown as Json,
+      alignment_updated_at: new Date().toISOString(),
+    };
+    let { error } = await supabase.from("goals").insert(fullPayload);
+    if (error && /value_alignment|alignment_updated_at/i.test(error.message)) {
+      const fallback = {
+        user_id: userData.user.id,
+        title: title.trim(),
+        description: desc.trim() || null,
+        target_date: date || null,
+        linked_value_id: primaryValueId || null,
+      };
+      ({ error } = await supabase.from("goals").insert(fallback));
+    }
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Tikslas išsaugotas");
     setTitle("");
     setDesc("");
     setDate("");
+    setPrimaryValueId("");
+    setAlignment({ value_link: "", personal_why: "", ownership: "", supporting_value_ids: [] });
     onCreated();
   }
 
   return (
-    <DialogContent>
+    <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
       <DialogHeader>
         <DialogTitle className="font-serif text-2xl">Naujas tikslas</DialogTitle>
       </DialogHeader>
@@ -602,12 +696,329 @@ function NewGoalDialog({ onCreated }: { onCreated: () => void }) {
             className="mt-1.5 w-52"
           />
         </div>
+        <div className="my-5 border-t border-border/70 pt-5">
+          <div className="mb-4 flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Gem className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Vertybinio ryšio patikra</h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Ne vertinimas, ar tikslas geras. Patikra padeda pamatyti, ar jis turi pakankamai
+                asmeninės prasmės, kad norėtum veikti.
+              </p>
+            </div>
+          </div>
+          <AlignmentFields
+            values={values}
+            primaryValueId={primaryValueId}
+            data={alignment}
+            onPrimaryValue={setPrimaryValueId}
+            onChange={setAlignment}
+          />
+        </div>
       </div>
       <DialogFooter>
-        <Button onClick={save} disabled={saving || !title.trim()}>
-          Išsaugoti
+        <div className="mr-auto text-xs text-muted-foreground">
+          Suderinamumas:{" "}
+          {calculateAlignmentScore({
+            ...alignment,
+            primaryValueId,
+            description: desc,
+            targetDate: date,
+          })}
+          %
+        </div>
+        <Button onClick={save} disabled={saving || !title.trim() || !primaryValueId}>
+          {saving ? <Loader2 className="animate-spin" /> : <CheckCircle2 />} Išsaugoti
         </Button>
       </DialogFooter>
     </DialogContent>
   );
+}
+
+function GoalAlignmentDialog({
+  goal,
+  values,
+  onSaved,
+}: {
+  goal: Goal;
+  values: Value[];
+  onSaved: () => void;
+}) {
+  const [primaryValueId, setPrimaryValueId] = useState(goal.linked_value_id ?? "");
+  const [data, setData] = useState<AlignmentData>({
+    value_link: goal.value_alignment?.value_link ?? "",
+    personal_why: goal.value_alignment?.personal_why ?? "",
+    ownership: goal.value_alignment?.ownership ?? "",
+    supporting_value_ids: goal.value_alignment?.supporting_value_ids ?? [],
+  });
+  const [saving, setSaving] = useState(false);
+  const score = calculateAlignmentScore({
+    ...data,
+    primaryValueId,
+    description: goal.description ?? "",
+    targetDate: goal.target_date ?? "",
+  });
+
+  async function save() {
+    if (!primaryValueId) return toast.error("Pasirink pagrindinę vertybę");
+    setSaving(true);
+    const names = values
+      .filter((value) => data.supporting_value_ids?.includes(value.id))
+      .map((value) => value.name);
+    let { error } = await supabase
+      .from("goals")
+      .update({
+        linked_value_id: primaryValueId,
+        value_alignment_score: score,
+        value_alignment: { ...data, supporting_value_names: names } as unknown as Json,
+        alignment_updated_at: new Date().toISOString(),
+      })
+      .eq("id", goal.id);
+    if (error && /value_alignment|alignment_updated_at/i.test(error.message)) {
+      const fallback = await supabase
+        .from("goals")
+        .update({ linked_value_id: primaryValueId })
+        .eq("id", goal.id);
+      error = fallback.error;
+      if (!error) toast.info("Vertybė susieta. Pilnam rezultatui dar reikia pritaikyti migraciją.");
+    }
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Vertybinis ryšys atnaujintas");
+    onSaved();
+  }
+
+  return (
+    <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>Vertybinio ryšio patikra</DialogTitle>
+        <p className="line-clamp-2 text-sm text-muted-foreground">{goal.title}</p>
+      </DialogHeader>
+      <AlignmentSummary score={score} />
+      <AlignmentFields
+        values={values}
+        primaryValueId={primaryValueId}
+        data={data}
+        onPrimaryValue={setPrimaryValueId}
+        onChange={setData}
+      />
+      <DialogFooter className="gap-2 sm:justify-between">
+        <Button asChild variant="outline">
+          <Link to="/ask" search={{ goal: goal.id } as never}>
+            <Sparkles /> Aptarti su mentoriumi
+          </Link>
+        </Button>
+        <Button onClick={save} disabled={saving || !primaryValueId}>
+          {saving ? <Loader2 className="animate-spin" /> : <CheckCircle2 />} Išsaugoti patikrą
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+}
+
+function AlignmentFields({
+  values,
+  primaryValueId,
+  data,
+  onPrimaryValue,
+  onChange,
+}: {
+  values: Value[];
+  primaryValueId: string;
+  data: AlignmentData;
+  onPrimaryValue: (id: string) => void;
+  onChange: (data: AlignmentData) => void;
+}) {
+  const supporting = data.supporting_value_ids ?? [];
+  function toggleValue(id: string) {
+    onChange({
+      ...data,
+      supporting_value_ids: supporting.includes(id)
+        ? supporting.filter((valueId) => valueId !== id)
+        : [...supporting, id].slice(-3),
+    });
+  }
+  return (
+    <div className="space-y-5">
+      <div>
+        <Label>Pagrindinė vertybė, kurią realizuoja šis tikslas</Label>
+        {values.length ? (
+          <Select value={primaryValueId} onValueChange={onPrimaryValue}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue placeholder="Pasirink vertybę" />
+            </SelectTrigger>
+            <SelectContent>
+              {values.map((value) => (
+                <SelectItem key={value.id} value={value.id}>
+                  #{value.rank} · {value.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="mt-2 rounded-xl border border-dashed p-3 text-sm text-muted-foreground">
+            Pirmiausia atlik vertybių nustatymo pratimą.{" "}
+            <Link to="/values" className="font-medium text-primary hover:underline">
+              Atidaryti pratimą
+            </Link>
+          </div>
+        )}
+      </div>
+      <div>
+        <Label>Kaip konkrečiai šis tikslas padės realizuoti pasirinktą vertybę?</Label>
+        <Textarea
+          className="mt-1.5"
+          rows={2}
+          value={data.value_link ?? ""}
+          onChange={(event) => onChange({ ...data, value_link: event.target.value })}
+          placeholder="Aprašyk realų ryšį, ne bendrą frazę…"
+        />
+      </div>
+      <div>
+        <Label>Kodėl tai svarbu būtent tau?</Label>
+        <Textarea
+          className="mt-1.5"
+          rows={2}
+          value={data.personal_why ?? ""}
+          onChange={(event) => onChange({ ...data, personal_why: event.target.value })}
+          placeholder="Kas tavo gyvenime pasikeis ir kodėl tau tai rūpi?"
+        />
+      </div>
+      <div>
+        <Label>Kam labiausiai priklauso šis tikslas?</Label>
+        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          {[
+            { key: "own" as const, title: "Mano", text: "Rinkčiausi net be kitų pritarimo" },
+            { key: "mixed" as const, title: "Mišrus", text: "Noriu aš, bet veikia ir lūkesčiai" },
+            {
+              key: "external" as const,
+              title: "Išorinis",
+              text: "Labiau „reikia“ arba „turėčiau“",
+            },
+          ].map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => onChange({ ...data, ownership: option.key })}
+              className={cn(
+                "rounded-xl border p-3 text-left transition-all",
+                data.ownership === option.key
+                  ? "border-primary/35 bg-primary/[0.07] ring-2 ring-primary/10"
+                  : "bg-card hover:border-primary/20",
+              )}
+            >
+              <div className="text-sm font-semibold">{option.title}</div>
+              <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                {option.text}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+      {values.length > 1 && (
+        <div>
+          <Label>Kokioms dar vertybėms šis tikslas gali suteikti naudą?</Label>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Pasirink iki 3. Platesnis ryšys dažnai padidina natūralią motyvaciją.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {values
+              .filter((value) => value.id !== primaryValueId)
+              .map((value) => (
+                <button
+                  key={value.id}
+                  type="button"
+                  onClick={() => toggleValue(value.id)}
+                  className={cn(
+                    "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                    supporting.includes(value.id)
+                      ? "border-primary/25 bg-primary text-primary-foreground"
+                      : "bg-card hover:bg-accent",
+                  )}
+                >
+                  {supporting.includes(value.id) && (
+                    <CheckCircle2 className="mr-1 inline h-3 w-3" />
+                  )}
+                  {value.name}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AlignmentSummary({ score }: { score: number }) {
+  const info = alignmentInfo(score);
+  return (
+    <div className={cn("rounded-2xl border p-4", info.panel)}>
+      <div className="flex items-center gap-3">
+        <div className="font-serif text-3xl">{score}%</div>
+        <div>
+          <div className="text-sm font-semibold">{info.label}</div>
+          <p className="mt-0.5 text-xs text-muted-foreground">{info.description}</p>
+        </div>
+      </div>
+      <Progress value={score} className="mt-3" />
+    </div>
+  );
+}
+
+function AlignmentBadge({ score }: { score: number | null | undefined }) {
+  if (score == null)
+    return (
+      <Badge variant="outline" className="gap-1 text-[10px] text-muted-foreground">
+        <ShieldQuestion className="h-3 w-3" /> Nepatikrintas
+      </Badge>
+    );
+  const info = alignmentInfo(score);
+  return (
+    <Badge variant="outline" className={cn("gap-1 text-[10px]", info.badge)}>
+      <Gem className="h-3 w-3" /> {score}% · {info.short}
+    </Badge>
+  );
+}
+
+function alignmentInfo(score: number) {
+  if (score >= 80)
+    return {
+      label: "Stipriai suderintas",
+      short: "stiprus ryšys",
+      description: "Tikslas turi aiškų asmeninį ir vertybinį pagrindą.",
+      panel: "border-map-green/25 bg-map-green/[0.06]",
+      badge: "border-map-green/25 text-map-green",
+    };
+  if (score >= 55)
+    return {
+      label: "Ryšį verta sustiprinti",
+      short: "vystomas ryšys",
+      description: "Kryptis prasminga, tačiau dalį ryšio dar verta sukonkretinti.",
+      panel: "border-map-orange/25 bg-map-orange/[0.06]",
+      badge: "border-map-orange/25 text-map-orange",
+    };
+  return {
+    label: "Galimai pasiskolintas tikslas",
+    short: "silpnas ryšys",
+    description:
+      "Tai nėra blogas tikslas — patikrink, kiek jame tavo noro, o kiek išorinio „turėčiau“.",
+    panel: "border-map-rose/25 bg-map-rose/[0.05]",
+    badge: "border-map-rose/25 text-map-rose",
+  };
+}
+
+function calculateAlignmentScore(
+  data: AlignmentData & { primaryValueId: string; description: string; targetDate: string },
+) {
+  let score = 0;
+  if (data.primaryValueId) score += 15;
+  if ((data.value_link?.trim().length ?? 0) >= 15) score += 25;
+  if ((data.personal_why?.trim().length ?? 0) >= 15) score += 20;
+  score += data.ownership === "own" ? 25 : data.ownership === "mixed" ? 13 : 0;
+  score += Math.min(data.supporting_value_ids?.length ?? 0, 2) * 5;
+  if (data.description.trim().length >= 20) score += 3;
+  if (data.targetDate) score += 2;
+  return Math.min(score, 100);
 }

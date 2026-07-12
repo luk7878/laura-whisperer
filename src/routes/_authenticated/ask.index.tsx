@@ -47,7 +47,7 @@ const STARTERS = [
 
 function AskIndex() {
   const navigate = useNavigate();
-  const search = useSearch({ strict: false }) as { session?: string };
+  const search = useSearch({ strict: false }) as { session?: string; goal?: string };
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [contextLoading, setContextLoading] = useState(false);
@@ -111,6 +111,73 @@ function AskIndex() {
       cancelled = true;
     };
   }, [search.session]);
+
+  useEffect(() => {
+    const goalId = search.goal;
+    if (!goalId) return;
+    let cancelled = false;
+    setContextLoading(true);
+    (async () => {
+      const { data: goal, error } = await supabase
+        .from("goals")
+        .select("*")
+        .eq("id", goalId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !goal) {
+        toast.error("Nepavyko įkelti tikslo konteksto");
+        setContextLoading(false);
+        return;
+      }
+      const alignment =
+        goal.value_alignment &&
+        typeof goal.value_alignment === "object" &&
+        !Array.isArray(goal.value_alignment)
+          ? (goal.value_alignment as Record<string, unknown>)
+          : {};
+      const { data: value } = goal.linked_value_id
+        ? await supabase
+            .from("values")
+            .select("name,rank")
+            .eq("id", goal.linked_value_id)
+            .maybeSingle()
+        : { data: null };
+      const context = [
+        "Noriu su tavimi aptarti savo tikslo vertybinį suderinamumą.",
+        "",
+        `Tikslas: ${goal.title}`,
+        goal.description ? `Aprašymas: ${goal.description}` : null,
+        goal.target_date ? `Terminas: ${goal.target_date}` : null,
+        value ? `Pagrindinė vertybė: #${value.rank} ${value.name}` : null,
+        typeof alignment.value_link === "string"
+          ? `Kaip tikslas realizuoja vertybę: ${alignment.value_link}`
+          : null,
+        typeof alignment.personal_why === "string"
+          ? `Kodėl tai svarbu man: ${alignment.personal_why}`
+          : null,
+        typeof alignment.ownership === "string"
+          ? `Tikslo kilmės įvertinimas: ${alignment.ownership}`
+          : null,
+        Array.isArray(alignment.supporting_value_names) && alignment.supporting_value_names.length
+          ? `Papildomai palaikomos vertybės: ${alignment.supporting_value_names.join(", ")}`
+          : null,
+        goal.value_alignment_score != null
+          ? `Dabartinis refleksinis suderinamumo balas: ${goal.value_alignment_score}/100.`
+          : null,
+        "",
+        "Nevertink tikslo kaip gero ar blogo. Padėk patikrinti, ar ryšys su mano realiomis vertybėmis konkretus, ar tik deklaruojamas. Įvardyk vieną stipriausią ryšį, vieną neaiškią vietą ir užduok vieną klausimą, kuris padėtų apsispręsti, ar tikslą stiprinti, performuluoti ar paleisti.",
+      ]
+        .filter(Boolean)
+        .join("\n");
+      setContextTitle(goal.title);
+      setInput(context);
+      setContextLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [search.goal]);
 
   async function start(text: string, e?: FormEvent) {
     e?.preventDefault();
