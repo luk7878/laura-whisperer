@@ -9,6 +9,7 @@ import {
   Heart,
   Eye,
   Zap,
+  Scale,
   TableProperties,
   TrendingUp,
   MoreHorizontal,
@@ -26,6 +27,10 @@ export type SessionMapData = {
   column: string | null;
   patterns: string[];
   grid: Record<string, string>;
+  touchedValue?: string | null;
+  valueConflict?: { left: string; right: string } | null;
+  valueDynamic?: string | null;
+  valueDynamicEvidence?: string | null;
 };
 
 const GRID_ROWS = [
@@ -108,6 +113,34 @@ export function GrowthMapBody({
         value={data.topic}
         placeholder="Dar neatpažinta"
       />
+
+      {(data.touchedValue || data.valueConflict) && (
+        <Card className="overflow-hidden border-violet-200 bg-gradient-to-br from-violet-50 via-background to-blue-50 p-4 dark:border-violet-900 dark:from-violet-950/30 dark:to-blue-950/20">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-map-violet">
+            <Scale className="h-4 w-4" />
+            Vertybinė įtampa
+          </div>
+          {data.valueConflict ? (
+            <div className="mt-3 flex items-center gap-2 font-serif text-xl">
+              <span>{data.valueConflict.left}</span>
+              <span className="text-map-violet">↔</span>
+              <span>{data.valueConflict.right}</span>
+            </div>
+          ) : (
+            <div className="mt-3 font-serif text-xl">{data.touchedValue}</div>
+          )}
+          {data.valueDynamic && data.valueDynamic !== "neaisku" && (
+            <Badge variant="secondary" className="mt-3 rounded-full font-normal">
+              {valueDynamicLabel(data.valueDynamic)}
+            </Badge>
+          )}
+          {data.valueDynamicEvidence && (
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {data.valueDynamicEvidence}
+            </p>
+          )}
+        </Card>
+      )}
       <MapCard
         icon={<Brain className="h-4 w-4" />}
         label="Pagrindinis įsitikinimas"
@@ -216,6 +249,13 @@ export function GrowthMapBody({
       )}
     </div>
   );
+}
+
+function valueDynamicLabel(value: string) {
+  if (value === "idealizacija") return "Galima idealizacija";
+  if (value === "svetima_hierarchija") return "Galimas svetimas lūkestis";
+  if (value === "konfliktas") return "Dviejų vertybių konfliktas";
+  return value;
 }
 
 function MapCard({

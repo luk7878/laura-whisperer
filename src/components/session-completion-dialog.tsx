@@ -39,6 +39,7 @@ type SessionContext = {
   emotion?: number | null;
   patterns?: string[] | null;
   messages?: { role: "user" | "assistant"; content: string }[];
+  grid?: Record<string, string>;
 };
 
 type Props = {
@@ -82,6 +83,9 @@ export function SessionCompletionDialog({
   const [goalTitle, setGoalTitle] = useState("");
   const [goalDesc, setGoalDesc] = useState("");
   const [goalDate, setGoalDate] = useState("");
+  const [touchedValueReflection, setTouchedValueReflection] = useState("");
+  const [valueImpactReflection, setValueImpactReflection] = useState("");
+  const [bothSidesAction, setBothSidesAction] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -94,7 +98,10 @@ export function SessionCompletionDialog({
     setGoalDesc("");
     setGoalDate("");
     setSuggested(false);
-  }, [open, sessionTopic, sessionTitle]);
+    setTouchedValueReflection(context?.grid?.["Paliesta vertybė"] ?? "");
+    setValueImpactReflection(context?.grid?.["Refleksija: padėjo ir trukdė"] ?? "");
+    setBothSidesAction(context?.grid?.["Refleksija: abi pusės"] ?? "");
+  }, [open, sessionTopic, sessionTitle, context?.grid]);
 
   async function suggestWithAI() {
     if (suggesting) return;
@@ -155,12 +162,8 @@ export function SessionCompletionDialog({
     }
   }
 
-
   function addStep() {
-    setSteps((s) => [
-      ...s,
-      { id: crypto.randomUUID(), title: "", due_date: "", asPriority: true },
-    ]);
+    setSteps((s) => [...s, { id: crypto.randomUUID(), title: "", due_date: "", asPriority: true }]);
   }
   function removeStep(id: string) {
     setSteps((s) => (s.length === 1 ? s : s.filter((x) => x.id !== id)));
@@ -233,7 +236,18 @@ export function SessionCompletionDialog({
         if (prErr) throw prErr;
       }
 
-      await supabase.from("sessions").update({ status: "closed" }).eq("id", sessionId);
+      await supabase
+        .from("sessions")
+        .update({
+          status: "closed",
+          grid: {
+            ...(context?.grid ?? {}),
+            "Paliesta vertybė": touchedValueReflection.trim(),
+            "Refleksija: padėjo ir trukdė": valueImpactReflection.trim(),
+            "Refleksija: abi pusės": bothSidesAction.trim(),
+          },
+        })
+        .eq("id", sessionId);
 
       toast.success("Planas, tikslas ir prioritetai išsaugoti");
       onOpenChange(false);
@@ -294,6 +308,44 @@ export function SessionCompletionDialog({
         <div className="flex-1 overflow-y-auto pr-1 space-y-4">
           {stage === "plan" && (
             <>
+              <Card className="space-y-4 border-violet-200 bg-gradient-to-br from-violet-50/80 to-background p-4 dark:border-violet-900 dark:from-violet-950/20">
+                <div>
+                  <div className="text-sm font-semibold text-map-violet">Vertybinė refleksija</div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Prieš pereidamas į veiksmą, įvardyk, ką ši situacija atskleidė apie tai, kas tau
+                    svarbu.
+                  </p>
+                </div>
+                <div>
+                  <Label>Kokia tavo vertybė buvo paliesta?</Label>
+                  <Input
+                    value={touchedValueReflection}
+                    onChange={(event) => setTouchedValueReflection(event.target.value)}
+                    placeholder="Pvz. Laisvė"
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Kaip ši situacija jai padėjo ir trukdė?</Label>
+                  <Textarea
+                    value={valueImpactReflection}
+                    onChange={(event) => setValueImpactReflection(event.target.value)}
+                    placeholder="Įvardyk abi situacijos puses..."
+                    rows={2}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Koks veiksmas leistų pagerbti abi konflikto puses?</Label>
+                  <Textarea
+                    value={bothSidesAction}
+                    onChange={(event) => setBothSidesAction(event.target.value)}
+                    placeholder="Vienas konkretus, mažas veiksmas..."
+                    rows={2}
+                    className="mt-1.5"
+                  />
+                </div>
+              </Card>
               <Card className="p-3 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent flex items-start gap-3">
                 <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
                   <Sparkles className="h-4 w-4" />
@@ -301,7 +353,8 @@ export function SessionCompletionDialog({
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium">Padėk susidėlioti su AI</div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Iš sesijos įžvalgų sugeneruosiu 2–5 konkrečius žingsnius, tikslą ir terminus. Tu peržiūrėsi ir pakoreguosi.
+                    Iš sesijos įžvalgų sugeneruosiu 2–5 konkrečius žingsnius, tikslą ir terminus. Tu
+                    peržiūrėsi ir pakoreguosi.
                   </p>
                 </div>
                 <Button
@@ -343,7 +396,13 @@ export function SessionCompletionDialog({
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <Label>Veiksmų žingsniai</Label>
-                  <Button type="button" size="sm" variant="ghost" onClick={addStep} className="gap-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={addStep}
+                    className="gap-1"
+                  >
                     <Plus className="h-3.5 w-3.5" /> Pridėti žingsnį
                   </Button>
                 </div>
@@ -398,8 +457,8 @@ export function SessionCompletionDialog({
           {stage === "goal" && (
             <>
               <p className="text-sm text-muted-foreground">
-                Iškelk tikslą, kurį šie veiksmai realiai įgyvendins. Pageidautina, kad tikslas atspindėtų
-                tavo vertybę, o ne pasiskolintą lūkestį.
+                Iškelk tikslą, kurį šie veiksmai realiai įgyvendins. Pageidautina, kad tikslas
+                atspindėtų tavo vertybę, o ne pasiskolintą lūkestį.
               </p>
               <div>
                 <Label>Tikslo pavadinimas</Label>
@@ -431,7 +490,9 @@ export function SessionCompletionDialog({
               <Card className="p-3 bg-muted/30 border-dashed">
                 <div className="text-xs font-medium text-muted-foreground mb-1">Susijęs planas</div>
                 <div className="text-sm">{planTitle}</div>
-                <div className="text-xs text-muted-foreground mt-1">{cleanSteps.length} žingsniai</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {cleanSteps.length} žingsniai
+                </div>
               </Card>
             </>
           )}
@@ -439,8 +500,8 @@ export function SessionCompletionDialog({
           {stage === "priorities" && (
             <>
               <p className="text-sm text-muted-foreground">
-                Pažymėk, kuriuos žingsnius nori pamatyti savo prioritetų sąraše. Rekomenduoju rinktis
-                1–3 artimiausius — kad realiai išeitų padaryti.
+                Pažymėk, kuriuos žingsnius nori pamatyti savo prioritetų sąraše. Rekomenduoju
+                rinktis 1–3 artimiausius — kad realiai išeitų padaryti.
               </p>
               <div className="space-y-2">
                 {cleanSteps.map((s, idx) => (
@@ -503,16 +564,18 @@ export function SessionCompletionDialog({
                 const i = STAGES.findIndex((s) => s.key === stage);
                 setStage(STAGES[i + 1].key);
               }}
-              disabled={
-                (stage === "plan" && !canNextPlan) || (stage === "goal" && !canNextGoal)
-              }
+              disabled={(stage === "plan" && !canNextPlan) || (stage === "goal" && !canNextGoal)}
               className="gap-1.5"
             >
               Toliau <ChevronRight className="h-4 w-4" />
             </Button>
           ) : (
             <Button type="button" onClick={save} disabled={saving} className="gap-1.5">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
               Užbaigti ir išsaugoti
             </Button>
           )}

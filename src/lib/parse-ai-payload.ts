@@ -10,6 +10,10 @@ export type MapPayload = {
   column?: string;
   patterns?: string[];
   grid?: Record<string, string>;
+  touched_value?: string;
+  value_conflict?: { left: string; right: string } | null;
+  value_dynamic?: "idealizacija" | "svetima_hierarchija" | "konfliktas" | "neaisku";
+  value_dynamic_evidence?: string;
 };
 
 const MARKER = /\n?-{3,}\s*MAP\s*-{3,}\s*\n([\s\S]*?)$/i;

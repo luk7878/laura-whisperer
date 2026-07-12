@@ -31,7 +31,8 @@ export const Route = createFileRoute("/api/chat")({
           global: { headers: { Authorization: `Bearer ${token}` } },
           auth: { persistSession: false, autoRefreshToken: false },
         });
-        const valueContext = await buildUserValueContext(supabase);
+        const lastUser = [...messages].reverse().find((message) => message.role === "user");
+        const valueContext = await buildUserValueContext(supabase, lastUser?.content ?? "");
         const systemPrompt = `${basePrompt}${valueContext.prompt}`;
         const key = requireLovableApiKey();
 

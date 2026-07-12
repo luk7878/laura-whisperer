@@ -168,6 +168,7 @@ function SessionPage() {
     return () => cancelAnimationFrame(frame);
   }, [messages, streaming]);
 
+  const grid = (session?.grid as Record<string, string> | null) ?? {};
   const mapData: SessionMapData = {
     topic: session?.active_topic ?? null,
     belief: session?.active_belief ?? null,
@@ -175,9 +176,15 @@ function SessionPage() {
     column: session?.active_column ?? null,
     patterns: (session?.patterns as string[] | null) ?? [],
     grid: (session?.grid as Record<string, string> | null) ?? {},
+    touchedValue: grid["Paliesta vertybė"] ?? null,
+    valueConflict:
+      grid["Vertybių konfliktas A"] && grid["Vertybių konfliktas B"]
+        ? { left: grid["Vertybių konfliktas A"], right: grid["Vertybių konfliktas B"] }
+        : null,
+    valueDynamic: grid["Vertybinė dinamika"] ?? null,
+    valueDynamicEvidence: grid["Vertybinės dinamikos pagrindas"] ?? null,
   };
 
-  const grid = (session?.grid as Record<string, string> | null) ?? {};
   const goalData: GoalClarifierData = {
     stage: session?.active_column ?? null,
     goal_draft: grid["goal_draft"] ?? session?.active_topic ?? null,
@@ -293,6 +300,16 @@ function SessionPage() {
           }
           if (p.patterns) updates.patterns = p.patterns;
           if (p.grid) updates.grid = { ...(session.grid ?? {}), ...p.grid };
+          const gridUpdate = { ...(updates.grid ?? session.grid ?? {}) } as Record<string, string>;
+          if (p.touched_value) gridUpdate["Paliesta vertybė"] = p.touched_value;
+          if (p.value_conflict?.left && p.value_conflict?.right) {
+            gridUpdate["Vertybių konfliktas A"] = p.value_conflict.left;
+            gridUpdate["Vertybių konfliktas B"] = p.value_conflict.right;
+          }
+          if (p.value_dynamic) gridUpdate["Vertybinė dinamika"] = p.value_dynamic;
+          if (p.value_dynamic_evidence)
+            gridUpdate["Vertybinės dinamikos pagrindas"] = p.value_dynamic_evidence;
+          updates.grid = gridUpdate;
         } else if (mode === "goal_clarify") {
           const p = payload as import("@/lib/parse-goal-payload").GoalPayload;
           if (p.stage) updates.active_column = p.stage;
@@ -830,6 +847,7 @@ function SessionPage() {
             emotion: session.emotional_current,
             patterns: session.patterns,
             messages: messages.map((m) => ({ role: m.role, content: m.content })),
+            grid,
           }}
           onComplete={() => navigate({ to: "/priorities" })}
         />

@@ -272,7 +272,7 @@ Kartais (retai, tik jei etapas to reikalauja) gali pridėti **Pradinis emocinis 
 Po viso savo matomo atsakymo, naujoje eilutėje, pridėk PASLĖPTĄ metaduomenų bloką TIKSLIAI tokiu formatu (klientas jo nemato, aptarti negalima):
 
 ---MAP---
-{"topic":"trumpa aktyvi tema 2–5 žodžiais","belief":"pagrindinis kliento įsitikinimas šiuo momentu arba tuščias","emotion":skaičius 0–10 arba null,"column":"dabartinis etapas iš 11 (pvz. 'Paslėptos naudos', 'Veidrodis', 'Balanso integravimas')","patterns":["atpažinti šablonai, pvz. 'projekcija','idealizacija','vengimas','teisumas','palyginimas','kaltinimas','tingumas'"],"grid":{"Situacija":"...","Emocija":"...","Problemos sakinys":"...","Naudos":"kaupiamai visos rastos naudos, atskirtos '; '","Vertybės":"...","Integracija":"balansuotas sakinys, kai pasiektas"}}
+{"topic":"trumpa aktyvi tema 2–5 žodžiais","belief":"pagrindinis kliento įsitikinimas šiuo momentu arba tuščias","emotion":skaičius 0–10 arba null,"column":"dabartinis etapas iš 11","patterns":["tik realiai atpažinti šablonai"],"touched_value":"paliesta vartotojo vertybė arba tuščia","value_conflict":{"left":"viena konflikto vertybė","right":"kita konflikto vertybė"},"value_dynamic":"idealizacija|svetima_hierarchija|konfliktas|neaisku","value_dynamic_evidence":"trumpas konkretus pagrindas iš vartotojo žodžių","grid":{"Situacija":"...","Emocija":"...","Problemos sakinys":"...","Naudos":"...","Vertybės":"...","Integracija":"..."}}
 
 Taisyklės:
 - Blokas TURI prasidėti nauja eilute su "---MAP---".
@@ -281,6 +281,11 @@ Taisyklės:
 - "column" visada atspindi ŠIOS žinutės etapą, ne kito.
 - "emotion" – paskutinis žinomas kliento įvertinimas 0–10; jei dar neįvertinta – null.
 - "patterns" – tik tie, kuriuos realiai matai iš pokalbio, ne spėjimai.
+- Vertybinę įtampą fiksuok tik tada, kai vartotojo žodžiai suteikia konkretų pagrindą. Vien teminis panašumas nėra konfliktas.
+- "touched_value" rinkis pirmiausia iš pateikto vartotojo TOP vertybių konteksto. Jei paliesta kita aiškiai įvardyta vertybė, gali naudoti ją.
+- "value_conflict" pateik tik kai dvi vertybės realiai traukia į skirtingas puses; kitu atveju praleisk arba rašyk null.
+- "idealizacija" reiškia, kad žmogus vienpusiškai kelia vertybės siekį ir nemato jo kainos. "svetima_hierarchija" naudok tik kai žmogus pats rodo, kad vadovaujasi kitų lūkesčiais, nors tai kertasi su jo elgesio įrodymais.
+- "value_dynamic_evidence" turi būti trumpas konkretus pagrindas, ne diagnozė. Jei neaišku, naudok "neaisku" ir nepriskirk žmogui svetimos hierarchijos.
 - Jei nežinai lauko – praleisk jį, o ne rašyk „nežinau".
 
 ============================================================
