@@ -18,6 +18,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SesijaTokenRouteImport } from './routes/sesija.$token'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ApiVisionAlignmentRouteImport } from './routes/api/vision-alignment'
 import { Route as ApiValueSimilaritiesRouteImport } from './routes/api/value-similarities'
 import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
@@ -102,6 +103,11 @@ const SesijaTokenRoute = SesijaTokenRouteImport.update({
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVisionAlignmentRoute = ApiVisionAlignmentRouteImport.update({
+  id: '/api/vision-alignment',
+  path: '/api/vision-alignment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiValueSimilaritiesRoute = ApiValueSimilaritiesRouteImport.update({
@@ -348,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/value-similarities': typeof ApiValueSimilaritiesRoute
+  '/api/vision-alignment': typeof ApiVisionAlignmentRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/value-similarities': typeof ApiValueSimilaritiesRoute
+  '/api/vision-alignment': typeof ApiVisionAlignmentRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -450,6 +458,7 @@ export interface FileRoutesById {
   '/api/plan-suggest': typeof ApiPlanSuggestRoute
   '/api/transcribe': typeof ApiTranscribeRoute
   '/api/value-similarities': typeof ApiValueSimilaritiesRoute
+  '/api/vision-alignment': typeof ApiVisionAlignmentRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/sesija/$token': typeof SesijaTokenRouteWithChildren
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -503,6 +512,7 @@ export interface FileRouteTypes {
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/api/value-similarities'
+    | '/api/vision-alignment'
     | '/email/unsubscribe'
     | '/sesija/$token'
     | '/.lovable/oauth/consent'
@@ -553,6 +563,7 @@ export interface FileRouteTypes {
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/api/value-similarities'
+    | '/api/vision-alignment'
     | '/email/unsubscribe'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -604,6 +615,7 @@ export interface FileRouteTypes {
     | '/api/plan-suggest'
     | '/api/transcribe'
     | '/api/value-similarities'
+    | '/api/vision-alignment'
     | '/email/unsubscribe'
     | '/sesija/$token'
     | '/.lovable/oauth/consent'
@@ -644,6 +656,7 @@ export interface RootRouteChildren {
   ApiPlanSuggestRoute: typeof ApiPlanSuggestRoute
   ApiTranscribeRoute: typeof ApiTranscribeRoute
   ApiValueSimilaritiesRoute: typeof ApiValueSimilaritiesRoute
+  ApiVisionAlignmentRoute: typeof ApiVisionAlignmentRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   SesijaTokenRoute: typeof SesijaTokenRouteWithChildren
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -725,6 +738,13 @@ declare module '@tanstack/react-router' {
       path: '/email/unsubscribe'
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/vision-alignment': {
+      id: '/api/vision-alignment'
+      path: '/api/vision-alignment'
+      fullPath: '/api/vision-alignment'
+      preLoaderRoute: typeof ApiVisionAlignmentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/value-similarities': {
@@ -1098,6 +1118,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPlanSuggestRoute: ApiPlanSuggestRoute,
   ApiTranscribeRoute: ApiTranscribeRoute,
   ApiValueSimilaritiesRoute: ApiValueSimilaritiesRoute,
+  ApiVisionAlignmentRoute: ApiVisionAlignmentRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   SesijaTokenRoute: SesijaTokenRouteWithChildren,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,

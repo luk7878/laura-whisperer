@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Check, Compass, Eye, Loader2, Save, Sparkles } from "lucide-react";
+import { AlertCircle, Check, Compass, Eye, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +25,8 @@ type Item = {
   updated_at: string;
 };
 type Value = { id: string; name: string; rank: number };
+type ValueLink = { vision_item_id: string; value_id: string; rationale: string };
+type AlignmentReflection = { observation: string; question: string };
 
 const CATEGORIES: {
   key: Category;
@@ -75,17 +77,32 @@ function VisionPage() {
   });
   const [saving, setSaving] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
+  const [valueLinks, setValueLinks] = useState<ValueLink[]>([]);
+  const [selectedValues, setSelectedValues] = useState<Record<Category, string[]>>({
+    be: [],
+    do: [],
+    have: [],
+  });
+  const [valueRationales, setValueRationales] = useState<Record<Category, string>>({
+    be: "",
+    do: "",
+    have: "",
+  });
+  const [analyzing, setAnalyzing] = useState(false);
+  const [reflection, setReflection] = useState<AlignmentReflection | null>(null);
 
   useEffect(() => {
     (async () => {
-      const [{ data: vision }, { data: valueRows }] = await Promise.all([
+      const [{ data: vision }, { data: valueRows }, { data: links }] = await Promise.all([
         supabase
           .from("vision_items")
           .select("id,category,horizon,content,why,evidence,linked_value_id,updated_at"),
         supabase.from("values").select("id,name,rank").lt("rank", 100).order("rank"),
+        supabase.from("vision_item_values").select("vision_item_id,value_id,rationale"),
       ]);
       setItems((vision as Item[]) ?? []);
       setValues((valueRows as Value[]) ?? []);
+      setValueLinks((links as ValueLink[]) ?? []);
       setLoading(false);
     })();
   }, []);
@@ -102,8 +119,40 @@ function VisionPage() {
       };
     }
     setDrafts(next);
+    setSelectedValues(
+      Object.fromEntries(
+        CATEGORIES.map((category) => {
+          const item = items.find(
+            (row) => row.category === category.key && row.horizon === horizon,
+          );
+          const linked = item
+            ? valueLinks
+                .filter((link) => link.vision_item_id === item.id)
+                .map((link) => link.value_id)
+            : [];
+          return [
+            category.key,
+            linked.length ? linked : item?.linked_value_id ? [item.linked_value_id] : [],
+          ];
+        }),
+      ) as Record<Category, string[]>,
+    );
+    setValueRationales(
+      Object.fromEntries(
+        CATEGORIES.map((category) => {
+          const item = items.find(
+            (row) => row.category === category.key && row.horizon === horizon,
+          );
+          const rationale = item
+            ? valueLinks.find((link) => link.vision_item_id === item.id)?.rationale
+            : "";
+          return [category.key, rationale ?? item?.why ?? ""];
+        }),
+      ) as Record<Category, string>,
+    );
+    setReflection(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [horizon, items]);
+  }, [horizon, items, valueLinks]);
 
   const completion = useMemo(
     () => CATEGORIES.filter((category) => drafts[category.key].content.trim()).length,
@@ -115,6 +164,7 @@ function VisionPage() {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return setSaving(null);
     const draft = drafts[category];
+    const linkedIds = selectedValues[category];
     const { data, error } = await supabase
       .from("vision_items")
       .upsert(
@@ -123,6 +173,7 @@ function VisionPage() {
           category,
           horizon,
           ...draft,
+          linked_value_id: linkedIds[0] ?? null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "user_id,category,horizon" },
@@ -131,11 +182,89 @@ function VisionPage() {
       .single();
     setSaving(null);
     if (error) return toast.error(error.message);
+    const { error: deleteError } = await supabase
+      .from("vision_item_values")
+      .delete()
+      .eq("vision_item_id", data.id);
+    if (deleteError) return toast.error("Pritaikyk naujausią duomenų bazės migraciją");
+    if (linkedIds.length) {
+      const { error: linkError } = await supabase.from("vision_item_values").insert(
+        linkedIds.map((valueId) => ({
+          user_id: auth.user.id,
+          vision_item_id: data.id,
+          value_id: valueId,
+          rationale: valueRationales[category].trim(),
+        })),
+      );
+      if (linkError) return toast.error(linkError.message);
+    }
+    setValueLinks((current) => [
+      ...current.filter((link) => link.vision_item_id !== data.id),
+      ...linkedIds.map((valueId) => ({
+        vision_item_id: data.id,
+        value_id: valueId,
+        rationale: valueRationales[category].trim(),
+      })),
+    ]);
     setItems((current) => [
       ...current.filter((item) => !(item.category === category && item.horizon === horizon)),
       data as Item,
     ]);
     toast.success("Vizijos dalis išsaugota");
+  }
+
+  async function analyzeAlignment() {
+    const vision = CATEGORIES.map((category) => ({
+      category: category.key,
+      content: drafts[category.key].content,
+      why: drafts[category.key].why,
+      evidence: drafts[category.key].evidence,
+    })).filter((item) => item.content.trim());
+    if (!vision.length) return toast.error("Pirmiausia užpildyk bent vieną vizijos dalį");
+    setAnalyzing(true);
+    try {
+      const { data: auth } = await supabase.auth.getSession();
+      const token = auth.session?.access_token;
+      if (!token) throw new Error("Nesi prisijungęs");
+      const response = await fetch("/api/vision-alignment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ vision }),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      const data = (await response.json()) as {
+        alignments?: { category: Category; value_names: string[]; rationale: string }[];
+        reflection?: AlignmentReflection | null;
+      };
+      const valueIdByName = new Map(values.map((value) => [value.name, value.id]));
+      for (const alignment of data.alignments ?? []) {
+        setSelectedValues((current) => ({
+          ...current,
+          [alignment.category]: alignment.value_names
+            .map((name) => valueIdByName.get(name))
+            .filter((id): id is string => !!id),
+        }));
+        setValueRationales((current) => ({
+          ...current,
+          [alignment.category]: alignment.rationale,
+        }));
+      }
+      setReflection(data.reflection ?? null);
+      toast.success("AI susiejo viziją su tavo vertybių įrodymais — peržiūrėk pasiūlymus");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nepavyko išanalizuoti vizijos");
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
+  function toggleValue(category: Category, valueId: string) {
+    setSelectedValues((current) => ({
+      ...current,
+      [category]: current[category].includes(valueId)
+        ? current[category].filter((id) => id !== valueId)
+        : [...current[category], valueId].slice(0, 5),
+    }));
   }
 
   return (
@@ -165,9 +294,24 @@ function VisionPage() {
                   tavo aukščiausiomis vertybėmis.
                 </p>
               </div>
-              <div className="rounded-xl border bg-background/70 px-4 py-3 text-center">
-                <div className="font-serif text-2xl">{completion}/3</div>
-                <div className="text-[10px] text-muted-foreground">užpildyta šiame horizonte</div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  className="gap-2 bg-background/70"
+                  onClick={analyzeAlignment}
+                  disabled={analyzing || !values.length}
+                >
+                  {analyzing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 text-primary" />
+                  )}
+                  AI patikrinti suderinamumą
+                </Button>
+                <div className="rounded-xl border bg-background/70 px-4 py-3 text-center">
+                  <div className="font-serif text-2xl">{completion}/3</div>
+                  <div className="text-[10px] text-muted-foreground">užpildyta šiame horizonte</div>
+                </div>
               </div>
             </div>
           </Card>
@@ -258,28 +402,45 @@ function VisionPage() {
                         />
                       </Field>
                       {values.length > 0 && (
-                        <Field label="Susieta vertybė">
-                          <select
-                            value={draft.linked_value_id ?? ""}
-                            onChange={(event) =>
-                              setDrafts((current) => ({
-                                ...current,
-                                [category.key]: {
-                                  ...draft,
-                                  linked_value_id: event.target.value || null,
-                                },
-                              }))
-                            }
-                            className="h-10 w-full rounded-md border bg-background px-3 text-sm"
-                          >
-                            <option value="">Pasirinkti nebūtina</option>
-                            {values.map((value) => (
-                              <option key={value.id} value={value.id}>
-                                {value.rank}. {value.name}
-                              </option>
-                            ))}
-                          </select>
-                        </Field>
+                        <div className="space-y-3">
+                          <div>
+                            <div className="mb-2 text-xs font-medium">Palaikomos vertybės</div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {values.slice(0, 8).map((value) => {
+                                const selected = selectedValues[category.key].includes(value.id);
+                                return (
+                                  <button
+                                    key={value.id}
+                                    type="button"
+                                    onClick={() => toggleValue(category.key, value.id)}
+                                    className={cn(
+                                      "rounded-full border px-2.5 py-1 text-xs transition",
+                                      selected
+                                        ? "border-primary bg-primary/10 text-primary"
+                                        : "bg-background text-muted-foreground hover:border-primary/40",
+                                    )}
+                                  >
+                                    {selected && <Check className="mr-1 inline h-3 w-3" />}
+                                    {value.name}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <Field label="Kodėl šios vertybės palaiko viziją?">
+                            <Textarea
+                              value={valueRationales[category.key]}
+                              onChange={(event) =>
+                                setValueRationales((current) => ({
+                                  ...current,
+                                  [category.key]: event.target.value,
+                                }))
+                              }
+                              rows={3}
+                              placeholder="Konkretus ryšys su tavo elgesiu ir vertybių testo įrodymais…"
+                            />
+                          </Field>
+                        </div>
                       )}
                       <Button
                         onClick={() => save(category.key)}
@@ -298,6 +459,21 @@ function VisionPage() {
                 );
               })}
             </div>
+          )}
+
+          {reflection && (
+            <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-background p-5 dark:border-amber-900 dark:from-amber-950/20">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-amber-100 p-2 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                  <AlertCircle className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">Vertybių refleksija</div>
+                  <p className="mt-1 text-sm text-muted-foreground">{reflection.observation}</p>
+                  <p className="mt-3 font-serif text-xl leading-relaxed">{reflection.question}</p>
+                </div>
+              </div>
+            </Card>
           )}
 
           <Card className="flex items-start gap-3 border-dashed p-4">
