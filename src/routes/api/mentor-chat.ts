@@ -226,9 +226,10 @@ export const Route = createFileRoute("/api/mentor-chat")({
         try {
           const searchQueries = await buildBilingualQueries(query, key);
           const vectors = await Promise.all(searchQueries.map(embedQuery));
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const results = await Promise.all(
             vectors.map((vector) =>
-              supabase.rpc("match_knowledge", {
+              supabaseAdmin.rpc("match_knowledge", {
                 query_embedding: JSON.stringify(vector),
                 match_count: 18,
               }),
