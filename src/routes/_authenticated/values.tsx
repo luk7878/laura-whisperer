@@ -13,6 +13,8 @@ import {
   Save,
   Sparkles,
   Trophy,
+  Combine,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -277,6 +279,54 @@ function ValuesPage() {
     });
   }
 
+  function removeGroup(index: number) {
+    const item = ranked[index];
+    if (!item) return;
+    if (ranked.length <= 2) return toast.error("Palik bent 2 vertybes hierarchijoje");
+    if (!window.confirm(`Pašalinti vertybę „${item.name}“ iš hierarchijos?`)) return;
+    setRanked((current) =>
+      current
+        .filter((_, itemIndex) => itemIndex !== index)
+        .map((value, rank) => ({ ...value, rank: rank + 1 })),
+    );
+    setAnswers((current) =>
+      current.map((answer) =>
+        normalize(answer.value) === normalize(item.name) ? { ...answer, value: "" } : answer,
+      ),
+    );
+    toast.info("Vertybė pašalinta. Nepamiršk išsaugoti hierarchijos.");
+  }
+
+  function mergeGroups(sourceIndex: number, targetIndex: number) {
+    if (sourceIndex === targetIndex) return;
+    const source = ranked[sourceIndex];
+    const target = ranked[targetIndex];
+    if (!source || !target) return;
+    setRanked((current) => {
+      const merged = current.map((item, index) =>
+        index === targetIndex
+          ? {
+              ...item,
+              count: item.count + source.count,
+              evidence: [...new Set([...item.evidence, ...source.evidence])],
+            }
+          : item,
+      );
+      return merged
+        .filter((_, index) => index !== sourceIndex)
+        .sort((a, b) => b.count - a.count)
+        .map((item, rank) => ({ ...item, rank: rank + 1 }));
+    });
+    setAnswers((current) =>
+      current.map((answer) =>
+        normalize(answer.value) === normalize(source.name)
+          ? { ...answer, value: target.name }
+          : answer,
+      ),
+    );
+    toast.success(`„${source.name}“ sujungta su „${target.name}“`);
+  }
+
   async function finish() {
     const final = ranked
       .filter((value) => value.name.trim())
@@ -417,6 +467,8 @@ function ValuesPage() {
             completed={lastAssessment?.status === "completed"}
             onRename={renameGroup}
             onMove={moveGroup}
+            onRemove={removeGroup}
+            onMerge={mergeGroups}
             onFinish={finish}
             onBack={() => {
               setStep(QUESTIONS.length - 1);
@@ -618,6 +670,8 @@ function Results({
   completed,
   onRename,
   onMove,
+  onRemove,
+  onMerge,
   onFinish,
   onBack,
 }: {
@@ -626,9 +680,12 @@ function Results({
   completed: boolean;
   onRename: (index: number, name: string) => void;
   onMove: (index: number, direction: -1 | 1) => void;
+  onRemove: (index: number) => void;
+  onMerge: (sourceIndex: number, targetIndex: number) => void;
   onFinish: () => void;
   onBack: () => void;
 }) {
+  const [mergeSource, setMergeSource] = useState<number | null>(null);
   const max = Math.max(...ranked.map((item) => item.count), 1);
   return (
     <div className="mx-auto max-w-5xl space-y-5">
@@ -709,11 +766,67 @@ function Results({
                     ))}
                   </ul>
                 </details>
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-3">
+                  {ranked.length > 1 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 gap-1.5 text-xs"
+                      onClick={() => setMergeSource(index)}
+                    >
+                      <Combine className="h-3.5 w-3.5" /> Sujungti su kita
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 gap-1.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => onRemove(index)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" /> Pašalinti
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
         ))}
       </div>
+      {mergeSource != null && ranked[mergeSource] && (
+        <Card className="border-primary/20 bg-primary/[0.035] p-4 md:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="font-semibold">Su kuo sujungti „{ranked[mergeSource].name}“?</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Visi atsakymai ir įrodymai bus perkelti į pasirinktą vertybę, o pasikartojimų
+                skaičius bus perskaičiuotas.
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setMergeSource(null)}>
+              Atšaukti
+            </Button>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {ranked.map((target, targetIndex) =>
+              targetIndex === mergeSource ? null : (
+                <Button
+                  key={`${target.name}-${targetIndex}`}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    onMerge(mergeSource, targetIndex);
+                    setMergeSource(null);
+                  }}
+                >
+                  #{targetIndex + 1} · {target.name}
+                </Button>
+              ),
+            )}
+          </div>
+        </Card>
+      )}
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft /> Patikslinti atsakymus

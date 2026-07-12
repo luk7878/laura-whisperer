@@ -71,7 +71,11 @@ function PrioritiesPage() {
         .order("done", { ascending: true })
         .order("due_date", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false }),
-      supabase.from("values").select("id, name, rank").order("rank", { ascending: true }),
+      supabase
+        .from("values")
+        .select("id, name, rank")
+        .lt("rank", 100)
+        .order("rank", { ascending: true }),
       supabase.from("goals").select("id, title").eq("status", "active"),
     ]);
     setItems((priorities as Priority[]) ?? []);

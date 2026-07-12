@@ -82,7 +82,7 @@ function VisionPage() {
         supabase
           .from("vision_items")
           .select("id,category,horizon,content,why,evidence,linked_value_id,updated_at"),
-        supabase.from("values").select("id,name,rank").order("rank"),
+        supabase.from("values").select("id,name,rank").lt("rank", 100).order("rank"),
       ]);
       setItems((vision as Item[]) ?? []);
       setValues((valueRows as Value[]) ?? []);
