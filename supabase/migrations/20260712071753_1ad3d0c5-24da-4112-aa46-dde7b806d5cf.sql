@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.book_clarity_slot(text, text, text, timestamptz, boolean) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.match_knowledge(vector, integer) FROM PUBLIC, anon, authenticated;
