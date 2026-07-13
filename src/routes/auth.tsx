@@ -39,7 +39,7 @@ function errorMessage(error: unknown, fallback: string) {
 
 function AuthPage() {
   const { next, mode: requestedMode } = Route.useSearch();
-  const target = next ?? "/session";
+  const target = next ?? "/compass";
   const validate = useServerFn(validateInviteCode);
   const consume = useServerFn(consumeInviteCode);
   const [mode, setMode] = useState<"signin" | "signup" | "forgot" | "recovery">(

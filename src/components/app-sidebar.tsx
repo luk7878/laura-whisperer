@@ -28,6 +28,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Gem,
+  Compass,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { NewSessionDialog, type SessionMode } from "@/components/new-session-dialog";
 
 const NAV = [
+  { title: "Mano kompasas", to: "/compass", icon: Compass },
   { title: "Gyva sesija", to: "/session", icon: Radio },
   { title: "Klausk mentoriaus", to: "/ask", icon: MessageSquare },
   { title: "Mano vertybės", to: "/values", icon: Gem },
@@ -125,7 +127,7 @@ export function AppSidebar() {
     >
       <SidebarHeader className="gap-4 px-4 pb-3 pt-5">
         <Link
-          to={adminArea ? "/admin" : "/session"}
+          to={adminArea ? "/admin" : "/compass"}
           className="group flex items-center gap-3 rounded-xl px-1 py-1"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-map-violet/10 ring-1 ring-primary/10 transition-transform group-hover:scale-105">

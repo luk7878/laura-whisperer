@@ -26,6 +26,7 @@ import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
 import { Route as ApiKnowledgeReindexRouteImport } from './routes/api/knowledge-reindex'
 import { Route as ApiKnowledgeIngestRouteImport } from './routes/api/knowledge-ingest'
 import { Route as ApiGoalBreakdownRouteImport } from './routes/api/goal-breakdown'
+import { Route as ApiCompassRecommendationRouteImport } from './routes/api/compass-recommendation'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedVisionRouteImport } from './routes/_authenticated/vision'
 import { Route as AuthenticatedValuesRouteImport } from './routes/_authenticated/values'
@@ -38,6 +39,7 @@ import { Route as AuthenticatedKnowledgeRouteImport } from './routes/_authentica
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
 import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
+import { Route as AuthenticatedCompassRouteImport } from './routes/_authenticated/compass'
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -145,6 +147,12 @@ const ApiGoalBreakdownRoute = ApiGoalBreakdownRouteImport.update({
   path: '/api/goal-breakdown',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompassRecommendationRoute =
+  ApiCompassRecommendationRouteImport.update({
+    id: '/api/compass-recommendation',
+    path: '/api/compass-recommendation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -203,6 +211,11 @@ const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
 const AuthenticatedGoalsRoute = AuthenticatedGoalsRouteImport.update({
   id: '/goals',
   path: '/goals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCompassRoute = AuthenticatedCompassRouteImport.update({
+  id: '/compass',
+  path: '/compass',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAskRoute = AuthenticatedAskRouteImport.update({
@@ -335,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/ask': typeof AuthenticatedAskRouteWithChildren
+  '/compass': typeof AuthenticatedCompassRoute
   '/goals': typeof AuthenticatedGoalsRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/journal': typeof AuthenticatedJournalRoute
@@ -347,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/values': typeof AuthenticatedValuesRoute
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/compass-recommendation': typeof ApiCompassRecommendationRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
   '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
@@ -386,6 +401,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/compass': typeof AuthenticatedCompassRoute
   '/goals': typeof AuthenticatedGoalsRoute
   '/insights': typeof AuthenticatedInsightsRoute
   '/journal': typeof AuthenticatedJournalRoute
@@ -398,6 +414,7 @@ export interface FileRoutesByTo {
   '/values': typeof AuthenticatedValuesRoute
   '/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/compass-recommendation': typeof ApiCompassRecommendationRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
   '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
@@ -439,6 +456,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/ask': typeof AuthenticatedAskRouteWithChildren
+  '/_authenticated/compass': typeof AuthenticatedCompassRoute
   '/_authenticated/goals': typeof AuthenticatedGoalsRoute
   '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
@@ -451,6 +469,7 @@ export interface FileRoutesById {
   '/_authenticated/values': typeof AuthenticatedValuesRoute
   '/_authenticated/vision': typeof AuthenticatedVisionRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/compass-recommendation': typeof ApiCompassRecommendationRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
   '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
@@ -493,6 +512,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/ask'
+    | '/compass'
     | '/goals'
     | '/insights'
     | '/journal'
@@ -505,6 +525,7 @@ export interface FileRouteTypes {
     | '/values'
     | '/vision'
     | '/api/chat'
+    | '/api/compass-recommendation'
     | '/api/goal-breakdown'
     | '/api/knowledge-ingest'
     | '/api/knowledge-reindex'
@@ -544,6 +565,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin'
+    | '/compass'
     | '/goals'
     | '/insights'
     | '/journal'
@@ -556,6 +578,7 @@ export interface FileRouteTypes {
     | '/values'
     | '/vision'
     | '/api/chat'
+    | '/api/compass-recommendation'
     | '/api/goal-breakdown'
     | '/api/knowledge-ingest'
     | '/api/knowledge-reindex'
@@ -596,6 +619,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/ask'
+    | '/_authenticated/compass'
     | '/_authenticated/goals'
     | '/_authenticated/insights'
     | '/_authenticated/journal'
@@ -608,6 +632,7 @@ export interface FileRouteTypes {
     | '/_authenticated/values'
     | '/_authenticated/vision'
     | '/api/chat'
+    | '/api/compass-recommendation'
     | '/api/goal-breakdown'
     | '/api/knowledge-ingest'
     | '/api/knowledge-reindex'
@@ -649,6 +674,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiCompassRecommendationRoute: typeof ApiCompassRecommendationRoute
   ApiGoalBreakdownRoute: typeof ApiGoalBreakdownRoute
   ApiKnowledgeIngestRoute: typeof ApiKnowledgeIngestRoute
   ApiKnowledgeReindexRoute: typeof ApiKnowledgeReindexRoute
@@ -796,6 +822,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGoalBreakdownRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/compass-recommendation': {
+      id: '/api/compass-recommendation'
+      path: '/api/compass-recommendation'
+      fullPath: '/api/compass-recommendation'
+      preLoaderRoute: typeof ApiCompassRecommendationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -878,6 +911,13 @@ declare module '@tanstack/react-router' {
       path: '/goals'
       fullPath: '/goals'
       preLoaderRoute: typeof AuthenticatedGoalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/compass': {
+      id: '/_authenticated/compass'
+      path: '/compass'
+      fullPath: '/compass'
+      preLoaderRoute: typeof AuthenticatedCompassRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/ask': {
@@ -1053,6 +1093,7 @@ const AuthenticatedAskRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAskRoute: typeof AuthenticatedAskRouteWithChildren
+  AuthenticatedCompassRoute: typeof AuthenticatedCompassRoute
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRoute
   AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
@@ -1069,6 +1110,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAskRoute: AuthenticatedAskRouteWithChildren,
+  AuthenticatedCompassRoute: AuthenticatedCompassRoute,
   AuthenticatedGoalsRoute: AuthenticatedGoalsRoute,
   AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
@@ -1111,6 +1153,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiCompassRecommendationRoute: ApiCompassRecommendationRoute,
   ApiGoalBreakdownRoute: ApiGoalBreakdownRoute,
   ApiKnowledgeIngestRoute: ApiKnowledgeIngestRoute,
   ApiKnowledgeReindexRoute: ApiKnowledgeReindexRoute,

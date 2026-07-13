@@ -14,19 +14,21 @@ import {
   ShieldCheck,
   Library,
   Gem,
+  Compass,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 const PRIMARY = [
+  { title: "Kompasas", to: "/compass", icon: Compass },
   { title: "Sesija", to: "/session", icon: Radio },
   { title: "Mentorius", to: "/ask", icon: MessageSquare },
   { title: "Tikslai", to: "/goals", icon: Target },
-  { title: "Žurnalas", to: "/journal", icon: BookOpen },
 ] as const;
 
 const MORE = [
+  { title: "Augimo žurnalas", to: "/journal", icon: BookOpen },
   { title: "Mano vertybės", to: "/values", icon: Gem },
   { title: "Vizija", to: "/vision", icon: Eye },
   { title: "Prioritetai", to: "/priorities", icon: ListChecks },
