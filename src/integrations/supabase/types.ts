@@ -231,6 +231,45 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_labs: {
+        Row: {
+          analysis: Json
+          created_at: string
+          decided_option: string | null
+          dilemma: string
+          id: string
+          options: Json
+          review_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json
+          created_at?: string
+          decided_option?: string | null
+          dilemma: string
+          id?: string
+          options?: Json
+          review_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis?: Json
+          created_at?: string
+          decided_option?: string | null
+          dilemma?: string
+          id?: string
+          options?: Json
+          review_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -315,45 +354,6 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
-        }
-        Relationships: []
-      }
-      decision_labs: {
-        Row: {
-          analysis: Json
-          created_at: string
-          decided_option: string | null
-          dilemma: string
-          id: string
-          options: Json
-          review_date: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          analysis?: Json
-          created_at?: string
-          decided_option?: string | null
-          dilemma: string
-          id?: string
-          options?: Json
-          review_date?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          analysis?: Json
-          created_at?: string
-          decided_option?: string | null
-          dilemma?: string
-          id?: string
-          options?: Json
-          review_date?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
