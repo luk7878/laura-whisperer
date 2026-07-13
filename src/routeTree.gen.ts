@@ -25,6 +25,7 @@ import { Route as ApiPlanSuggestRouteImport } from './routes/api/plan-suggest'
 import { Route as ApiMentorChatRouteImport } from './routes/api/mentor-chat'
 import { Route as ApiKnowledgeReindexRouteImport } from './routes/api/knowledge-reindex'
 import { Route as ApiKnowledgeIngestRouteImport } from './routes/api/knowledge-ingest'
+import { Route as ApiGoalPortfolioRouteImport } from './routes/api/goal-portfolio'
 import { Route as ApiGoalBreakdownRouteImport } from './routes/api/goal-breakdown'
 import { Route as ApiDecisionLabRouteImport } from './routes/api/decision-lab'
 import { Route as ApiCompassRecommendationRouteImport } from './routes/api/compass-recommendation'
@@ -142,6 +143,11 @@ const ApiKnowledgeReindexRoute = ApiKnowledgeReindexRouteImport.update({
 const ApiKnowledgeIngestRoute = ApiKnowledgeIngestRouteImport.update({
   id: '/api/knowledge-ingest',
   path: '/api/knowledge-ingest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiGoalPortfolioRoute = ApiGoalPortfolioRouteImport.update({
+  id: '/api/goal-portfolio',
+  path: '/api/goal-portfolio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGoalBreakdownRoute = ApiGoalBreakdownRouteImport.update({
@@ -377,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/api/compass-recommendation': typeof ApiCompassRecommendationRoute
   '/api/decision-lab': typeof ApiDecisionLabRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
+  '/api/goal-portfolio': typeof ApiGoalPortfolioRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
   '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
   '/api/mentor-chat': typeof ApiMentorChatRoute
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
   '/api/compass-recommendation': typeof ApiCompassRecommendationRoute
   '/api/decision-lab': typeof ApiDecisionLabRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
+  '/api/goal-portfolio': typeof ApiGoalPortfolioRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
   '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
   '/api/mentor-chat': typeof ApiMentorChatRoute
@@ -489,6 +497,7 @@ export interface FileRoutesById {
   '/api/compass-recommendation': typeof ApiCompassRecommendationRoute
   '/api/decision-lab': typeof ApiDecisionLabRoute
   '/api/goal-breakdown': typeof ApiGoalBreakdownRoute
+  '/api/goal-portfolio': typeof ApiGoalPortfolioRoute
   '/api/knowledge-ingest': typeof ApiKnowledgeIngestRoute
   '/api/knowledge-reindex': typeof ApiKnowledgeReindexRoute
   '/api/mentor-chat': typeof ApiMentorChatRoute
@@ -547,6 +556,7 @@ export interface FileRouteTypes {
     | '/api/compass-recommendation'
     | '/api/decision-lab'
     | '/api/goal-breakdown'
+    | '/api/goal-portfolio'
     | '/api/knowledge-ingest'
     | '/api/knowledge-reindex'
     | '/api/mentor-chat'
@@ -602,6 +612,7 @@ export interface FileRouteTypes {
     | '/api/compass-recommendation'
     | '/api/decision-lab'
     | '/api/goal-breakdown'
+    | '/api/goal-portfolio'
     | '/api/knowledge-ingest'
     | '/api/knowledge-reindex'
     | '/api/mentor-chat'
@@ -658,6 +669,7 @@ export interface FileRouteTypes {
     | '/api/compass-recommendation'
     | '/api/decision-lab'
     | '/api/goal-breakdown'
+    | '/api/goal-portfolio'
     | '/api/knowledge-ingest'
     | '/api/knowledge-reindex'
     | '/api/mentor-chat'
@@ -701,6 +713,7 @@ export interface RootRouteChildren {
   ApiCompassRecommendationRoute: typeof ApiCompassRecommendationRoute
   ApiDecisionLabRoute: typeof ApiDecisionLabRoute
   ApiGoalBreakdownRoute: typeof ApiGoalBreakdownRoute
+  ApiGoalPortfolioRoute: typeof ApiGoalPortfolioRoute
   ApiKnowledgeIngestRoute: typeof ApiKnowledgeIngestRoute
   ApiKnowledgeReindexRoute: typeof ApiKnowledgeReindexRoute
   ApiMentorChatRoute: typeof ApiMentorChatRoute
@@ -838,6 +851,13 @@ declare module '@tanstack/react-router' {
       path: '/api/knowledge-ingest'
       fullPath: '/api/knowledge-ingest'
       preLoaderRoute: typeof ApiKnowledgeIngestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/goal-portfolio': {
+      id: '/api/goal-portfolio'
+      path: '/api/goal-portfolio'
+      fullPath: '/api/goal-portfolio'
+      preLoaderRoute: typeof ApiGoalPortfolioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/goal-breakdown': {
@@ -1197,6 +1217,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCompassRecommendationRoute: ApiCompassRecommendationRoute,
   ApiDecisionLabRoute: ApiDecisionLabRoute,
   ApiGoalBreakdownRoute: ApiGoalBreakdownRoute,
+  ApiGoalPortfolioRoute: ApiGoalPortfolioRoute,
   ApiKnowledgeIngestRoute: ApiKnowledgeIngestRoute,
   ApiKnowledgeReindexRoute: ApiKnowledgeReindexRoute,
   ApiMentorChatRoute: ApiMentorChatRoute,

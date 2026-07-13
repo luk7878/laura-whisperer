@@ -21,6 +21,13 @@ Grąžink TIK JSON pagal šią schemą, be jokio papildomo teksto:
   "goal_title": "aiškus tikslas, kylantis iš įžvalgos (max 70 simb.)",
   "goal_description": "kaip atrodys, kai bus pasiekta – matomas, jautriamas rezultatas (2–4 sakiniai)",
   "goal_target_days": 30,
+  "experiment": {
+    "hypothesis": "jei atliksiu konkretų veiksmą, pastebėsiu konkretų pokytį",
+    "action": "vienas mažas veiksmas",
+    "observable_behavior": "ką objektyviai stebėsiu",
+    "success_criterion": "konkretus sėkmės slenkstis",
+    "duration_days": 5
+  },
   "steps": [
     {
       "title": "veiksmažodžiu pradedantis, konkretus, matuojamas (max 80 simb.)",
@@ -38,6 +45,9 @@ Griežtos taisyklės:
 - 1–2 žingsniai su as_priority=true (artimiausi, kritiniai). Kiti – palaikomieji.
 - due_in_days: pirmas žingsnis dažniausiai 1–3 d. Nė vienas > 30 d.
 - Jei sesijos temoje buvo konkretus žmogus – bent vienas žingsnis liečia santykį su juo (padėka, pokalbis, atsiprašymas, ribos).
+- Eksperimentas trunka 3–7 dienas, yra saugus ir lengvai atšaukiamas.
+- Hipotezė turi būti patikrinama, veiksmas – vienas, o sėkmės kriterijus – konkretus.
+- Stebimas elgesys negali remtis vien savijauta: įvardyk veiksmą, dažnį, laiką ar rezultatą.
 - Kalba lietuvių, kreipinys „tu".`;
 
 export const Route = createFileRoute("/api/plan-suggest")({

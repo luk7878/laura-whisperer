@@ -46,6 +46,9 @@ import {
   ShieldQuestion,
   Pencil,
   Scale,
+  AlertTriangle,
+  GitMerge,
+  ScanSearch,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -96,6 +99,29 @@ type Task = {
   done: boolean;
 };
 
+type PortfolioAnalysis = {
+  summary?: string;
+  recommended_active_goal_ids?: string[];
+  conflicts?: { goal_ids: string[]; reason: string }[];
+  duplicates?: { goal_ids: string[]; reason: string; suggested_title?: string }[];
+  deadline_risks?: { goal_id: string; reason: string; suggestion: string }[];
+  actions?: {
+    kind: "pause" | "merge" | "split";
+    goal_ids: string[];
+    title: string;
+    reason: string;
+  }[];
+};
+
+function estimateHours(estimate: string | null) {
+  if (!estimate) return 0;
+  const value = Number(estimate.replace(",", ".").match(/[\d.]+/)?.[0] ?? 0);
+  const normalized = estimate.toLowerCase();
+  if (normalized.includes("sav")) return value * 10;
+  if (normalized.includes(" d")) return value * 6;
+  return normalized.includes("val") ? value : 0;
+}
+
 function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -106,6 +132,8 @@ function GoalsPage() {
   const [values, setValues] = useState<Value[]>([]);
   const [alignmentGoal, setAlignmentGoal] = useState<Goal | null>(null);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [portfolioAnalysis, setPortfolioAnalysis] = useState<PortfolioAnalysis | null>(null);
+  const [checkingPortfolio, setCheckingPortfolio] = useState(false);
 
   async function load() {
     const [{ data: g }, { data: t }, { data: v }] = await Promise.all([
@@ -151,6 +179,35 @@ function GoalsPage() {
     ? goals.find((goal) => goal.id === focusTask.goal_id)
     : activeGoals[0];
   const overallProgress = tasks.length ? Math.round((completedTasks / tasks.length) * 100) : 0;
+  const weekEnd = new Date();
+  weekEnd.setHours(23, 59, 59, 999);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  const weeklyTasks = openTasks.filter(
+    (task) => task.due_date && new Date(`${task.due_date}T00:00:00`) <= weekEnd,
+  );
+  const weeklyHours =
+    Math.round(weeklyTasks.reduce((sum, task) => sum + estimateHours(task.estimate), 0) * 10) / 10;
+
+  async function checkPortfolio() {
+    setCheckingPortfolio(true);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) throw new Error("Neprisijungęs");
+      const response = await fetch("/api/goal-portfolio", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error(await response.text().catch(() => "AI klaida"));
+      const result = (await response.json()) as { analysis?: PortfolioAnalysis };
+      setPortfolioAnalysis(result.analysis ?? {});
+      toast.success("Tikslų portfelis patikrintas");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nepavyko patikrinti portfelio");
+    } finally {
+      setCheckingPortfolio(false);
+    }
+  }
 
   function toggleExpanded(id: string) {
     setExpanded((s) => {
@@ -373,6 +430,115 @@ function GoalsPage() {
                   warning={overdueTasks.length > 0}
                 />
               </div>
+
+              <Card
+                className={cn(
+                  "overflow-hidden border-primary/20",
+                  activeGoals.length > 3 && "border-amber-300 bg-amber-50/40 dark:bg-amber-950/10",
+                )}
+              >
+                <div className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between md:p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
+                      <ScanSearch className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold">Tikslų portfelio apkrova</h3>
+                        <Badge variant={activeGoals.length > 3 ? "destructive" : "secondary"}>
+                          {activeGoals.length} / 3 aktyvūs
+                        </Badge>
+                        <Badge variant="outline" className="gap-1">
+                          <Clock3 className="h-3 w-3" /> ~{weeklyHours} val. šią savaitę
+                        </Badge>
+                      </div>
+                      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                        {activeGoals.length > 3
+                          ? "Daugiau nei trys aktyvūs tikslai dažnai pradeda konkuruoti dėl tos pačios energijos. Patikrink, ką verta pristabdyti, sujungti ar išskaidyti."
+                          : "Apkrova skaičiuojama pagal per artimiausias 7 dienas numatytas užduotis ir jų įverčius."}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={checkPortfolio}
+                    disabled={checkingPortfolio || activeGoals.length < 2}
+                    className="shrink-0 gap-2"
+                  >
+                    {checkingPortfolio ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    Patikrinti su AI
+                  </Button>
+                </div>
+                {portfolioAnalysis && (
+                  <div className="space-y-4 border-t bg-background/70 p-4 md:p-5">
+                    {portfolioAnalysis.summary && (
+                      <p className="text-sm leading-relaxed">{portfolioAnalysis.summary}</p>
+                    )}
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {!!portfolioAnalysis.conflicts?.length && (
+                        <PortfolioFinding
+                          icon={AlertTriangle}
+                          title="Konkuruojantys tikslai"
+                          items={portfolioAnalysis.conflicts.map((item) => item.reason)}
+                          tone="amber"
+                        />
+                      )}
+                      {!!portfolioAnalysis.duplicates?.length && (
+                        <PortfolioFinding
+                          icon={GitMerge}
+                          title="Galimi pasikartojimai"
+                          items={portfolioAnalysis.duplicates.map((item) =>
+                            item.suggested_title
+                              ? `${item.reason} Galimas bendras tikslas: „${item.suggested_title}“`
+                              : item.reason,
+                          )}
+                          tone="violet"
+                        />
+                      )}
+                      {!!portfolioAnalysis.deadline_risks?.length && (
+                        <PortfolioFinding
+                          icon={Clock3}
+                          title="Terminų rizikos"
+                          items={portfolioAnalysis.deadline_risks.map(
+                            (item) => `${item.reason} ${item.suggestion}`,
+                          )}
+                          tone="red"
+                        />
+                      )}
+                      {!!portfolioAnalysis.actions?.length && (
+                        <PortfolioFinding
+                          icon={Compass}
+                          title="Siūlomi sprendimai"
+                          items={portfolioAnalysis.actions.map(
+                            (item) => `${item.title} — ${item.reason}`,
+                          )}
+                          tone="blue"
+                        />
+                      )}
+                    </div>
+                    {!!portfolioAnalysis.recommended_active_goal_ids?.length && (
+                      <div>
+                        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Rekomenduojamas fokusas
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {portfolioAnalysis.recommended_active_goal_ids.slice(0, 3).map((id) => {
+                            const goal = goals.find((item) => item.id === id);
+                            return goal ? <Badge key={id}>{goal.title}</Badge> : null;
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Tai rekomendacija, ne automatinis pakeitimas. Tikslų būsena nebuvo pakeista.
+                    </p>
+                  </div>
+                )}
+              </Card>
 
               <div className="flex items-center justify-between pt-2">
                 <div>
@@ -733,6 +899,42 @@ function EditGoalDialog({
         </Button>
       </DialogFooter>
     </DialogContent>
+  );
+}
+
+function PortfolioFinding({
+  icon: Icon,
+  title,
+  items,
+  tone,
+}: {
+  icon: typeof AlertTriangle;
+  title: string;
+  items: string[];
+  tone: "amber" | "violet" | "red" | "blue";
+}) {
+  const toneClasses = {
+    amber:
+      "border-amber-200 bg-amber-50/60 text-amber-700 dark:border-amber-900 dark:bg-amber-950/20",
+    violet:
+      "border-violet-200 bg-violet-50/60 text-violet-700 dark:border-violet-900 dark:bg-violet-950/20",
+    red: "border-red-200 bg-red-50/60 text-red-700 dark:border-red-900 dark:bg-red-950/20",
+    blue: "border-blue-200 bg-blue-50/60 text-blue-700 dark:border-blue-900 dark:bg-blue-950/20",
+  }[tone];
+  return (
+    <div className={cn("rounded-xl border p-3", toneClasses)}>
+      <div className="flex items-center gap-2 text-sm font-semibold">
+        <Icon className="h-4 w-4" /> {title}
+      </div>
+      <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-foreground/80">
+        {items.map((item, index) => (
+          <li key={`${item}-${index}`} className="flex gap-2">
+            <span aria-hidden>•</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

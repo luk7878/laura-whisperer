@@ -27,6 +27,7 @@ import {
   ChevronRight,
   CheckCircle2,
   Sparkles,
+  FlaskConical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +55,7 @@ type Props = {
 
 const STAGES = [
   { key: "plan", label: "Veiksmų planas", icon: ListChecks },
+  { key: "experiment", label: "Eksperimentas", icon: FlaskConical },
   { key: "goal", label: "Tikslas", icon: Target },
   { key: "priorities", label: "Prioritetai", icon: Flag },
 ] as const;
@@ -86,6 +88,11 @@ export function SessionCompletionDialog({
   const [touchedValueReflection, setTouchedValueReflection] = useState("");
   const [valueImpactReflection, setValueImpactReflection] = useState("");
   const [bothSidesAction, setBothSidesAction] = useState("");
+  const [experimentHypothesis, setExperimentHypothesis] = useState("");
+  const [experimentAction, setExperimentAction] = useState("");
+  const [observableBehavior, setObservableBehavior] = useState("");
+  const [successCriterion, setSuccessCriterion] = useState("");
+  const [experimentDays, setExperimentDays] = useState(5);
 
   useEffect(() => {
     if (!open) return;
@@ -101,6 +108,11 @@ export function SessionCompletionDialog({
     setTouchedValueReflection(context?.grid?.["Paliesta vertybė"] ?? "");
     setValueImpactReflection(context?.grid?.["Refleksija: padėjo ir trukdė"] ?? "");
     setBothSidesAction(context?.grid?.["Refleksija: abi pusės"] ?? "");
+    setExperimentHypothesis("");
+    setExperimentAction("");
+    setObservableBehavior("");
+    setSuccessCriterion("");
+    setExperimentDays(5);
   }, [open, sessionTopic, sessionTitle, context?.grid]);
 
   async function suggestWithAI() {
@@ -127,6 +139,13 @@ export function SessionCompletionDialog({
         goal_description?: string;
         goal_target_days?: number;
         steps?: { title: string; why?: string; due_in_days?: number; as_priority?: boolean }[];
+        experiment?: {
+          hypothesis?: string;
+          action?: string;
+          observable_behavior?: string;
+          success_criterion?: string;
+          duration_days?: number;
+        };
       };
       if (data.plan_title) setPlanTitle(data.plan_title);
       if (data.plan_summary) setPlanSummary(data.plan_summary);
@@ -152,6 +171,13 @@ export function SessionCompletionDialog({
           }),
         );
       }
+      if (data.experiment) {
+        setExperimentHypothesis(data.experiment.hypothesis ?? "");
+        setExperimentAction(data.experiment.action ?? "");
+        setObservableBehavior(data.experiment.observable_behavior ?? "");
+        setSuccessCriterion(data.experiment.success_criterion ?? "");
+        setExperimentDays(Math.max(3, Math.min(7, data.experiment.duration_days ?? 5)));
+      }
       setSuggested(true);
       toast.success("AI paruošė juodraštį – peržiūrėk ir pakoreguok");
     } catch (err) {
@@ -175,6 +201,11 @@ export function SessionCompletionDialog({
   const cleanSteps = steps.filter((s) => s.title.trim().length > 0);
   const canNextPlan = planTitle.trim().length > 0 && cleanSteps.length > 0;
   const canNextGoal = goalTitle.trim().length > 0;
+  const canNextExperiment =
+    experimentHypothesis.trim().length > 0 &&
+    experimentAction.trim().length > 0 &&
+    observableBehavior.trim().length > 0 &&
+    successCriterion.trim().length > 0;
 
   async function save() {
     if (saving) return;
@@ -222,6 +253,20 @@ export function SessionCompletionDialog({
 
       await supabase.from("action_plans").update({ goal_id: goal.id }).eq("id", plan.id);
 
+      const reviewDate = new Date();
+      reviewDate.setDate(reviewDate.getDate() + Math.max(3, Math.min(7, experimentDays)));
+      const { error: experimentError } = await supabase.from("growth_experiments").insert({
+        user_id: uid,
+        session_id: sessionId,
+        goal_id: goal.id,
+        hypothesis: experimentHypothesis.trim(),
+        action: experimentAction.trim(),
+        observable_behavior: observableBehavior.trim(),
+        success_criterion: successCriterion.trim(),
+        review_date: reviewDate.toISOString().slice(0, 10),
+      });
+      if (experimentError) throw experimentError;
+
       const priorityRows = cleanSteps
         .filter((s) => s.asPriority)
         .map((s) => ({
@@ -245,11 +290,15 @@ export function SessionCompletionDialog({
             "Paliesta vertybė": touchedValueReflection.trim(),
             "Refleksija: padėjo ir trukdė": valueImpactReflection.trim(),
             "Refleksija: abi pusės": bothSidesAction.trim(),
+            "Eksperimento hipotezė": experimentHypothesis.trim(),
+            "Eksperimento veiksmas": experimentAction.trim(),
+            "Eksperimento stebėjimas": observableBehavior.trim(),
+            "Eksperimento sėkmė": successCriterion.trim(),
           },
         })
         .eq("id", sessionId);
 
-      toast.success("Planas, tikslas ir prioritetai išsaugoti");
+      toast.success("Planas, eksperimentas, tikslas ir prioritetai išsaugoti");
       onOpenChange(false);
       onComplete?.();
     } catch (err) {
@@ -271,7 +320,7 @@ export function SessionCompletionDialog({
             Užbaikime sesiją: nuo įžvalgos į veiksmą
           </DialogTitle>
           <DialogDescription>
-            Trys žingsniai: susidėliok planą, iškelk iš jo tikslą, atrink šios savaitės prioritetus.
+            Keturi žingsniai: planas, mažas patikrinamas eksperimentas, tikslas ir prioritetai.
           </DialogDescription>
         </DialogHeader>
 
@@ -497,6 +546,81 @@ export function SessionCompletionDialog({
             </>
           )}
 
+          {stage === "experiment" && (
+            <>
+              <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-background p-4 dark:border-emerald-900 dark:from-emerald-950/20">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                    <FlaskConical className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">Įžvalga tampa bandymu</div>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      Neįsipareigok dideliam pokyčiui iš karto. Per 3–7 dienas surink realių duomenų
+                      apie tai, kas veikia tavo kasdienybėje.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+              <div>
+                <Label>Hipotezė</Label>
+                <Textarea
+                  value={experimentHypothesis}
+                  onChange={(event) => setExperimentHypothesis(event.target.value)}
+                  placeholder="Jei atliksiu šį veiksmą, tuomet pastebėsiu…"
+                  rows={2}
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>Mažas konkretus veiksmas</Label>
+                <Textarea
+                  value={experimentAction}
+                  onChange={(event) => setExperimentAction(event.target.value)}
+                  placeholder="Ką konkrečiai darysiu kiekvieną dieną ar vieną kartą?"
+                  rows={2}
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Ką objektyviai stebėsiu?</Label>
+                  <Textarea
+                    value={observableBehavior}
+                    onChange={(event) => setObservableBehavior(event.target.value)}
+                    placeholder="Veiksmą, dažnį, laiką ar rezultatą…"
+                    rows={3}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Sėkmės kriterijus</Label>
+                  <Textarea
+                    value={successCriterion}
+                    onChange={(event) => setSuccessCriterion(event.target.value)}
+                    placeholder="Eksperimentas pasiteisins, jei…"
+                    rows={3}
+                    className="mt-1.5"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Trukmė: {experimentDays} d.</Label>
+                <Input
+                  type="range"
+                  min={3}
+                  max={7}
+                  value={experimentDays}
+                  onChange={(event) => setExperimentDays(Number(event.target.value))}
+                  className="mt-2"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Peržiūra bus suplanuota po {experimentDays} dienų.
+                </p>
+              </div>
+            </>
+          )}
+
           {stage === "priorities" && (
             <>
               <p className="text-sm text-muted-foreground">
@@ -534,6 +658,7 @@ export function SessionCompletionDialog({
                 <div className="text-xs font-medium text-map-green mb-1">Bus išsaugota</div>
                 <ul className="text-sm space-y-0.5">
                   <li>1 veiksmų planas · {cleanSteps.length} žingsniai</li>
+                  <li>1 eksperimentas · {experimentDays} dienos</li>
                   <li>1 tikslas · „{goalTitle}"</li>
                   <li>{cleanSteps.filter((s) => s.asPriority).length} prioritetai</li>
                 </ul>
@@ -564,7 +689,11 @@ export function SessionCompletionDialog({
                 const i = STAGES.findIndex((s) => s.key === stage);
                 setStage(STAGES[i + 1].key);
               }}
-              disabled={(stage === "plan" && !canNextPlan) || (stage === "goal" && !canNextGoal)}
+              disabled={
+                (stage === "plan" && !canNextPlan) ||
+                (stage === "experiment" && !canNextExperiment) ||
+                (stage === "goal" && !canNextGoal)
+              }
               className="gap-1.5"
             >
               Toliau <ChevronRight className="h-4 w-4" />
