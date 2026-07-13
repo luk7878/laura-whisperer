@@ -318,6 +318,45 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_labs: {
+        Row: {
+          analysis: Json
+          created_at: string
+          decided_option: string | null
+          dilemma: string
+          id: string
+          options: Json
+          review_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis?: Json
+          created_at?: string
+          decided_option?: string | null
+          dilemma: string
+          id?: string
+          options?: Json
+          review_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis?: Json
+          created_at?: string
+          decided_option?: string | null
+          dilemma?: string
+          id?: string
+          options?: Json
+          review_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       goal_tasks: {
         Row: {
           ai_generated: boolean

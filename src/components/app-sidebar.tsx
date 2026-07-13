@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   Gem,
   Compass,
+  Scale,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,7 @@ import { NewSessionDialog, type SessionMode } from "@/components/new-session-dia
 
 const NAV = [
   { title: "Mano kompasas", to: "/compass", icon: Compass },
+  { title: "Sprendimų laboratorija", to: "/decisions", icon: Scale },
   { title: "Gyva sesija", to: "/session", icon: Radio },
   { title: "Klausk mentoriaus", to: "/ask", icon: MessageSquare },
   { title: "Mano vertybės", to: "/values", icon: Gem },

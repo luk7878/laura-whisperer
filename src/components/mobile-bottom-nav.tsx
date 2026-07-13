@@ -15,6 +15,7 @@ import {
   Library,
   Gem,
   Compass,
+  Scale,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ const PRIMARY = [
 ] as const;
 
 const MORE = [
+  { title: "Sprendimų laboratorija", to: "/decisions", icon: Scale },
   { title: "Augimo žurnalas", to: "/journal", icon: BookOpen },
   { title: "Mano vertybės", to: "/values", icon: Gem },
   { title: "Vizija", to: "/vision", icon: Eye },
