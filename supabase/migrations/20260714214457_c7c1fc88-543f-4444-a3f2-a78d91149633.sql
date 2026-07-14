@@ -1,0 +1,1 @@
+revoke execute on function public.create_growth_agent_defaults() from public, anon, authenticated;

@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      agent_settings: {
-        Row: {
-          confirm_before_write: boolean
-          created_at: string
-          enabled: boolean
-          include_values_context: boolean
-          remember_goal_history: boolean
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          confirm_before_write?: boolean
-          created_at?: string
-          enabled?: boolean
-          include_values_context?: boolean
-          remember_goal_history?: boolean
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          confirm_before_write?: boolean
-          created_at?: string
-          enabled?: boolean
-          include_values_context?: boolean
-          remember_goal_history?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       action_plans: {
         Row: {
           created_at: string
@@ -90,6 +60,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      agent_settings: {
+        Row: {
+          confirm_before_write: boolean
+          created_at: string
+          enabled: boolean
+          include_values_context: boolean
+          remember_goal_history: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confirm_before_write?: boolean
+          created_at?: string
+          enabled?: boolean
+          include_values_context?: boolean
+          remember_goal_history?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confirm_before_write?: boolean
+          created_at?: string
+          enabled?: boolean
+          include_values_context?: boolean
+          remember_goal_history?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       clarity_bookings: {
         Row: {
@@ -387,111 +387,6 @@ export type Database = {
         }
         Relationships: []
       }
-      decision_labs: {
-        Row: {
-          analysis: Json
-          created_at: string
-          decided_option: string | null
-          dilemma: string
-          id: string
-          options: Json
-          review_date: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          analysis?: Json
-          created_at?: string
-          decided_option?: string | null
-          dilemma: string
-          id?: string
-          options?: Json
-          review_date?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          analysis?: Json
-          created_at?: string
-          decided_option?: string | null
-          dilemma?: string
-          id?: string
-          options?: Json
-          review_date?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      growth_experiments: {
-        Row: {
-          action: string
-          created_at: string
-          goal_id: string | null
-          hypothesis: string
-          id: string
-          observable_behavior: string
-          result: string | null
-          review_date: string
-          session_id: string | null
-          start_date: string
-          status: string
-          success_criterion: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          goal_id?: string | null
-          hypothesis: string
-          id?: string
-          observable_behavior: string
-          result?: string | null
-          review_date: string
-          session_id?: string | null
-          start_date?: string
-          status?: string
-          success_criterion: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          goal_id?: string | null
-          hypothesis?: string
-          id?: string
-          observable_behavior?: string
-          result?: string | null
-          review_date?: string
-          session_id?: string | null
-          start_date?: string
-          status?: string
-          success_criterion?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "growth_experiments_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "growth_experiments_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       feature_entitlements: {
         Row: {
           access_source: string
@@ -652,6 +547,72 @@ export type Database = {
             columns: ["linked_value_id"]
             isOneToOne: false
             referencedRelation: "values"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      growth_experiments: {
+        Row: {
+          action: string
+          created_at: string
+          goal_id: string | null
+          hypothesis: string
+          id: string
+          observable_behavior: string
+          result: string | null
+          review_date: string
+          session_id: string | null
+          start_date: string
+          status: string
+          success_criterion: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          goal_id?: string | null
+          hypothesis: string
+          id?: string
+          observable_behavior: string
+          result?: string | null
+          review_date: string
+          session_id?: string | null
+          start_date?: string
+          status?: string
+          success_criterion: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          goal_id?: string | null
+          hypothesis?: string
+          id?: string
+          observable_behavior?: string
+          result?: string | null
+          review_date?: string
+          session_id?: string | null
+          start_date?: string
+          status?: string
+          success_criterion?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_experiments_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_experiments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
             referencedColumns: ["id"]
           },
         ]
