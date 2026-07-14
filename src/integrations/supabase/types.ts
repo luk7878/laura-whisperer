@@ -551,6 +551,72 @@ export type Database = {
           },
         ]
       }
+      growth_experiments: {
+        Row: {
+          action: string
+          created_at: string
+          goal_id: string | null
+          hypothesis: string
+          id: string
+          observable_behavior: string
+          result: string | null
+          review_date: string
+          session_id: string | null
+          start_date: string
+          status: string
+          success_criterion: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          goal_id?: string | null
+          hypothesis: string
+          id?: string
+          observable_behavior: string
+          result?: string | null
+          review_date: string
+          session_id?: string | null
+          start_date?: string
+          status?: string
+          success_criterion: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          goal_id?: string | null
+          hypothesis?: string
+          id?: string
+          observable_behavior?: string
+          result?: string | null
+          review_date?: string
+          session_id?: string | null
+          start_date?: string
+          status?: string
+          success_criterion?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "growth_experiments_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "growth_experiments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_codes: {
         Row: {
           active: boolean
