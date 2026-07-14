@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_settings: {
+        Row: {
+          confirm_before_write: boolean
+          created_at: string
+          enabled: boolean
+          include_values_context: boolean
+          remember_goal_history: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confirm_before_write?: boolean
+          created_at?: string
+          enabled?: boolean
+          include_values_context?: boolean
+          remember_goal_history?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confirm_before_write?: boolean
+          created_at?: string
+          enabled?: boolean
+          include_values_context?: boolean
+          remember_goal_history?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       action_plans: {
         Row: {
           created_at: string
@@ -461,6 +491,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      feature_entitlements: {
+        Row: {
+          access_source: string
+          active: boolean
+          created_at: string
+          expires_at: string | null
+          feature_key: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_source?: string
+          active?: boolean
+          created_at?: string
+          expires_at?: string | null
+          feature_key: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_source?: string
+          active?: boolean
+          created_at?: string
+          expires_at?: string | null
+          feature_key?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       goal_tasks: {
         Row: {

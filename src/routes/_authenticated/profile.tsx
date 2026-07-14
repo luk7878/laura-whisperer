@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { User, Shield, Bell, KeyRound, Trash2 } from "lucide-react";
+import { User, Shield, Bell, KeyRound, Trash2, Bot, Sparkles, LockKeyhole } from "lucide-react";
 
 import {
   AlertDialog,
@@ -60,24 +60,62 @@ type Profile = {
   reminder_time: string | null;
 };
 
+type AgentSettings = {
+  user_id: string;
+  enabled: boolean;
+  confirm_before_write: boolean;
+  remember_goal_history: boolean;
+  include_values_context: boolean;
+};
+
+type AgentEntitlement = {
+  access_source: string;
+  active: boolean;
+  expires_at: string | null;
+};
+
 function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [agentSettings, setAgentSettings] = useState<AgentSettings | null>(null);
+  const [agentEntitlement, setAgentEntitlement] = useState<AgentEntitlement | null>(null);
+  const [savingAgent, setSavingAgent] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
       setEmail(userData.user.email ?? "");
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userData.user.id)
-        .maybeSingle();
+      const [{ data, error }, { data: settings }, { data: entitlement }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userData.user.id).maybeSingle(),
+        supabase
+          .from("agent_settings")
+          .select(
+            "user_id,enabled,confirm_before_write,remember_goal_history,include_values_context",
+          )
+          .eq("user_id", userData.user.id)
+          .maybeSingle(),
+        supabase
+          .from("feature_entitlements")
+          .select("access_source,active,expires_at")
+          .eq("user_id", userData.user.id)
+          .eq("feature_key", "growth_agent")
+          .maybeSingle(),
+      ]);
       if (error) toast.error(error.message);
+      setAgentSettings(
+        (settings as AgentSettings | null) ?? {
+          user_id: userData.user.id,
+          enabled: false,
+          confirm_before_write: true,
+          remember_goal_history: true,
+          include_values_context: true,
+        },
+      );
+      setAgentEntitlement((entitlement as AgentEntitlement | null) ?? null);
       if (data) setProfile(data as Profile);
       else {
         // create empty profile if missing
@@ -114,6 +152,20 @@ function ProfilePage() {
       toast.success("Slaptažodis atnaujintas");
       setNewPassword("");
     }
+  }
+
+  function updateAgent<K extends keyof AgentSettings>(key: K, value: AgentSettings[K]) {
+    setAgentSettings((settings) => (settings ? { ...settings, [key]: value } : settings));
+  }
+
+  async function saveAgentSettings() {
+    if (!agentSettings || !agentEntitlement?.active) return;
+    setSavingAgent(true);
+    const { error } = await supabase.from("agent_settings").upsert(agentSettings);
+    setSavingAgent(false);
+    if (error) toast.error(error.message);
+    else
+      toast.success(agentSettings.enabled ? "Augimo agentas įjungtas" : "Augimo agentas išjungtas");
   }
 
   async function deleteAccount() {
@@ -162,6 +214,9 @@ function ProfilePage() {
               </TabsTrigger>
               <TabsTrigger value="notifications" className="gap-1.5 shrink-0">
                 <Bell className="h-4 w-4" /> <span className="hidden sm:inline">Pranešimai</span>
+              </TabsTrigger>
+              <TabsTrigger value="agent" className="gap-1.5 shrink-0">
+                <Bot className="h-4 w-4" /> <span className="hidden sm:inline">Agentas</span>
               </TabsTrigger>
               <TabsTrigger value="account" className="gap-1.5 shrink-0">
                 <KeyRound className="h-4 w-4" /> <span className="hidden sm:inline">Paskyra</span>
@@ -393,6 +448,96 @@ function ProfilePage() {
             </TabsContent>
 
             {/* ACCOUNT */}
+            <TabsContent value="agent">
+              <div className="space-y-4">
+                <Card className="overflow-hidden border-primary/20">
+                  <div className="bg-gradient-to-br from-primary/10 via-background to-violet-500/5 p-5 md:p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                        <Bot className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="font-serif text-2xl">Asmeninis augimo agentas</h2>
+                          {agentEntitlement?.active ? (
+                            <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                              {agentEntitlement.access_source === "preview"
+                                ? "Bandomoji prieiga"
+                                : "Aktyvi prieiga"}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+                              <LockKeyhole className="h-3 w-3" /> Reikalinga prenumerata
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                          Agentas galės prisiminti tikslų istoriją, planuoti dieną ir paruošti
+                          tikslų bei prioritetų pakeitimus. Prieš keisdamas duomenis visada pateiks
+                          aiškų veiksmų juodraštį.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <CardContent className="space-y-5 p-5 md:p-6">
+                    {agentSettings && (
+                      <>
+                        <ToggleRow
+                          label="Įjungti augimo agentą"
+                          desc="Mentoriaus pokalbiuose leis ne tik atsakyti, bet ir paruošti veiksmus platformoje."
+                          checked={agentSettings.enabled}
+                          onChange={(value) => updateAgent("enabled", value)}
+                          disabled={!agentEntitlement?.active}
+                        />
+                        <Separator />
+                        <ToggleRow
+                          label="Prieš pakeitimus prašyti patvirtinimo"
+                          desc="Tikslai, prioritetai ir terminai nebus keičiami be tavo aiškaus sutikimo."
+                          checked={agentSettings.confirm_before_write}
+                          onChange={(value) => updateAgent("confirm_before_write", value)}
+                          disabled={!agentSettings.enabled}
+                        />
+                        <ToggleRow
+                          label="Naudoti tikslų istoriją"
+                          desc="Aptikti panašius, anksčiau pradelstus ar nebaigtus tikslus."
+                          checked={agentSettings.remember_goal_history}
+                          onChange={(value) => updateAgent("remember_goal_history", value)}
+                          disabled={!agentSettings.enabled}
+                        />
+                        <ToggleRow
+                          label="Naudoti vertybių kontekstą"
+                          desc="Patikrinti, ar siūlomi veiksmai palaiko tavo realią vertybių hierarchiją."
+                          checked={agentSettings.include_values_context}
+                          onChange={(value) => updateAgent("include_values_context", value)}
+                          disabled={!agentSettings.enabled}
+                        />
+                        <div className="rounded-xl border bg-muted/30 p-4">
+                          <div className="flex items-center gap-2 text-sm font-semibold">
+                            <Sparkles className="h-4 w-4 text-primary" /> Ką agentas galės daryti
+                          </div>
+                          <ul className="mt-2 grid gap-1.5 text-xs text-muted-foreground sm:grid-cols-2">
+                            <li>• Sudaryti realistišką dienos planą</li>
+                            <li>• Rasti panašius ankstesnius tikslus</li>
+                            <li>• Paruošti naują tikslą ar prioritetą</li>
+                            <li>• Perspėti apie per didelę apkrovą</li>
+                          </ul>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button
+                            onClick={saveAgentSettings}
+                            disabled={savingAgent || !agentEntitlement?.active}
+                          >
+                            {savingAgent ? "Saugoma…" : "Išsaugoti agento nustatymus"}
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* ACCOUNT */}
             <TabsContent value="account">
               <div className="space-y-4">
                 <Card>
@@ -463,11 +608,13 @@ function ToggleRow({
   desc,
   checked,
   onChange,
+  disabled = false,
 }: {
   label: string;
   desc: string;
   checked: boolean;
   onChange: (v: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="flex items-start justify-between gap-4">
@@ -475,7 +622,7 @@ function ToggleRow({
         <div className="text-sm font-medium">{label}</div>
         <div className="text-xs text-muted-foreground">{desc}</div>
       </div>
-      <Switch checked={checked} onCheckedChange={onChange} />
+      <Switch checked={checked} onCheckedChange={onChange} disabled={disabled} />
     </div>
   );
 }
