@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { AI_GATEWAY_URL, requireLovableApiKey } from "@/lib/ai-gateway.server";
 import { embedQuery } from "@/lib/knowledge-embed.server";
 import { buildUserValueContext } from "@/lib/value-context.server";
@@ -114,6 +114,79 @@ function mergeMatches(groups: KnowledgeMatch[][]) {
   return [...merged.values()];
 }
 
+async function buildAgentContext(supabase: SupabaseClient<Database>, userId: string) {
+  const [{ data: settings }, { data: entitlement }] = await Promise.all([
+    supabase
+      .from("agent_settings")
+      .select("enabled,confirm_before_write,remember_goal_history,include_values_context")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("feature_entitlements")
+      .select("active,expires_at")
+      .eq("user_id", userId)
+      .eq("feature_key", "growth_agent")
+      .maybeSingle(),
+  ]);
+  const entitlementActive =
+    entitlement?.active &&
+    (!entitlement.expires_at || new Date(entitlement.expires_at).getTime() > Date.now());
+  if (!settings?.enabled || !entitlementActive)
+    return { active: false, includeValues: true, prompt: "" };
+
+  const [{ data: goals }, { data: tasks }, { data: priorities }] = await Promise.all([
+    supabase
+      .from("goals")
+      .select("id,title,description,target_date,status,progress,created_at,value_alignment_score")
+      .order("created_at", { ascending: false })
+      .limit(settings.remember_goal_history ? 30 : 10),
+    supabase
+      .from("goal_tasks")
+      .select("goal_id,title,estimate,due_date,done")
+      .order("created_at", { ascending: false })
+      .limit(80),
+    supabase
+      .from("priorities")
+      .select("id,title,due_date,done,linked_goal_id,created_at")
+      .order("created_at", { ascending: false })
+      .limit(30),
+  ]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    active: true,
+    includeValues: settings.include_values_context,
+    prompt: `
+============================================================
+AUGIMO AGENTO REŽIMAS ĮJUNGTAS
+============================================================
+
+Šiandien: ${today}.
+Tu gali ne tik konsultuoti, bet ir paruošti vartotojui veiksmų juodraštį. Duomenų pats nekeiti: pakeitimai vyksta tik per frontend patvirtinimo dialogą.
+
+Vartotojo tikslai (įskaitant istoriją):
+${JSON.stringify(goals ?? [])}
+
+Tikslų užduotys:
+${JSON.stringify(tasks ?? [])}
+
+Dabartiniai ir ankstesni prioritetai:
+${JSON.stringify(priorities ?? [])}
+
+Agento taisyklės:
+- Kai vartotojas prašo suplanuoti dieną, remkis esamais tikslais ir prioritetais, pasiūlyk realistišką planą bei daugiausia 3 svarbiausius veiksmus.
+- Kai prašo pridėti tikslą, pirmiausia patikrink, ar nėra tokio paties arba labai panašaus aktyvaus, pristabdyto ar pradelsto tikslo.
+- Jei panašus tikslas jau buvo, aiškiai pasakyk, kada jis pradėtas, kokia būsena ir kas liko nepadaryta. Nesiūlyk dublikato – siūlyk atnaujinti kryptį arba konkretų prioritetą.
+- Jei aktyvių tikslų jau 3 ar daugiau, perspėk apie portfelio apkrovą ir naują tikslą siūlyk tik turint aiškų pagrindą.
+- Jei ryšys su vertybėmis neaiškus, neužblokuok žmogaus ir nediagnozuok. Įvardyk neaiškumą bei užduok vieną konkretų klausimą prieš siūlydamas įrašyti tikslą.
+- Terminą vertink pagal progresą, likusias užduotis ir ankstesnius vėlavimus.
+- Tik kai vartotojas aiškiai paprašo sukurti, pridėti, suplanuoti ar pakeisti, atsakymo gale pateik ACTIONS bloką.
+- Dienos plano elementams naudok kind="priority" ir due_in_days=0. Naujam rezultatui naudok kind="goal".
+- ACTIONS yra juodraštis patvirtinimui, todėl prieš jį trumpai paaiškink, ką ir kodėl siūlai.
+`,
+  };
+}
+
 const MENTOR_SYSTEM = `Tu esi įžvalgus ir praktiškas augimo mentorius. Atsakai kaip žmogus – ramiai, aiškiai ir profesionaliai. Tavo vertė nėra informacijos kiekis: padedi išgirsti tikrąjį klausimą, atrinkti svarbiausią principą ir paversti jį prasmingu kitu žingsniu.
 
 Kalbėk lietuviškai, kreipiniu „tu".
@@ -181,7 +254,7 @@ Tik kai vartotojas aiškiai pasirengęs veikti ir atsakymas natūraliai veda į 
 {"suggestions":[{"kind":"priority","title":"...","due_in_days":3}]}
 
 Taisyklės:
-- "kind": "goal" (didesnis tikslas) arba "priority" (konkretus žingsnis 1–7 d.).
+- "kind": "goal" (didesnis tikslas) arba "priority" (konkretus žingsnis 0–7 d.; 0 reiškia šiandien).
 - Ne daugiau 3 pasiūlymų. Praleisk bloką, jei nieko konkretaus siūlyti.
 - title trumpas (iki 80 simbolių), description – 1–2 sakiniai (nebūtina).
 - Griežtas JSON, be komentarų.
@@ -212,6 +285,8 @@ export const Route = createFileRoute("/api/mentor-chat")({
           global: { headers: { Authorization: `Bearer ${token}` } },
           auth: { persistSession: false, autoRefreshToken: false },
         });
+        const { data: authData } = await supabase.auth.getUser(token);
+        if (!authData.user) return new Response("Unauthorized", { status: 401 });
 
         const key = requireLovableApiKey();
         // Search in both Lithuanian and English so multilingual books compete fairly.
@@ -255,14 +330,17 @@ export const Route = createFileRoute("/api/mentor-chat")({
           console.error("embed/search failed", e);
         }
 
-        const valueContext = await buildUserValueContext(supabase, lastUser.content);
+        const agentContext = await buildAgentContext(supabase, authData.user.id);
+        const valueContext = agentContext.includeValues
+          ? await buildUserValueContext(supabase, lastUser.content)
+          : { prompt: "" };
         const sourcesBlock = sources.length
           ? sources
               .map((s) => `[${s.n}] ${s.title}\n"""\n${s.content.slice(0, 1400)}\n"""`)
               .join("\n\n")
           : "(šiai užklausai pakankamai aktualių šaltinių nerasta)";
 
-        const systemWithSources = `${MENTOR_SYSTEM}${valueContext.prompt}\n\n=== ŠALTINIAI ===\n${sourcesBlock}\n=== ŠALTINIŲ PABAIGA ===`;
+        const systemWithSources = `${MENTOR_SYSTEM}${agentContext.prompt}${valueContext.prompt}\n\n=== ŠALTINIAI ===\n${sourcesBlock}\n=== ŠALTINIŲ PABAIGA ===`;
 
         const upstream = await fetch(`${AI_GATEWAY_URL}/chat/completions`, {
           method: "POST",
@@ -330,6 +408,7 @@ export const Route = createFileRoute("/api/mentor-chat")({
             "Cache-Control": "no-cache",
             "X-Sources-Count": String(sources.length),
             "X-Sources-B64": sourcesB64,
+            "X-Agent-Active": agentContext.active ? "true" : "false",
           },
         });
       },

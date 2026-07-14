@@ -11,7 +11,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { MessageSquare, Library, Plus, Loader2, Trash2, PanelLeft, Gem } from "lucide-react";
+import { MessageSquare, Library, Plus, Loader2, Trash2, PanelLeft, Gem, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,7 @@ function AskLayout() {
   const [loading, setLoading] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [valuesCount, setValuesCount] = useState(0);
+  const [agentActive, setAgentActive] = useState(false);
 
   async function load() {
     const { data, error } = await supabase
@@ -41,11 +42,30 @@ function AskLayout() {
   }
 
   useEffect(() => {
-    supabase
-      .from("values")
-      .select("id", { count: "exact", head: true })
-      .lt("rank", 100)
-      .then(({ count }) => setValuesCount(count ?? 0));
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      const [{ count }, { data: settings }, { data: entitlement }] = await Promise.all([
+        supabase.from("values").select("id", { count: "exact", head: true }).lt("rank", 100),
+        supabase
+          .from("agent_settings")
+          .select("enabled")
+          .eq("user_id", userData.user.id)
+          .maybeSingle(),
+        supabase
+          .from("feature_entitlements")
+          .select("active,expires_at")
+          .eq("user_id", userData.user.id)
+          .eq("feature_key", "growth_agent")
+          .maybeSingle(),
+      ]);
+      setValuesCount(count ?? 0);
+      setAgentActive(
+        !!settings?.enabled &&
+          !!entitlement?.active &&
+          (!entitlement.expires_at || new Date(entitlement.expires_at).getTime() > Date.now()),
+      );
+    })();
   }, []);
 
   useEffect(() => {
@@ -130,6 +150,12 @@ function AskLayout() {
               : "Atsakymai iš tavo įkeltos medžiagos"}
           </p>
         </div>
+
+        {agentActive && (
+          <div className="hidden items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary sm:flex">
+            <Bot className="h-3.5 w-3.5" /> Agentas aktyvus
+          </div>
+        )}
 
         {valuesCount > 0 && (
           <Button asChild variant="ghost" size="sm" className="hidden gap-1.5 lg:inline-flex">

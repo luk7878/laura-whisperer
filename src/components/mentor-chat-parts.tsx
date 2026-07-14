@@ -157,7 +157,7 @@ export function SaveActionDialog({
     if (action) {
       setTitle(action.title);
       setDesc(action.description ?? "");
-      if (action.due_in_days) {
+      if (action.due_in_days != null) {
         const d = new Date();
         d.setDate(d.getDate() + action.due_in_days);
         setDate(d.toISOString().slice(0, 10));
