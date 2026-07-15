@@ -31,7 +31,7 @@ function actionKey(action: ActionSuggestion) {
 }
 
 function isConfirmationMessage(value: string) {
-  return /^(taip[,!]?\s*)?(patvirtinu|patvirtink|išsaugok|issaugok)(\s*(viską|viska|juos|jas))?[.!]?$/i.test(
+  return /^(taip[,!]?\s*)?((prašau|prasau)\s+)?(patvirtinu|patvirtink|išsaugok|issaugok|pridėk|pridek)(\s*(viską|viska|juos|jas))?[.!]?$/i.test(
     value.trim(),
   );
 }
@@ -47,6 +47,7 @@ function ThreadView() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoRepliedFor = useRef<string | null>(null);
+  const assistantRunningRef = useRef(false);
 
   // Load messages when thread changes
   useEffect(() => {
@@ -104,6 +105,8 @@ function ThreadView() {
   }, [loading, messages, threadId]);
 
   async function runAssistant(current: Msg[]) {
+    if (assistantRunningRef.current) return;
+    assistantRunningRef.current = true;
     setBusy(true);
     setMessages((m) => [...m, { role: "assistant", content: "" }]);
     try {
@@ -144,6 +147,7 @@ function ThreadView() {
       toast.error(err instanceof Error ? err.message : "AI klaida");
       setMessages((m) => m.slice(0, -1));
     } finally {
+      assistantRunningRef.current = false;
       setBusy(false);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
@@ -157,6 +161,9 @@ function ThreadView() {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return toast.error("Nesi prisijungęs");
     const next: Msg[] = [...messages, { role: "user", content: text }];
+    // Šią žinutę apdoros send() srautas. Neleisk pradinės gijos auto-reply efektui
+    // tuo pačiu metu paleisti antros identiškos AI užklausos.
+    autoRepliedFor.current = threadId;
     setMessages(next);
     const { error } = await supabase.from("mentor_messages").insert({
       thread_id: threadId,
