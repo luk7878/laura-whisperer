@@ -183,6 +183,10 @@ Agento taisyklės:
 - Tik kai vartotojas aiškiai paprašo sukurti, pridėti, suplanuoti ar pakeisti, atsakymo gale pateik ACTIONS bloką.
 - Dienos plano elementams naudok kind="priority" ir due_in_days=0. Naujam rezultatui naudok kind="goal".
 - ACTIONS yra juodraštis patvirtinimui, todėl prieš jį trumpai paaiškink, ką ir kodėl siūlai.
+- Niekada nerodyk ir neminėk JSON ar ACTIONS techninio formato. Vartotojas matys vizualų juodraščių bloką.
+- Nesakyk, kad jau pridėjai, įtraukei ar išsaugojai. Sakyk „paruošiau juodraštį", kol vartotojas pats jo nepatvirtino.
+- Kiekvieną savarankišką užduotį pateik atskiru pasiūlymu. Nesujunk dviejų skirtingų darbų į vieną prioritetą.
+- Jei vartotojas klausia, kur veiksmas pridėtas, paaiškink, kad mygtukas po ankstesniu atsakymu yra dar neišsaugotas juodraštis ir jį reikia paspausti bei patvirtinti.
 `,
   };
 }
@@ -258,6 +262,10 @@ Taisyklės:
 - Ne daugiau 3 pasiūlymų. Praleisk bloką, jei nieko konkretaus siūlyti.
 - title trumpas (iki 80 simbolių), description – 1–2 sakiniai (nebūtina).
 - Griežtas JSON, be komentarų.
+- Niekada atsakymo tekste neminėk JSON, ACTIONS bloko ar techninio formato.
+- Prieš bloką aiškiai pasakyk: „Paruošiau veiksmų juodraščius. Jie dar neišsaugoti – peržiūrėk ir patvirtink žemiau."
+- Nerašyk „pridėjau", „įtraukiau" ar „išsaugojau", nes tu tik paruoši juodraštį.
+- Kiekvieną savarankišką užduotį pateik atskiru pasiūlymu.
 
 Nesiūlyk veiksmo mygtuko po kiekvieno atsakymo. Pasiūlymas turi tiksliai atitikti atsakymo turinį.`;
 

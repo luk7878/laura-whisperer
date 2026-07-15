@@ -33,6 +33,7 @@ function ThreadView() {
   const [busy, setBusy] = useState(false);
   const [input, setInput] = useState("");
   const [action, setAction] = useState<ActionSuggestion | null>(null);
+  const [savedActionKeys, setSavedActionKeys] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoRepliedFor = useRef<string | null>(null);
@@ -42,6 +43,7 @@ function ThreadView() {
     let cancelled = false;
     setLoading(true);
     setMessages([]);
+    setSavedActionKeys(new Set());
     autoRepliedFor.current = null;
     (async () => {
       const { data, error } = await supabase
@@ -166,7 +168,7 @@ function ThreadView() {
             </div>
           )}
           {messages.map((m, i) => (
-            <MessageBubble key={i} msg={m} onAction={setAction} />
+            <MessageBubble key={i} msg={m} onAction={setAction} savedActionKeys={savedActionKeys} />
           ))}
           {busy && messages[messages.length - 1]?.role === "user" && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground pl-11">
@@ -207,7 +209,15 @@ function ThreadView() {
         </div>
       </form>
 
-      <SaveActionDialog action={action} onClose={() => setAction(null)} />
+      <SaveActionDialog
+        action={action}
+        onClose={() => setAction(null)}
+        onSaved={(savedAction) =>
+          setSavedActionKeys((current) =>
+            new Set(current).add(`${savedAction.kind}:${savedAction.title}`),
+          )
+        }
+      />
     </div>
   );
 }

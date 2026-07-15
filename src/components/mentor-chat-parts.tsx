@@ -22,6 +22,8 @@ import {
   BookOpen,
   Sparkles,
   User as UserIcon,
+  Info,
+  ArrowRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -38,9 +40,11 @@ export type Msg = {
 export function MessageBubble({
   msg,
   onAction,
+  savedActionKeys,
 }: {
   msg: Msg;
   onAction: (a: ActionSuggestion) => void;
+  savedActionKeys?: Set<string>;
 }) {
   const isUser = msg.role === "user";
   return (
@@ -74,25 +78,47 @@ export function MessageBubble({
         </div>
 
         {!isUser && msg.actions && msg.actions.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {msg.actions.map((a, i) => (
-              <Button
-                key={i}
-                size="sm"
-                variant="outline"
-                className="gap-1.5 h-8 text-xs max-w-full"
-                onClick={() => onAction(a)}
-              >
-                {a.kind === "goal" ? (
-                  <Target className="h-3.5 w-3.5 text-primary shrink-0" />
-                ) : (
-                  <ListChecks className="h-3.5 w-3.5 text-primary shrink-0" />
-                )}
-                <span className="truncate">
-                  {a.kind === "goal" ? "→ Tikslas" : "→ Prioritetas"}: {a.title}
-                </span>
-              </Button>
-            ))}
+          <div className="w-full overflow-hidden rounded-xl border border-primary/20 bg-primary/[0.035]">
+            <div className="flex items-start gap-2 border-b border-primary/10 px-3 py-2.5">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div>
+                <div className="text-xs font-semibold">Siūlomi pakeitimai · dar neišsaugota</div>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+                  Paspausk veiksmą, peržiūrėk informaciją ir tik tada patvirtink įrašymą.
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2 p-2.5">
+              {msg.actions.map((a, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  disabled={savedActionKeys?.has(`${a.kind}:${a.title}`)}
+                  className="flex w-full items-center gap-3 rounded-lg border bg-background p-3 text-left transition hover:border-primary/40 hover:shadow-sm disabled:cursor-default disabled:border-emerald-200 disabled:bg-emerald-50/50 disabled:opacity-80 dark:disabled:border-emerald-900 dark:disabled:bg-emerald-950/20"
+                  onClick={() => onAction(a)}
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    {a.kind === "goal" ? (
+                      <Target className="h-4 w-4" />
+                    ) : (
+                      <ListChecks className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {a.kind === "goal" ? "Tikslo juodraštis" : "Prioriteto juodraštis"}
+                    </div>
+                    <div className="mt-0.5 text-sm font-medium leading-snug">{a.title}</div>
+                    <div className="mt-1 text-[11px] font-medium text-primary">
+                      {savedActionKeys?.has(`${a.kind}:${a.title}`)
+                        ? "Išsaugota sistemoje"
+                        : "Peržiūrėti ir išsaugoti"}
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -144,9 +170,11 @@ function SourcesPanel({ sources }: { sources: Source[] }) {
 export function SaveActionDialog({
   action,
   onClose,
+  onSaved,
 }: {
   action: ActionSuggestion | null;
   onClose: () => void;
+  onSaved?: (action: ActionSuggestion) => void;
 }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -193,6 +221,7 @@ export function SaveActionDialog({
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success(isGoal ? "Tikslas išsaugotas" : "Prioritetas išsaugotas");
+    onSaved?.(action);
     onClose();
   }
 
@@ -210,6 +239,10 @@ export function SaveActionDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-200">
+            Tai dar tik juodraštis. Į sistemą jis bus įrašytas tik paspaudus „Patvirtinti ir
+            išsaugoti“.
+          </div>
           <div>
             <Label>Pavadinimas</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1.5" />
@@ -240,7 +273,7 @@ export function SaveActionDialog({
             Atšaukti
           </Button>
           <Button onClick={save} disabled={saving || !title.trim()}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Išsaugoti"}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Patvirtinti ir išsaugoti"}
           </Button>
         </DialogFooter>
       </DialogContent>
