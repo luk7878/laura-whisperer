@@ -17,7 +17,11 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthedLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const focusMode = pathname === "/ask" || pathname.startsWith("/ask/") || pathname === "/session";
+  const pinnedWorkspace =
+    pathname === "/ask" || pathname.startsWith("/ask/") || pathname === "/session";
+  // Mentoriaus lange pagrindinė navigacija lieka matoma. Pilno fokusavimo
+  // režimą naudojame tik gyvai sesijai, kur svarbus maksimalus darbo plotas.
+  const focusMode = pathname === "/session";
   const [sidebarOpen, setSidebarOpen] = useState(!focusMode);
 
   useEffect(() => {
@@ -26,7 +30,11 @@ function AuthedLayout() {
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-      <div className="flex min-h-[100dvh] w-full bg-transparent overflow-x-hidden">
+      <div
+        className={`flex w-full bg-transparent ${
+          pinnedWorkspace ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh] overflow-x-hidden"
+        }`}
+      >
         <AppSidebar />
         <div className="flex-1 min-w-0 flex flex-col pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0">
           <Outlet />

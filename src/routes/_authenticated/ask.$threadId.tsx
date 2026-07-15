@@ -251,7 +251,7 @@ function ThreadView() {
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-6">
         <div className="max-w-3xl mx-auto space-y-5">
           {loading && (
@@ -272,7 +272,7 @@ function ThreadView() {
 
       <form
         onSubmit={send}
-        className="border-t bg-background/95 backdrop-blur px-3 py-3 md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+        className="relative z-20 shrink-0 border-t bg-background/95 px-3 py-3 backdrop-blur md:p-4 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
       >
         <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border bg-card p-2 shadow-sm transition focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
           <Textarea

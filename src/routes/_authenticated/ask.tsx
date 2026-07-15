@@ -134,8 +134,8 @@ function AskLayout() {
   );
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col bg-transparent">
-      <header className="app-page-header py-2.5 md:py-3">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-transparent">
+      <header className="app-page-header relative z-20 shrink-0 py-2.5 md:py-3">
         <SidebarTrigger className="shrink-0" />
         <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-map-violet text-white shadow-md flex items-center justify-center shrink-0">
           <MessageSquare className="h-4 w-4" />
@@ -165,16 +165,17 @@ function AskLayout() {
           </Button>
         )}
 
-        {/* Mobile thread menu */}
+        {/* Pokalbių istorija atidaroma pareikalavus, kad nekonkuruotų su pagrindine navigacija. */}
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="md:hidden h-9 w-9 p-0 shrink-0"
+              className="h-9 shrink-0 gap-1.5 px-2 md:px-3"
               title="Pokalbiai"
             >
               <PanelLeft className="h-4 w-4" />
+              <span className="hidden lg:inline">Pokalbiai</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[85vw] max-w-xs p-0 flex flex-col">
@@ -200,21 +201,8 @@ function AskLayout() {
         </Button>
       </header>
 
-      <div className="flex-1 min-h-0 flex">
-        {/* Thread list — desktop */}
-        <aside className="hidden md:flex w-72 shrink-0 border-r border-border/60 flex-col bg-card/35 backdrop-blur">
-          <div className="border-b px-3 pb-2 pt-3">
-            <div className="mb-2 px-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Mentoriaus pokalbiai
-            </div>
-            <Button onClick={createNew} className="w-full gap-2" size="sm">
-              <Plus className="h-4 w-4" /> Naujas pokalbis
-            </Button>
-          </div>
-          {ThreadList}
-        </aside>
-
-        <main className="flex-1 min-w-0 flex flex-col">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Outlet />
         </main>
       </div>
