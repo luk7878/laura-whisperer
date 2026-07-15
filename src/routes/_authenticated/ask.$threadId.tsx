@@ -26,6 +26,16 @@ type Row = {
   created_at: string;
 };
 
+function actionKey(action: ActionSuggestion) {
+  return `${action.kind}:${action.title}`;
+}
+
+function isConfirmationMessage(value: string) {
+  return /^(taip[,!]?\s*)?(patvirtinu|patvirtink|išsaugok|issaugok)(\s*(viską|viska|juos|jas))?[.!]?$/i.test(
+    value.trim(),
+  );
+}
+
 function ThreadView() {
   const { threadId } = useParams({ from: "/_authenticated/ask/$threadId" });
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -155,7 +165,82 @@ function ThreadView() {
       content: text,
     });
     if (error) return toast.error(error.message);
+    const pendingActions = [...messages]
+      .reverse()
+      .find((message) => message.role === "assistant" && message.actions?.length)
+      ?.actions?.filter((suggestion) => !savedActionKeys.has(actionKey(suggestion)));
+    if (isConfirmationMessage(text) && pendingActions?.length) {
+      await confirmActionsFromChat(next, pendingActions);
+      return;
+    }
     await runAssistant(next);
+  }
+
+  async function confirmActionsFromChat(current: Msg[], suggestions: ActionSuggestion[]) {
+    setBusy(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("Nesi prisijungęs");
+      const uid = userData.user.id;
+      const goals = suggestions.filter((suggestion) => suggestion.kind === "goal");
+      const priorities = suggestions.filter((suggestion) => suggestion.kind !== "goal");
+      const toDate = (days?: number) => {
+        if (days == null) return null;
+        const date = new Date();
+        date.setDate(date.getDate() + days);
+        return date.toISOString().slice(0, 10);
+      };
+      if (goals.length) {
+        const { error } = await supabase.from("goals").insert(
+          goals.map((goal) => ({
+            user_id: uid,
+            title: goal.title.trim(),
+            description: goal.description?.trim() || null,
+            target_date: toDate(goal.due_in_days),
+            status: "active",
+            progress: 0,
+          })),
+        );
+        if (error) throw error;
+      }
+      if (priorities.length) {
+        const { error } = await supabase.from("priorities").insert(
+          priorities.map((priority) => ({
+            user_id: uid,
+            title: priority.title.trim(),
+            due_date: toDate(priority.due_in_days),
+          })),
+        );
+        if (error) throw error;
+      }
+      const confirmation = [
+        "Patvirtinta ir išsaugota sistemoje:",
+        ...suggestions.map(
+          (suggestion) =>
+            `- ${suggestion.kind === "goal" ? "Tikslai" : "Prioritetai"} → ${suggestion.title}`,
+        ),
+        "",
+        `Rasi ${goals.length && priorities.length ? "Tikslų ir Prioritetų skiltyse" : goals.length ? "Tikslų skiltyje" : "Prioritetų skiltyje"}.`,
+      ].join("\n");
+      await supabase.from("mentor_messages").insert({
+        thread_id: threadId,
+        user_id: uid,
+        role: "assistant",
+        content: confirmation,
+      });
+      setSavedActionKeys((keys) => {
+        const updated = new Set(keys);
+        suggestions.forEach((suggestion) => updated.add(actionKey(suggestion)));
+        return updated;
+      });
+      setMessages([...current, { role: "assistant", content: confirmation }]);
+      toast.success("Veiksmai išsaugoti sistemoje");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nepavyko išsaugoti veiksmų");
+    } finally {
+      setBusy(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
   }
 
   return (

@@ -187,6 +187,7 @@ Agento taisyklės:
 - Nesakyk, kad jau pridėjai, įtraukei ar išsaugojai. Sakyk „paruošiau juodraštį", kol vartotojas pats jo nepatvirtino.
 - Kiekvieną savarankišką užduotį pateik atskiru pasiūlymu. Nesujunk dviejų skirtingų darbų į vieną prioritetą.
 - Jei vartotojas klausia, kur veiksmas pridėtas, paaiškink, kad mygtukas po ankstesniu atsakymu yra dar neišsaugotas juodraštis ir jį reikia paspausti bei patvirtinti.
+- Niekada pats netvirtink, kad žodis „Patvirtinu" įrašė duomenis. Pokalbio patvirtinimus apdoroja frontend sistema prieš kreipdamasi į tave.
 `,
   };
 }
