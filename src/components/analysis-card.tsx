@@ -72,7 +72,15 @@ export function detectStageFromMessages(messages: { role: string; content: strin
   return 1;
 }
 
-export function AnalysisCard({ content, time }: { content: string; time?: string }) {
+export function AnalysisCard({
+  content,
+  time,
+  emotionValue,
+}: {
+  content: string;
+  time?: string;
+  emotionValue?: number | null;
+}) {
   const p = parseAnalysis(content);
   const hasStructure = p.etapas || p.fokusas || p.klausimas;
 
@@ -159,6 +167,33 @@ export function AnalysisCard({ content, time }: { content: string; time?: string
             <p className="relative -mt-2 whitespace-pre-wrap text-base font-medium leading-8 text-foreground md:text-lg">
               {p.klausimas}
             </p>
+            {(emotionValue != null || /0\s*[–—-]\s*10|emocin/i.test(p.klausimas)) && (
+              <div className="relative mt-8">
+                <div className="mb-2 flex justify-between px-0.5 text-[10px] text-muted-foreground">
+                  {Array.from({ length: 11 }, (_, value) => (
+                    <span
+                      key={value}
+                      className={value === emotionValue ? "font-semibold text-map-green" : ""}
+                    >
+                      {value}
+                    </span>
+                  ))}
+                </div>
+                <div className="relative flex items-center justify-between">
+                  <div className="absolute inset-x-2 top-1/2 h-px -translate-y-1/2 bg-border" />
+                  {Array.from({ length: 11 }, (_, value) => (
+                    <span
+                      key={value}
+                      className={`relative z-10 h-4 w-4 rounded-full border-2 bg-background ${
+                        value === emotionValue
+                          ? "scale-125 border-map-green bg-map-green shadow-[0_0_0_6px_color-mix(in_oklab,var(--color-map-green)_18%,transparent)]"
+                          : "border-border"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="relative mt-3 text-right text-5xl font-serif leading-none text-map-green/30">
               ”
             </div>

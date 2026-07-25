@@ -11,24 +11,14 @@ import {
   MicOff,
   Send,
   Loader2,
-  Circle,
   Sparkles,
-  Quote,
   Radio,
-  Flame,
-  Activity,
-  Layers,
-  Settings2,
-  ChevronRight,
   Table2,
   Map as MapIcon,
   Puzzle,
-  Ear,
-  HelpCircle,
-  Gem,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GrowthMap, GrowthMapBody, type SessionMapData } from "@/components/growth-map";
+import { GrowthMapBody, type SessionMapData } from "@/components/growth-map";
 import {
   GoalClarifier,
   GoalClarifierBody,
@@ -37,7 +27,7 @@ import {
 import { NewSessionDialog, type SessionMode } from "@/components/new-session-dialog";
 import { extractMapPayload } from "@/lib/parse-ai-payload";
 import { extractGoalPayload } from "@/lib/parse-goal-payload";
-import { AnalysisCard, UserCard } from "@/components/analysis-card";
+import { AnalysisCard, UserCard, detectStageFromMessages } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
@@ -92,19 +82,10 @@ function SessionPage() {
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
   const [mapSheetOpen, setMapSheetOpen] = useState(false);
-  const [valuesCount, setValuesCount] = useState(0);
 
   const mode: SessionMode = (session?.mode as SessionMode) ?? "demartini";
 
   // Load or bootstrap active session
-  useEffect(() => {
-    supabase
-      .from("values")
-      .select("id", { count: "exact", head: true })
-      .lt("rank", 100)
-      .then(({ count }) => setValuesCount(count ?? 0));
-  }, []);
-
   useEffect(() => {
     (async () => {
       if (sidFromUrl) {
@@ -199,9 +180,7 @@ function SessionPage() {
   };
 
   const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-  const lastUser = [...messages].reverse().find((m) => m.role === "user");
-  const focusQuote =
-    lastUser?.content?.split(/[.!?]/)[0]?.trim() || "Kokia mintis dabar giliausiai kalba?";
+  const currentStage = detectStageFromMessages(messages);
 
   async function sendMessage(e?: FormEvent) {
     e?.preventDefault();
@@ -479,37 +458,22 @@ function SessionPage() {
             <SidebarTrigger className="mt-1 shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-serif text-xl md:text-2xl leading-tight text-foreground truncate max-w-full">
+                <h1 className="font-serif text-xl font-semibold leading-tight text-foreground truncate max-w-full md:text-3xl">
                   {session?.title ?? "Gyva augimo sesija"}
                 </h1>
-                <ModeBadge mode={mode} />
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1 flex-wrap">
+              <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                <ModeBadge mode={mode} />
+                {mode === "demartini" && <span>· {currentStage} etapas iš 11</span>}
+                <span>·</span>
                 <span className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-map-green animate-pulse" />
                   Sesija aktyvi
                 </span>
                 <span>· {currentTime}</span>
               </div>
-              <p className="hidden xl:block text-xs text-muted-foreground mt-1">
-                {mode === "goal_clarify"
-                  ? "Vedlys išgrynina tavo tikslą per 8 etapus – nuo neapdirbto noro iki pirmo veiksmo."
-                  : mode === "mentor"
-                    ? "Mentorius atsako iš tavo įkeltos medžiagos su citatomis."
-                    : "AI klauso, atspindi, perklausia ir pildo tavo augimo žemėlapį."}
-              </p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
-              <Button
-                onClick={() => setNewSessionOpen(true)}
-                variant="outline"
-                size="sm"
-                className="gap-1.5 h-9 px-2 md:px-3"
-                title="Pradėti naują sesiją"
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">Nauja</span>
-              </Button>
               {mode === "demartini" && (
                 <Button
                   onClick={() => setCompletionOpen(true)}
@@ -519,7 +483,7 @@ function SessionPage() {
                   title="Užbaigti ir suplanuoti"
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span className="hidden md:inline">Užbaigti</span>
+                  <span className="hidden md:inline">Baigti sesiją</span>
                 </Button>
               )}
               {mode === "goal_clarify" && (
@@ -578,99 +542,7 @@ function SessionPage() {
         <div className="flex-1 min-h-0 overflow-hidden bg-transparent">
           {tab === "session" && (
             <div ref={scrollRef} className="h-full overflow-y-auto">
-              <div className="max-w-4xl mx-auto px-3 md:px-6 py-5 md:py-7 space-y-5">
-                {/* Sesijos pulsas */}
-                <div className="flex items-center gap-2 overflow-x-auto rounded-2xl border border-white/80 bg-card/85 px-3 py-2.5 shadow-[0_10px_30px_-24px_oklch(0.25_0.08_270)] backdrop-blur">
-                  <Activity className="h-4 w-4 shrink-0 text-map-green" />
-                  <div className="flex min-w-max items-center gap-2">
-                    <PulseBadge icon={<Ear className="h-3 w-3" />} tone="map-green">
-                      {streaming ? "AI analizuoja…" : "Klausausi"}
-                    </PulseBadge>
-                    {valuesCount > 0 && (
-                      <PulseBadge icon={<Gem className="h-3 w-3" />} tone="map-violet">
-                        Žino tavo TOP {Math.min(valuesCount, 5)} vertybes
-                      </PulseBadge>
-                    )}
-                    {mode === "demartini" && (
-                      <>
-                        {mapData.topic && (
-                          <PulseBadge
-                            icon={<Circle className="h-3 w-3 fill-current" />}
-                            tone="map-blue"
-                          >
-                            Aktyvi tema: {mapData.topic}
-                          </PulseBadge>
-                        )}
-                        {mapData.emotion != null && (
-                          <PulseBadge icon={<Flame className="h-3 w-3" />} tone="map-orange">
-                            Emocinis krūvis: {mapData.emotion}/10
-                          </PulseBadge>
-                        )}
-                        {mapData.column && (
-                          <PulseBadge icon={<Layers className="h-3 w-3" />} tone="map-violet">
-                            Aktyvus modulis: {mapData.column}
-                          </PulseBadge>
-                        )}
-                      </>
-                    )}
-                    {mode === "goal_clarify" && (
-                      <>
-                        {goalData.stage && (
-                          <PulseBadge icon={<Layers className="h-3 w-3" />} tone="map-violet">
-                            Etapas: {goalData.stage}
-                          </PulseBadge>
-                        )}
-                        {goalData.goal_draft && (
-                          <PulseBadge
-                            icon={<Circle className="h-3 w-3 fill-current" />}
-                            tone="map-blue"
-                          >
-                            Tikslas: {goalData.goal_draft.slice(0, 60)}
-                          </PulseBadge>
-                        )}
-                        {goalData.value && (
-                          <PulseBadge icon={<Sparkles className="h-3 w-3" />} tone="map-teal">
-                            Vertybė: {goalData.value}
-                          </PulseBadge>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Gyvas fokusas – tik demartini režime */}
-                {mode === "demartini" && messages.length > 0 && (
-                  <Card className="overflow-hidden border-primary/15 bg-gradient-to-br from-primary/[0.09] via-card to-map-violet/[0.06] p-5 md:p-7">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">Gyvas fokusas</span>
-                      <span className="text-xs text-muted-foreground hidden sm:inline">
-                        · Sustokime čia
-                      </span>
-                    </div>
-                    <div className="text-center py-2 md:py-3">
-                      <Quote className="h-5 w-5 md:h-6 md:w-6 text-primary/40 mx-auto mb-2" />
-                      <blockquote className="font-serif text-lg md:text-2xl leading-snug text-foreground max-w-xl mx-auto">
-                        „{focusQuote}."
-                      </blockquote>
-                      <p className="text-xs md:text-sm text-muted-foreground mt-3 max-w-md mx-auto">
-                        Tai atrodo kaip giluminis įsitikinimas, kuris stipriai tave stabdo.
-                      </p>
-                    </div>
-                    <div className="flex gap-2 justify-center mt-4 flex-wrap">
-                      <Button size="sm" className="gap-1.5 text-xs">
-                        <Sparkles className="h-3.5 w-3.5" /> Gilinam
-                      </Button>
-                      <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-                        <HelpCircle className="h-3.5 w-3.5" /> Paprasčiau
-                      </Button>
-                      <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-                        Kitas klausimas <ChevronRight className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </Card>
-                )}
-
+              <div className="mx-auto max-w-6xl space-y-5 px-3 py-5 md:px-6 md:py-7">
                 {messages.length === 0 && (
                   <Card className="p-6 md:p-10 text-center border-dashed">
                     <div
@@ -698,10 +570,33 @@ function SessionPage() {
                   </Card>
                 )}
 
-                {/* Messages */}
-                {messages.map((m) => (
-                  <MessageBubble key={m.id} message={m} />
-                ))}
+                {lastAssistant && (
+                  <AnalysisCard
+                    content={lastAssistant.content}
+                    time={
+                      lastAssistant.created_at
+                        ? new Date(lastAssistant.created_at).toLocaleTimeString("lt-LT", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : undefined
+                    }
+                    emotionValue={mapData.emotion}
+                  />
+                )}
+
+                {messages.length > 2 && (
+                  <details className="group rounded-2xl border border-border/70 bg-card/55 px-4 py-3">
+                    <summary className="cursor-pointer list-none text-sm font-medium text-muted-foreground transition hover:text-foreground">
+                      Ankstesnis pokalbis · {Math.max(messages.length - 1, 0)} žinutės
+                    </summary>
+                    <div className="mt-4 space-y-4 border-t pt-4">
+                      {messages.slice(0, -1).map((message) => (
+                        <MessageBubble key={message.id} message={message} />
+                      ))}
+                    </div>
+                  </details>
+                )}
 
                 {streaming && lastAssistant?.content === "" && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -740,16 +635,17 @@ function SessionPage() {
           className="z-20 shrink-0 border-t bg-background/95 px-3 py-3 backdrop-blur md:px-5 md:py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
         >
           <div className="max-w-3xl mx-auto">
-            <div className="mb-2 flex items-center gap-2 px-1 text-[11px] text-muted-foreground">
+            <div className="mb-2 flex items-center gap-1 rounded-full border bg-muted/40 p-1 text-[11px] text-muted-foreground w-fit">
               <span
                 className={cn(
                   "h-2 w-2 rounded-full",
                   recording ? "animate-pulse bg-destructive" : "bg-map-green",
                 )}
               />
-              <span>{recording ? "Įrašoma…" : "Balso režimas aktyvus"}</span>
-              <span>·</span>
-              <span>{streaming ? "AI analizuoja" : "AI klausosi"}</span>
+              <span className="rounded-full px-2.5 py-1">{recording ? "Įrašoma…" : "Kalbėti"}</span>
+              <span className="rounded-full bg-background px-2.5 py-1 font-medium text-primary shadow-sm">
+                Rašyti
+              </span>
             </div>
             <div className="flex items-end gap-2.5">
               <button
@@ -807,11 +703,7 @@ function SessionPage() {
       </div>
 
       {/* Right panel — desktop */}
-      {mode === "goal_clarify" ? (
-        <GoalClarifier data={goalData} onSave={saveGoal} />
-      ) : mode === "demartini" ? (
-        <GrowthMap data={mapData} />
-      ) : null}
+      {mode === "goal_clarify" ? <GoalClarifier data={goalData} onSave={saveGoal} /> : null}
 
       {/* Mobile map sheet */}
       {(mode === "demartini" || mode === "goal_clarify") && (
@@ -882,31 +774,6 @@ function ModeBadge({ mode }: { mode: SessionMode }) {
     >
       <Icon className="h-3 w-3" />
       {cfg.label}
-    </Badge>
-  );
-}
-
-function PulseBadge({
-  children,
-  icon,
-  tone,
-}: {
-  children: React.ReactNode;
-  icon: React.ReactNode;
-  tone: string;
-}) {
-  return (
-    <Badge
-      variant="outline"
-      className="gap-1.5 py-1.5 px-2.5 font-normal rounded-full border"
-      style={{
-        color: `var(--color-${tone})`,
-        borderColor: `color-mix(in oklab, var(--color-${tone}) 30%, transparent)`,
-        backgroundColor: `color-mix(in oklab, var(--color-${tone}) 8%, transparent)`,
-      }}
-    >
-      {icon}
-      {children}
     </Badge>
   );
 }
