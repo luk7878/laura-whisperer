@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import { Flag, Target, HelpCircle, Info, Lightbulb, Activity, Sparkles } from "lucide-react";
+import { HelpCircle, Info, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 type Parsed = {
@@ -85,154 +85,99 @@ export function AnalysisCard({
   const hasStructure = p.etapas || p.fokusas || p.klausimas;
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-primary/10 bg-card shadow-sm">
-      <div className="flex items-center justify-between px-5 py-4 md:px-6">
-        <div className="flex items-center gap-2.5 font-semibold text-foreground">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+    <div className="grid overflow-hidden rounded-3xl border border-border/70 bg-card shadow-sm lg:grid-cols-[1.45fr_0.9fr]">
+      <section className="p-5 md:p-7">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-primary">
             <Sparkles className="h-4 w-4" />
+            Dabartinė įžvalga
           </div>
-          AI analizė
-        </div>
-        {time && <span className="text-xs text-muted-foreground">{time}</span>}
-      </div>
-
-      <div className="grid gap-4 px-4 pb-4 md:px-6 md:pb-6 lg:grid-cols-[1.75fr_0.85fr]">
-        <div className="rounded-2xl border bg-background p-4 shadow-sm md:p-5">
-          {hasStructure && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field
-                icon={<Flag className="h-4 w-4" />}
-                label="Etapas"
-                value={p.etapas}
-                tone="primary"
-              />
-              <Field
-                icon={<Target className="h-4 w-4" />}
-                label="Fokusas"
-                value={p.fokusas}
-                tone="violet"
-              />
-            </div>
-          )}
-
-          {p.intro && (
-            <div className="mt-5">
-              <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed prose-headings:font-serif prose-headings:text-foreground prose-headings:leading-tight prose-headings:mb-3 prose-p:my-2.5 prose-strong:text-foreground md:prose-lg">
-                <ReactMarkdown>{p.intro}</ReactMarkdown>
-              </div>
-              <div className="mt-4 h-0.5 w-24 bg-gradient-to-r from-primary via-map-violet to-transparent" />
-            </div>
-          )}
-
-          {p.intensity && (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs">
-              <Activity className="h-3.5 w-3.5 text-primary" />
-              <span className="text-muted-foreground">Emocinis intensyvumas</span>
-              <span className="font-semibold text-primary">{p.intensity}</span>
-            </div>
-          )}
-
-          {p.hint && (
-            <div className="mt-5 flex items-start gap-3 rounded-xl border border-map-violet/15 bg-gradient-to-r from-map-violet/10 to-primary/5 px-4 py-3 text-sm">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-map-violet/15 text-map-violet">
-                <Lightbulb className="h-4 w-4" />
-              </div>
-              <div className="leading-relaxed text-map-violet">
-                <span className="font-semibold">Esmė: </span>
-                {p.hint}
-              </div>
-            </div>
-          )}
-
-          {!hasStructure && !p.intro && (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown>{content || "…"}</ReactMarkdown>
-            </div>
-          )}
+          {time && <span className="text-xs text-muted-foreground">{time}</span>}
         </div>
 
-        {p.klausimas && (
-          <div className="relative min-h-[260px] overflow-hidden rounded-2xl border border-map-green/20 bg-gradient-to-br from-map-green/[0.06] via-background to-map-teal/[0.10] p-5 shadow-sm md:p-6">
-            <div className="absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-map-green/[0.07]" />
-            <div className="absolute -right-8 top-8 h-20 w-20 rounded-full bg-map-teal/[0.05]" />
-            <div className="relative flex items-center gap-2.5 text-map-green">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-map-green/15">
-                <HelpCircle className="h-5 w-5" />
-              </div>
-              <span className="font-semibold">Klausimas</span>
-            </div>
-            <div className="relative mt-7 text-5xl font-serif leading-none text-map-green/30">
-              “
-            </div>
-            <p className="relative -mt-2 whitespace-pre-wrap text-base font-medium leading-8 text-foreground md:text-lg">
-              {p.klausimas}
-            </p>
-            {(emotionValue != null || /0\s*[–—-]\s*10|emocin/i.test(p.klausimas)) && (
-              <div className="relative mt-8">
-                <div className="mb-2 flex justify-between px-0.5 text-[10px] text-muted-foreground">
-                  {Array.from({ length: 11 }, (_, value) => (
-                    <span
-                      key={value}
-                      className={value === emotionValue ? "font-semibold text-map-green" : ""}
-                    >
-                      {value}
-                    </span>
-                  ))}
-                </div>
-                <div className="relative flex items-center justify-between">
-                  <div className="absolute inset-x-2 top-1/2 h-px -translate-y-1/2 bg-border" />
-                  {Array.from({ length: 11 }, (_, value) => (
-                    <span
-                      key={value}
-                      className={`relative z-10 h-4 w-4 rounded-full border-2 bg-background ${
-                        value === emotionValue
-                          ? "scale-125 border-map-green bg-map-green shadow-[0_0_0_6px_color-mix(in_oklab,var(--color-map-green)_18%,transparent)]"
-                          : "border-border"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+        {hasStructure && (p.etapas || p.fokusas) && (
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+            {p.etapas && (
+              <p>
+                <span className="text-muted-foreground">Etapas: </span>
+                <span className="font-medium">{p.etapas}</span>
+              </p>
             )}
-            <div className="relative mt-3 text-right text-5xl font-serif leading-none text-map-green/30">
-              ”
+            {p.fokusas && (
+              <p>
+                <span className="text-muted-foreground">Fokusas: </span>
+                <span className="font-medium">{p.fokusas}</span>
+              </p>
+            )}
+          </div>
+        )}
+
+        {p.intro && (
+          <div className="mt-6">
+            <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed prose-headings:font-serif prose-headings:text-foreground prose-headings:leading-tight prose-headings:mb-3 prose-p:my-2.5 prose-strong:text-foreground md:prose-lg">
+              <ReactMarkdown>{p.intro}</ReactMarkdown>
             </div>
           </div>
         )}
-      </div>
-    </Card>
-  );
-}
 
-function Field({
-  icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value?: string;
-  tone: "primary" | "violet" | "teal";
-}) {
-  const toneMap = {
-    primary: "text-primary bg-primary/10",
-    violet: "text-map-violet bg-map-violet/10",
-    teal: "text-teal-600 bg-teal-500/10",
-  };
-  return (
-    <div className="flex min-h-[92px] gap-3 rounded-xl border bg-card/80 p-3.5">
-      <div
-        className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${toneMap[tone]}`}
-      >
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <div className={`text-sm font-medium ${toneMap[tone].split(" ")[0]}`}>{label}</div>
-        <div className="text-sm text-foreground/90 leading-snug mt-0.5 whitespace-pre-wrap">
-          {value || <span className="text-muted-foreground">—</span>}
-        </div>
-      </div>
+        {p.intensity && (
+          <p className="mt-5 text-sm text-muted-foreground">
+            Emocinis intensyvumas: <strong className="text-foreground">{p.intensity}</strong>
+          </p>
+        )}
+
+        {p.hint && (
+          <p className="mt-6 border-l-2 border-primary/35 pl-4 text-sm leading-relaxed text-muted-foreground">
+            <span className="font-semibold text-foreground">Esmė: </span>
+            {p.hint}
+          </p>
+        )}
+
+        {!hasStructure && !p.intro && (
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown>{content || "…"}</ReactMarkdown>
+          </div>
+        )}
+      </section>
+
+      {p.klausimas && (
+        <aside className="relative min-h-[260px] border-t border-map-green/15 bg-map-green/[0.045] p-5 md:p-7 lg:border-l lg:border-t-0">
+          <div className="relative flex items-center gap-2.5 text-map-green">
+            <HelpCircle className="h-4 w-4" />
+            <span className="text-sm font-semibold">Dabar atsakyk</span>
+          </div>
+          <p className="relative mt-8 whitespace-pre-wrap font-serif text-xl font-medium leading-8 text-foreground md:text-2xl">
+            {p.klausimas}
+          </p>
+          {(emotionValue != null || /0\s*[–—-]\s*10|emocin/i.test(p.klausimas)) && (
+            <div className="relative mt-8">
+              <div className="mb-2 flex justify-between px-0.5 text-[10px] text-muted-foreground">
+                {Array.from({ length: 11 }, (_, value) => (
+                  <span
+                    key={value}
+                    className={value === emotionValue ? "font-semibold text-map-green" : ""}
+                  >
+                    {value}
+                  </span>
+                ))}
+              </div>
+              <div className="relative flex items-center justify-between">
+                <div className="absolute inset-x-2 top-1/2 h-px -translate-y-1/2 bg-border" />
+                {Array.from({ length: 11 }, (_, value) => (
+                  <span
+                    key={value}
+                    className={`relative z-10 h-4 w-4 rounded-full border-2 bg-background ${
+                      value === emotionValue
+                        ? "scale-125 border-map-green bg-map-green shadow-[0_0_0_6px_color-mix(in_oklab,var(--color-map-green)_18%,transparent)]"
+                        : "border-border"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
+      )}
     </div>
   );
 }

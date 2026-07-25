@@ -4,19 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import {
-  Mic,
-  MicOff,
-  Send,
-  Loader2,
-  Sparkles,
-  Radio,
-  Table2,
-  Map as MapIcon,
-  Puzzle,
-} from "lucide-react";
+import { Mic, MicOff, Send, Loader2, Sparkles, CheckCircle2, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GrowthMapBody, type SessionMapData } from "@/components/growth-map";
 import {
@@ -29,10 +18,8 @@ import { extractMapPayload } from "@/lib/parse-ai-payload";
 import { extractGoalPayload } from "@/lib/parse-goal-payload";
 import { AnalysisCard, UserCard, detectStageFromMessages } from "@/components/analysis-card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { SessionCompletionDialog } from "@/components/session-completion-dialog";
 import { SessionIntegration } from "@/components/session-integration";
-import { CheckCircle2, Compass, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/session")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -59,10 +46,10 @@ type SessionRow = {
 };
 
 const TABS = [
-  { key: "session", label: "Sesija", icon: Radio },
-  { key: "table", label: "Lentelė", icon: Table2 },
-  { key: "map", label: "Žemėlapis", icon: MapIcon },
-  { key: "integration", label: "Integracija", icon: Puzzle },
+  { key: "session", label: "Dabartinis žingsnis" },
+  { key: "table", label: "Lentelė" },
+  { key: "map", label: "Augimo žemėlapis" },
+  { key: "integration", label: "Integracija" },
 ] as const;
 
 function SessionPage() {
@@ -81,7 +68,6 @@ function SessionPage() {
   const [completionOpen, setCompletionOpen] = useState(false);
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
-  const [mapSheetOpen, setMapSheetOpen] = useState(false);
 
   const mode: SessionMode = (session?.mode as SessionMode) ?? "demartini";
 
@@ -463,7 +449,7 @@ function SessionPage() {
                 </h1>
               </div>
               <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                <ModeBadge mode={mode} />
+                <span>{modeLabel(mode)}</span>
                 {mode === "demartini" && <span>· {currentStage} etapas iš 11</span>}
                 <span>·</span>
                 <span className="flex items-center gap-1.5">
@@ -474,6 +460,18 @@ function SessionPage() {
               </div>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
+              <select
+                value={tab}
+                onChange={(event) => setTab(event.target.value as (typeof TABS)[number]["key"])}
+                className="h-9 max-w-[118px] rounded-lg border border-border bg-background px-2 text-xs text-muted-foreground outline-none transition focus:border-primary/50 md:max-w-none md:px-2.5"
+                aria-label="Sesijos vaizdas"
+              >
+                {TABS.map((item) => (
+                  <option key={item.key} value={item.key}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
               {mode === "demartini" && (
                 <Button
                   onClick={() => setCompletionOpen(true)}
@@ -502,41 +500,9 @@ function SessionPage() {
                   <span className="hidden md:inline">Perkelti</span>
                 </Button>
               )}
-              {(mode === "demartini" || mode === "goal_clarify") && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="lg:hidden h-9 w-9 p-0"
-                  onClick={() => setMapSheetOpen(true)}
-                  title="Augimo žemėlapis"
-                >
-                  <MapIcon className="h-4 w-4" />
-                </Button>
-              )}
             </div>
           </div>
         </header>
-
-        {/* Tabs */}
-        <div className="z-10 shrink-0 border-b border-border/60 bg-background/70 px-3 backdrop-blur-xl md:px-6 overflow-x-auto">
-          <div className="flex min-w-max gap-1 py-2">
-            {TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all whitespace-nowrap",
-                  tab === t.key
-                    ? "bg-primary/[0.09] text-primary shadow-[inset_0_0_0_1px_oklch(0.535_0.205_274_/_0.08)]"
-                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-                )}
-              >
-                <t.icon className="h-4 w-4" />
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Body */}
         <div className="flex-1 min-h-0 overflow-hidden bg-transparent">
@@ -608,11 +574,14 @@ function SessionPage() {
           )}
 
           {tab === "table" && <TableView data={mapData} />}
-          {tab === "map" && (
-            <PlaceholderView icon={MapIcon} title="Žemėlapio vaizdas">
-              Pilnas vizualus 14 stulpelių žemėlapis. Netrukus.
-            </PlaceholderView>
-          )}
+          {tab === "map" &&
+            (mode === "goal_clarify" ? (
+              <GoalClarifierBody data={goalData} onSave={saveGoal} />
+            ) : (
+              <div className="mx-auto max-w-3xl">
+                <GrowthMapBody data={mapData} />
+              </div>
+            ))}
           {tab === "integration" && session && (
             <SessionIntegration
               session={{
@@ -635,28 +604,16 @@ function SessionPage() {
           className="z-20 shrink-0 border-t bg-background/95 px-3 py-3 backdrop-blur md:px-5 md:py-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]"
         >
           <div className="max-w-3xl mx-auto">
-            <div className="mb-2 flex items-center gap-1 rounded-full border bg-muted/40 p-1 text-[11px] text-muted-foreground w-fit">
-              <span
-                className={cn(
-                  "h-2 w-2 rounded-full",
-                  recording ? "animate-pulse bg-destructive" : "bg-map-green",
-                )}
-              />
-              <span className="rounded-full px-2.5 py-1">{recording ? "Įrašoma…" : "Kalbėti"}</span>
-              <span className="rounded-full bg-background px-2.5 py-1 font-medium text-primary shadow-sm">
-                Rašyti
-              </span>
-            </div>
-            <div className="flex items-end gap-2.5">
+            <div className="flex items-end rounded-[1.5rem] border bg-card p-1.5 shadow-sm transition-all focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
               <button
                 type="button"
                 onClick={recording ? stopRecording : startRecording}
                 disabled={streaming || transcribing}
                 className={cn(
-                  "h-12 w-12 rounded-full flex items-center justify-center shrink-0 border shadow-sm transition-all",
+                  "h-11 w-11 rounded-full flex items-center justify-center shrink-0 transition-all",
                   recording
-                    ? "bg-destructive text-destructive-foreground border-destructive"
-                    : "border-primary/15 bg-primary/10 text-primary hover:scale-105 hover:bg-primary/15",
+                    ? "bg-destructive text-destructive-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-primary",
                 )}
                 title={recording ? "Sustabdyti įrašymą" : "Įrašyti balsu"}
               >
@@ -669,34 +626,32 @@ function SessionPage() {
                 )}
               </button>
 
-              <div className="flex min-w-0 flex-1 items-end rounded-[1.5rem] border bg-card py-1.5 pl-3 pr-1.5 shadow-sm transition-all focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/5">
-                <Textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Pasakyk, kas dabar kyla mintyse…"
-                  rows={1}
-                  disabled={streaming || transcribing}
-                  className="max-h-32 min-h-[42px] flex-1 resize-none border-0 bg-transparent px-2 py-2 text-base shadow-none focus-visible:ring-0"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={streaming || !input.trim()}
-                  className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-primary to-map-violet p-0 shadow-md hover:opacity-90"
-                >
-                  {streaming ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Pasakyk, kas dabar kyla mintyse…"
+                rows={1}
+                disabled={streaming || transcribing}
+                className="max-h-32 min-h-[42px] flex-1 resize-none border-0 bg-transparent px-2 py-2 text-base shadow-none focus-visible:ring-0"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={streaming || !input.trim()}
+                className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-primary to-map-violet p-0 shadow-md hover:opacity-90"
+              >
+                {streaming ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
             </div>
           </div>
         </form>
@@ -704,26 +659,6 @@ function SessionPage() {
 
       {/* Right panel — desktop */}
       {mode === "goal_clarify" ? <GoalClarifier data={goalData} onSave={saveGoal} /> : null}
-
-      {/* Mobile map sheet */}
-      {(mode === "demartini" || mode === "goal_clarify") && (
-        <Sheet open={mapSheetOpen} onOpenChange={setMapSheetOpen}>
-          <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
-            <SheetHeader className="px-4 py-3 border-b">
-              <SheetTitle className="text-left font-serif text-lg">
-                {mode === "goal_clarify" ? "Tikslo išgryninimas" : "Augimo žemėlapis"}
-              </SheetTitle>
-            </SheetHeader>
-            <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
-              {mode === "goal_clarify" ? (
-                <GoalClarifierBody data={goalData} onSave={saveGoal} />
-              ) : (
-                <GrowthMapBody data={mapData} />
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
 
       {session && mode === "demartini" && (
         <SessionCompletionDialog
@@ -754,28 +689,10 @@ function SessionPage() {
   );
 }
 
-function ModeBadge({ mode }: { mode: SessionMode }) {
-  const cfg =
-    mode === "goal_clarify"
-      ? { label: "Tikslo išgryninimas", tone: "map-teal", Icon: Compass }
-      : mode === "mentor"
-        ? { label: "Mentorius", tone: "map-teal", Icon: BookOpen }
-        : { label: "Emocinis balansas", tone: "map-orange", Icon: Sparkles };
-  const { Icon } = cfg;
-  return (
-    <Badge
-      variant="outline"
-      className="gap-1.5 py-1 px-2 font-normal text-[11px] rounded-full"
-      style={{
-        color: `var(--color-${cfg.tone})`,
-        borderColor: `color-mix(in oklab, var(--color-${cfg.tone}) 35%, transparent)`,
-        backgroundColor: `color-mix(in oklab, var(--color-${cfg.tone}) 10%, transparent)`,
-      }}
-    >
-      <Icon className="h-3 w-3" />
-      {cfg.label}
-    </Badge>
-  );
+function modeLabel(mode: SessionMode) {
+  if (mode === "goal_clarify") return "Tikslo išgryninimas";
+  if (mode === "mentor") return "Mentorius";
+  return "Emocinis balansas";
 }
 
 function MessageBubble({ message }: { message: Message }) {
@@ -827,26 +744,6 @@ function TableView({ data }: { data: SessionMapData }) {
           ))}
         </div>
       </Card>
-    </div>
-  );
-}
-
-function PlaceholderView({
-  icon: Icon,
-  title,
-  children,
-}: {
-  icon: typeof MapIcon;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="max-w-2xl mx-auto p-12 text-center">
-      <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary mx-auto flex items-center justify-center mb-4">
-        <Icon className="h-7 w-7" />
-      </div>
-      <h2 className="font-serif text-2xl">{title}</h2>
-      <p className="text-sm text-muted-foreground mt-2">{children}</p>
     </div>
   );
 }
